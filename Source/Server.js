@@ -6,6 +6,111 @@ for (var i = 0; i < commonFiles.length; i++)
 	eval(fs.readFileSync("./Common/" + fileName).toString());
 }
 
+function ClientConnection(server, clientID, socket)
+{
+	this.server = server;
+	this.clientID = clientID;
+	this.socket = socket;
+
+	this.socket.on
+	(
+		"identify", 
+		this.handleEvent_ClientIdentifyingSelf.bind(this)
+	);
+}
+{	
+	ClientConnection.prototype.handleEvent_ClientDisconnected = function()
+	{
+		console.log("Someone left the server.")
+		var bodies = this.server.world.bodies;
+		var bodyToDestroy = bodies[this.clientID];
+		if (bodyToDestroy != null)
+		{
+			bodyToDestroy.integrity = 0;
+		}
+	}
+	
+	ClientConnection.prototype.handleEvent_ClientIdentifyingSelf = function(clientName)
+	{
+		this.clientName = clientName;
+		
+		var server = this.server;
+
+		var clientConnection = server.clientConnections[this.clientID];
+		var socketToClient = clientConnection.socket;
+		
+		var session = new Session(this.clientID, server.world);
+		var sessionSerialized = server.serializer.serialize(session);
+		socketToClient.emit("sessionEstablished", sessionSerialized);
+	
+		var world = server.world;
+		var bodyDefnPlayer = world.bodyDefns["_Player"];
+		var bodyDefnForClient = bodyDefnPlayer.clone();
+		bodyDefnForClient.name = this.clientID;
+		bodyDefnForClient.color = ColorHelper.random();
+
+		var updateBodyDefnRegister = new Update_BodyDefnRegister
+		(
+			bodyDefnForClient
+		);
+		updateBodyDefnRegister.updateWorld(world);
+		world.updatesOutgoing.push(updateBodyDefnRegister);
+
+		var bodyForClient = new Body
+		(
+			this.clientID, // id
+			clientName, // name
+			bodyDefnForClient.name,
+			new Coords().randomize().multiply(world.size),
+			new Coords().randomize().normalize()
+		);
+		
+		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
+		world.updatesOutgoing.push(updateBodyCreate);
+		updateBodyCreate.updateWorld(world);
+		
+		socketToClient.on
+		(
+			"update",
+			this.handleEvent_ClientUpdateReceived.bind(this)
+		);
+		
+		socketToClient.on
+		(
+			"disconnect",
+			this.handleEvent_ClientDisconnected.bind(this)
+		);
+		
+		console.log(clientName + " joined the server.");
+	}
+	
+	ClientConnection.prototype.handleEvent_ClientUpdateReceived = function(updateSerialized)
+	{
+		var serializer;
+		var firstChar = updateSerialized[0];
+		
+		if (firstChar == "{") // JSON
+		{
+			serializer = this.server.serializer;
+		}
+		else // terse
+		{
+			var updateCode = firstChar;
+			if (updateCode == Update_Actions.UpdateCode)
+			{
+				serializer = new Update_Actions();
+			}
+		}
+		
+		var update = serializer.deserialize
+		(
+			updateSerialized
+		);
+				
+		update.updateWorld(this.server.world);
+	}	
+}
+
 function Server(portToListenOn, world)
 {
 	this.portToListenOn = portToListenOn;
@@ -14,7 +119,7 @@ function Server(portToListenOn, world)
 {
 	Server.prototype.initialize = function()
 	{
-		this.socketsToClients = [];
+		this.clientConnections = [];
 		
 		Log.IsEnabled = true;
 
@@ -94,9 +199,10 @@ function Server(portToListenOn, world)
 			var serializer = (update.serialize == null ? this.serializer : update);
 			var updateSerialized = serializer.serialize(update);
 
-			for (var c = 0; c < this.socketsToClients.length; c++)
+			for (var c = 0; c < this.clientConnections.length; c++)
 			{
-				var socketToClient = this.socketsToClients[c];
+				var clientConnection = this.clientConnections[c];
+				var socketToClient = clientConnection.socket;
 				socketToClient.emit("update", updateSerialized);
 			}
 		}
@@ -107,105 +213,15 @@ function Server(portToListenOn, world)
 
 	Server.prototype.handleEvent_ClientConnecting = function(socketToClient)
 	{
-		var clientIndex = this.socketsToClients.length;
+		var clientIndex = this.clientConnections.length;
 		var clientID = "C_" + clientIndex;
 		
-		this.socketsToClients.push(socketToClient);
-		this.socketsToClients[clientID] = socketToClient;
+		var clientConnection = new ClientConnection(this, clientID, socketToClient);
+		this.clientConnections.push(clientConnection);
+		this.clientConnections[clientID] = clientConnection;
 	
-		socketToClient.on("identify", this.handleEvent_ClientIdentifyingSelf.bind(this));
 		socketToClient.emit("connected", clientID);
-	}
-	
-	Server.prototype.handleEvent_ClientIdentifyingSelf = function(clientIDAndNameAsString)
-	{
-		var clientIDAndName = clientIDAndNameAsString.split(";");
-		var clientID = clientIDAndName[0];
-		var clientName = clientIDAndName[1];
-		
-		var socketToClient = this.socketsToClients[clientID];
-		
-		var session = new Session(clientID, this.world);
-		var sessionSerialized = this.serializer.serialize(session);
-		var socketToClient = this.socketsToClients[clientID];
-		socketToClient.emit("sessionEstablished", sessionSerialized);
-	
-		var bodyDefnPlayer = this.world.bodyDefns["_Player"];
-		var bodyDefnForClient = bodyDefnPlayer.clone();
-		bodyDefnForClient.name = clientID;
-		bodyDefnForClient.color = ColorHelper.random();
-
-		var updateBodyDefnRegister = new Update_BodyDefnRegister
-		(
-			bodyDefnForClient
-		);
-		updateBodyDefnRegister.updateWorld(this.world);
-		this.world.updatesOutgoing.push(updateBodyDefnRegister);
-
-		var bodyForClient = new Body
-		(
-			clientID, // id
-			clientName, // name
-			bodyDefnForClient.name,
-			new Coords().randomize().multiply(this.world.size),
-			new Coords().randomize().normalize()
-		);
-		
-		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
-		this.world.updatesOutgoing.push(updateBodyCreate);
-		updateBodyCreate.updateWorld(this.world);
-		
-		socketToClient.on
-		(
-			"update",
-			this.handleEvent_ClientUpdateReceived.bind(this)
-		);
-		
-		// hack - Ugh, lambda.
-		socketToClient.on
-		(
-			"disconnect",
-			function()
-			{
-				console.log(clientName + " left the server.")
-				var bodies = this.world.bodies;
-				var bodyToDestroy = bodies[clientID];
-				if (bodyToDestroy != null)
-				{
-					bodyToDestroy.integrity = 0;
-				}
-			}.bind(this)
-		);
-		
-		console.log(clientName + " joined the server.");
-	}
-		
-	Server.prototype.handleEvent_ClientUpdateReceived = function(updateSerialized)
-	{
-		var serializer;
-		var firstChar = updateSerialized[0];
-		
-		if (firstChar == "{") // JSON
-		{
-			serializer = this.serializer;
-		}
-		else // terse
-		{
-			var updateCode = firstChar;
-			if (updateCode == Update_Actions.UpdateCode)
-			{
-				serializer = new Update_Actions();
-			}
-		}
-		
-		var update = serializer.deserialize
-		(
-			updateSerialized
-		);
-				
-		update.updateWorld(this.world, this);
-	}
-	
+	}		
 }
 
 function main()

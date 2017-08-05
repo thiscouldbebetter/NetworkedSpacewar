@@ -88,26 +88,22 @@ function Client()
 
 	Client.prototype.connect = function(serviceURLToConnectTo, clientName)
 	{
-		if (serviceURLToConnectTo != this.serviceURL)
-		{
-			this.serviceURL = serviceURLToConnectTo;
-			this.clientName = clientName;
-		
-			if (this.socketToServer != null)
-			{
-				this.socketToServer.disconnect();
-				this.socketToServer = null;
-			}
-			
-			this.socketToServer = io.connect(this.serviceURL);
-			
-			this.socketToServer.on
-			(
-				"connected", 
-				this.handleEvent_ServerConnected.bind(this)
-			);
-		}
+		this.serviceURL = serviceURLToConnectTo;
+		this.clientName = clientName;
 	
+		if (this.socketToServer != null)
+		{
+			this.socketToServer.disconnect();
+			this.socketToServer = null;
+		}
+		
+		this.socketToServer = io.connect(this.serviceURL);
+		
+		this.socketToServer.on
+		(
+			"connected", 
+			this.handleEvent_ServerConnected.bind(this)
+		);	
 	}
 	
 	Client.prototype.updateForTick = function()
@@ -164,7 +160,7 @@ function Client()
 	{
 		this.clientID = clientID;
 		
-		this.socketToServer.emit("identify", this.clientID + ";" + this.clientName);
+		this.socketToServer.emit("identify", this.clientName);
 
 		this.socketToServer.on
 		(
