@@ -1,0 +1,234 @@
+<html>
+<body>
+
+<!-- imports -->
+
+<script type="text/javascript" src="Common/ArrayExtensions.js"></script>
+<script type="text/javascript" src="Common/Action.js"></script>
+<script type="text/javascript" src="Common/Activity.js"></script>
+<script type="text/javascript" src="Common/Body.js"></script>
+<script type="text/javascript" src="Common/BodyDefn.js"></script>
+<script type="text/javascript" src="Common/ColorHelper.js"></script>
+<script type="text/javascript" src="Common/Coords.js"></script>
+<script type="text/javascript" src="Common/Device.js"></script>
+<script type="text/javascript" src="Common/Log.js"></script>
+<script type="text/javascript" src="Common/Display.js"></script>
+<script type="text/javascript" src="Common/IDHelper.js"></script>
+<script type="text/javascript" src="Common/InputHelper.js"></script>
+<script type="text/javascript" src="Common/Serializer.js"></script>
+<script type="text/javascript" src="Common/SerializerNode.js"></script>
+<script type="text/javascript" src="Common/Session.js"></script>
+<script type="text/javascript" src="Common/Update_Actions.js"></script>
+<script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
+<script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
+<script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
+<script type="text/javascript" src="Common/Update_Physics.js"></script>
+<script type="text/javascript" src="Common/World.js"></script>
+
+<script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
+
+<!-- imports ends -->
+
+<div id="divUI">
+
+	<label>Server:</label>
+	<input id="inputServiceURL" value="http://localhost:8089"></input>
+	<br />
+	
+	<label>Name:</label>
+	<input id="inputName" value=""></input>
+	<br />
+
+	<button onclick="buttonConnect_Clicked();">Connect</button>
+	<br />
+	
+	<div id="divDisplay"></div>
+	
+</div>
+
+<script type="text/javascript">
+
+// ui event handlers
+
+function buttonConnect_Clicked()
+{
+	var inputServiceURL = document.getElementById("inputServiceURL");
+	var serviceURL = inputServiceURL.value;
+
+	var inputName = document.getElementById("inputName");
+	var name = inputName.value;
+	
+	if (serviceURL.length == 0)
+	{
+		alert("No server specified!")
+	}
+	else if (name.length == 0)
+	{
+		alert("No name specified!")
+	}
+	else
+	{
+		Client.Instance.connect(serviceURL, name);
+	}
+	
+}
+
+// classes
+
+function Client()
+{
+	 // do nothing
+}
+{
+	// isntance
+	
+	Client.Instance = new Client();
+	
+	// methods
+
+	Client.prototype.connect = function(serviceURLToConnectTo, clientName)
+	{
+		if (serviceURLToConnectTo != this.serviceURL)
+		{
+			this.serviceURL = serviceURLToConnectTo;
+			this.clientName = clientName;
+		
+			if (this.socketToServer != null)
+			{
+				this.socketToServer.disconnect();
+				this.socketToServer = null;
+			}
+			
+			this.socketToServer = io.connect(this.serviceURL);
+			
+			this.socketToServer.on
+			(
+				"connected", 
+				this.handleEvent_ServerConnected.bind(this)
+			);
+		}
+	
+	}
+	
+	Client.prototype.updateForTick = function()
+	{
+		var world = this.session.world;
+
+		world.updateForTick_UpdatesApply(this.updatesIncoming);
+
+		world.updateForTick_Remove();
+
+		world.updateForTick_Spawn();
+
+		this.updateForTick_Client();
+
+		this.updateForTick_UpdatesOutgoingSend();
+	}
+
+	Client.prototype.updateForTick_Client = function()
+	{
+		var world = this.session.world;
+
+		var bodyForUser = world.bodies[this.session.idOfBodyControlledByUser];
+
+		if (bodyForUser != null)
+		{
+			var activity = bodyForUser.activity;
+			
+			activity.perform
+			(
+				world, this.inputHelper, bodyForUser, activity
+			);
+		}
+
+		this.display.drawWorld(world);
+	}
+
+	Client.prototype.updateForTick_UpdatesOutgoingSend = function()
+	{
+		var world = this.session.world;
+
+		for (var i = 0; i < world.updatesOutgoing.length; i++)
+		{
+			var update = world.updatesOutgoing[i];
+			var serializer = (update.serialize == null ? this.serializer : update);
+			var updateSerialized = serializer.serialize(update);
+			this.socketToServer.emit("update", updateSerialized);
+		}
+		world.updatesOutgoing.length = 0;
+	}
+
+	// events
+	
+	Client.prototype.handleEvent_ServerConnected = function(clientID)
+	{
+		this.clientID = clientID;
+		
+		this.socketToServer.emit("identify", this.clientID + ";" + this.clientName);
+
+		this.socketToServer.on
+		(
+			"sessionEstablished", 
+			this.handleEvent_SessionEstablished.bind(this)
+		);
+	}
+	
+	Client.prototype.handleEvent_SessionEstablished = function(sessionSerialized)
+	{
+		this.serializer = new Serializer();
+		
+		var session = this.serializer.deserialize(sessionSerialized);
+		
+		this.session = session;
+		var world = this.session.world;
+		
+		this.inputHelper = new InputHelper();
+		this.inputHelper.initialize(document);
+
+		this.display = new Display("divDisplay", world.size);
+		this.display.initialize(document);
+	
+		this.updatesIncoming = []; 
+	
+		this.socketToServer.on
+		(
+			"update", 
+			this.handleEvent_UpdateReceived.bind(this)
+		);
+
+		this.timer = setInterval
+		(
+			this.updateForTick.bind(this),
+			world.millisecondsPerTick()
+		);
+	}
+	
+
+	Client.prototype.handleEvent_UpdateReceived = function(updateSerialized)
+	{
+		var serializer;
+		var firstChar = updateSerialized[0];
+		
+		if (firstChar == "{") // JSON
+		{
+			serializer = this.serializer;
+		}
+		else // terse
+		{
+			var updateCode = firstChar;
+			if (updateCode == Update_Physics.UpdateCode)
+			{
+				serializer = new Update_Physics();
+			}
+		}
+	
+		var update = serializer.deserialize(updateSerialized);
+		
+		this.updatesIncoming.push(update);
+	}
+}
+
+</script>
+
+</body>
+</html>

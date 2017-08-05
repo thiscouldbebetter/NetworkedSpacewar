@@ -1,0 +1,164 @@
+<html>
+<body>
+
+<!-- imports -->
+
+<script type="text/javascript" src="Common/ArrayExtensions.js"></script>
+<script type="text/javascript" src="Common/Action.js"></script>
+<script type="text/javascript" src="Common/Activity.js"></script>
+<script type="text/javascript" src="Common/Body.js"></script>
+<script type="text/javascript" src="Common/BodyDefn.js"></script>
+<script type="text/javascript" src="Common/ColorHelper.js"></script>
+<script type="text/javascript" src="Common/Coords.js"></script>
+<script type="text/javascript" src="Common/Device.js"></script>
+<script type="text/javascript" src="Common/Log.js"></script>
+<script type="text/javascript" src="Common/Display.js"></script>
+<script type="text/javascript" src="Common/IDHelper.js"></script>
+<script type="text/javascript" src="Common/InputHelper.js"></script>
+<script type="text/javascript" src="Common/Serializer.js"></script>
+<script type="text/javascript" src="Common/SerializerNode.js"></script>
+<script type="text/javascript" src="Common/Session.js"></script>
+<script type="text/javascript" src="Common/Update_Actions.js"></script>
+<script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
+<script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
+<script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
+<script type="text/javascript" src="Common/Update_Physics.js"></script>
+<script type="text/javascript" src="Common/World.js"></script>
+
+<!-- imports ends -->
+
+<div id="divUI">
+	<div id="divDisplay"></div>
+</div>
+
+<script type="text/javascript">
+
+function Local()
+{
+	// do nothing
+}
+{
+	Local.prototype.initialize = function()
+	{
+		this.clientID = "_" + IDHelper.IDNext();
+
+		this.inputHelper = new InputHelper();
+		this.inputHelper.initialize(document);
+
+		this.display = new Display("divDisplay", this.world.size);
+		this.display.initialize(document);
+
+		this.updatesIncoming = [];
+
+		var bodyDefnForUser = BodyDefn.player
+		(
+			this.world, 
+			this.clientID, 
+			3 // radius
+		);
+		var update = new Update_BodyDefnRegister(bodyDefnForUser);
+		this.world.updatesOutgoing.push(update);
+
+		var bodyForUser = new Body
+		(
+			this.clientID,
+			this.clientID,
+			bodyDefnForUser.name,
+			new Coords(10, 10),
+			new Coords(1, 0)
+		);
+		
+		update = new Update_BodyCreate(bodyForUser);
+		this.world.updatesOutgoing.push(update);
+
+		setInterval
+		(
+			this.updateForTick.bind(this),
+			this.world.millisecondsPerTick()
+		);	
+	}
+
+	Local.prototype.start = function()
+	{
+		this.clientID = IDHelper.IDNext();
+		this.document = document;
+
+		this.world = World.build();
+
+		this.initialize();
+	}
+
+	Local.prototype.updateForTick = function()
+	{
+		var world = this.world;
+
+		world.updateForTick_UpdatesApply(this.updatesIncoming);
+
+		world.updateForTick_Remove();
+
+		world.updateForTick_Spawn();
+
+		this.updateForTick_Client();
+
+		this.updateForTick_Server();
+
+		this.updateForTick_UpdatesOutgoingSend();
+	}
+
+	Local.prototype.updateForTick_Client = function()
+	{
+		var world = this.world;
+
+		var bodyForUser = world.bodies[this.clientID];
+
+		if (bodyForUser != null)
+		{
+			var activity = bodyForUser.activity;
+			if (activity != null)
+			{
+				activity.perform(world, this.inputHelper, bodyForUser, activity);
+			}
+		}
+
+		this.display.drawWorld(world);
+	}
+
+	Local.prototype.updateForTick_Server = function()
+	{
+		var world = this.world;
+		var bodies = world.bodies;
+
+		for (var i = 0; i < bodies.length; i++)
+		{
+			var body = bodies[i];
+			body.updateForTick_Integrity(world);
+			body.updateForTick_Actions(world);
+			body.updateForTick_Physics(world);
+		}
+
+		for (var i = 0; i < bodies.length; i++)
+		{
+			var body = bodies[i];
+			body.updateForTick_Collisions(world, i);
+		}
+	}
+
+	Local.prototype.updateForTick_UpdatesOutgoingSend = function()
+	{
+		var world = this.world;
+
+		for (var i = 0; i < world.updatesOutgoing.length; i++)
+		{
+			var update = world.updatesOutgoing[i];
+			this.updatesIncoming.push(update);
+		}
+		world.updatesOutgoing.length = 0;
+	}
+}
+
+new Local().start();
+
+</script>
+
+</body>
+</html>
