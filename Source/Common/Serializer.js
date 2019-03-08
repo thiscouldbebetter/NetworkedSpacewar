@@ -13,7 +13,7 @@ function Serializer()
 		var returnValue = nodeRoot.unwrap([]);
 
 		return returnValue;
-	}
+	};
 
 	Serializer.prototype.serialize = function(objectToSerialize)
 	{
@@ -23,11 +23,11 @@ function Serializer()
 
 		var nodeRootSerialized = JSON.stringify
 		(
-			nodeRoot, 
-			null, // ? 
+			nodeRoot,
+			null, // ?
 			4 // pretty-print indent size
 		);
 
 		return nodeRootSerialized;
-	}
+	};
 }

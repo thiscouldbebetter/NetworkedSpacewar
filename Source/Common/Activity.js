@@ -11,5 +11,5 @@ function Activity(name, perform)
 	Activity.prototype.clone = function()
 	{
 		return new Activity(this.name, this.perform);
-	}
+	};
 }

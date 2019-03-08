@@ -28,13 +28,13 @@ function Body(id, name, defnName, pos, orientation)
 		{
 			bodyDefnOther.collide(world, other, this);
 		}
-	}
+	};
 
 	Body.prototype.defn = function(world)
 	{
 		var returnValue = world.bodyDefns[this.defnName];
 		return returnValue;
-	}
+	};
 
 	Body.prototype.initializeForWorld = function(world)
 	{
@@ -45,7 +45,7 @@ function Body(id, name, defnName, pos, orientation)
 		this.ticksSinceActionPerformed = 0;
 		this.devices = bodyDefn.devices.clone().addLookups("name");
 		this.activity = bodyDefn.activity;
-	}
+	};
 
 	Body.prototype.overwriteWith = function(other)
 	{
@@ -55,7 +55,7 @@ function Body(id, name, defnName, pos, orientation)
 		this.vel.overwriteWith(other.vel);
 		this.accel.overwriteWith(other.accel);
 		this.right.overwriteWith(other.right);
-	}
+	};
 
 	Body.prototype.updateForTick_Actions = function(world)
 	{
@@ -73,7 +73,7 @@ function Body(id, name, defnName, pos, orientation)
 				var action = world.actions[actionName];
 				action.perform(world, this);
 			}
-			
+
 			actionNames.length = 0;
 
 			for (var d = 0; d < this.devices.length; d++)
@@ -88,31 +88,31 @@ function Body(id, name, defnName, pos, orientation)
 				this.energy = bodyDefn.energyMax;
 			}
 		}
-	}
+	};
 
 	Body.prototype.updateForTick_Collisions = function(world, i)
 	{
 		var bodies = world.bodies;
-		
+
 		for (var j = i + 1; j < bodies.length; j++)
 		{
 			var bodyOther = bodies[j];
-	
+
 			var distanceFromThisToOther = bodyOther.pos.clone().subtract
 			(
 				this.pos
 			).magnitude();
-			
-			var sumOfRadii = 
-				this.defn(world).radius 
+
+			var sumOfRadii =
+				this.defn(world).radius
 				+ bodyOther.defn(world).radius;
-	
+
 			if (distanceFromThisToOther < sumOfRadii)
 			{
 				this.collideWith(world, bodyOther);
 			}
 		}
-	}
+	};
 
 	Body.prototype.updateForTick_Integrity = function(world)
 	{
@@ -138,7 +138,7 @@ function Body(id, name, defnName, pos, orientation)
 			world.updatesImmediate.push(update);
 			world.updatesOutgoing.push(update);
 		}
-	}
+	};
 
 	Body.prototype.updateForTick_Physics = function(world)
 	{
@@ -161,7 +161,7 @@ function Body(id, name, defnName, pos, orientation)
 		);
 
 		this.accel.clear();
-		
+
 		if (bodyDefn.speedMax != 0 || bodyDefn.turnRate != 0)
 		{
 			var update = new Update_Physics
@@ -171,5 +171,24 @@ function Body(id, name, defnName, pos, orientation)
 
 			world.updatesOutgoing.push(update);
 		}
-	}
+	};
+
+	// drawable
+	Body.prototype.drawToDisplay = function(display, world)
+	{
+		var body = this;
+
+		var bodyPos = body.pos;
+		var bodyDefn = body.defn(world);
+		var bodySize = bodyDefn.radius;
+		var bodyColor = bodyDefn.color;
+
+		display.drawText(body.name, bodyPos, bodyColor);
+		display.drawCircle(bodyPos, bodySize, bodyColor);
+
+		if (bodyDefn.speedMax != 0) // hack
+		{
+			display.drawRay(bodyPos, body.orientation, bodySize * 2, bodyColor)
+		}
+	};
 }

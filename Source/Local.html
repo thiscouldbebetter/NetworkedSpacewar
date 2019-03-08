@@ -42,18 +42,11 @@ function Local()
 	{
 		this.clientID = "_" + IDHelper.IDNext();
 
-		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document);
-
-		this.display = new Display("divDisplay", this.world.size);
-		this.display.initialize(document);
-
 		this.updatesIncoming = [];
 
 		var bodyDefnForUser = BodyDefn.player
 		(
-			this.world, 
-			this.clientID, 
+			this.world,
 			3 // radius
 		);
 		var update = new Update_BodyDefnRegister(bodyDefnForUser);
@@ -75,18 +68,24 @@ function Local()
 		(
 			this.updateForTick.bind(this),
 			this.world.millisecondsPerTick()
-		);	
-	}
+		);
+
+		this.inputHelper = new InputHelper();
+		this.inputHelper.initialize(document);
+
+		this.display = new Display("divDisplay", this.world.size);
+		this.display.initialize(document);
+	};
 
 	Local.prototype.start = function()
 	{
 		this.clientID = IDHelper.IDNext();
 		this.document = document;
 
-		this.world = World.build();
+		this.world = World.default();
 
 		this.initialize();
-	}
+	};
 
 	Local.prototype.updateForTick = function()
 	{
@@ -103,7 +102,7 @@ function Local()
 		this.updateForTick_Server();
 
 		this.updateForTick_UpdatesOutgoingSend();
-	}
+	};
 
 	Local.prototype.updateForTick_Client = function()
 	{
@@ -120,8 +119,8 @@ function Local()
 			}
 		}
 
-		this.display.drawWorld(world);
-	}
+		this.world.drawToDisplay(this.display);
+	};
 
 	Local.prototype.updateForTick_Server = function()
 	{
@@ -141,19 +140,20 @@ function Local()
 			var body = bodies[i];
 			body.updateForTick_Collisions(world, i);
 		}
-	}
+	};
 
 	Local.prototype.updateForTick_UpdatesOutgoingSend = function()
 	{
 		var world = this.world;
 
-		for (var i = 0; i < world.updatesOutgoing.length; i++)
+		var updates = world.updatesOutgoing;
+		for (var i = 0; i < updates.length; i++)
 		{
-			var update = world.updatesOutgoing[i];
+			var update = updates[i];
 			this.updatesIncoming.push(update);
 		}
 		world.updatesOutgoing.length = 0;
-	}
+	};
 }
 
 new Local().start();

@@ -11,5 +11,5 @@ function Log()
 		{
 			console.log(message);
 		}
-	}
+	};
 }

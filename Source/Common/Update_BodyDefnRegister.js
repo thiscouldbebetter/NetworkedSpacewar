@@ -9,5 +9,5 @@ function Update_BodyDefnRegister(bodyDefn)
 	{
 		world.bodyDefns.push(this.bodyDefn);
 		world.bodyDefns[this.bodyDefn.name] = this.bodyDefn;
-	}
+	};
 }

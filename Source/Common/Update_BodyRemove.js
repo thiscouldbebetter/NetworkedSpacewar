@@ -8,5 +8,5 @@ function Update_BodyRemove(bodyID)
 	Update_BodyRemove.prototype.updateWorld = function(world)
 	{
 		world.bodyIDsToRemove.push(this.bodyID);
-	}
+	};
 }

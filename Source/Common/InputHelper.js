@@ -10,7 +10,7 @@ function InputHelper()
 		this.inputNamesActive = [];
 		document.body.onkeydown = this.handleEventKeyDown.bind(this);
 		document.body.onkeyup = this.handleEventKeyUp.bind(this);
-	}
+	};
 
 	// events
 
@@ -22,12 +22,12 @@ function InputHelper()
 			this.inputNamesActive.push(inputName);
 			this.inputNamesActive[inputName] = inputName;
 		}
-	}
+	};
 
 	InputHelper.prototype.handleEventKeyUp = function(event)
 	{
 		var inputName = event.key;
 		this.inputNamesActive.remove(inputName);
 		delete this.inputNamesActive[inputName];
-	}
+	};
 }

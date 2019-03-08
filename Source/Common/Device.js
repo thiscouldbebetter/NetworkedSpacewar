@@ -4,7 +4,7 @@ function Device(name, ticksToCharge, energyToUse, use)
 	this.name = name;
 	this.ticksToCharge = ticksToCharge;
 	this.energyToUse = energyToUse;
-	this.use = use;	
+	this.use = use;
 
 	this.ticksSinceUsed = 0;
 }
@@ -58,7 +58,7 @@ function Device(name, ticksToCharge, energyToUse, use)
 					),
 					body.orientation.clone()
 				);
-	
+
 				projectile.vel.overwriteWith
 				(
 					body.orientation
@@ -74,7 +74,7 @@ function Device(name, ticksToCharge, energyToUse, use)
 		);
 
 		return returnValue;
-	}
+	};
 
 	Device.jump = function()
 	{
@@ -108,17 +108,17 @@ function Device(name, ticksToCharge, energyToUse, use)
 		);
 
 		return returnValue;
-	}
+	};
 
 	// instance methods
 
 	Device.prototype.clone = function()
 	{
 		return new Device(this.name, this.ticksToCharge, this.energyToUse, this.use);
-	}	
+	};
 
 	Device.prototype.updateForTick = function(world, body)
 	{
 		this.ticksSinceUsed++;
-	}
+	};
 }

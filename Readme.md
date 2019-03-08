@@ -3,6 +3,8 @@ Networked Spacewar
 
 A networked version of the classic game Spacewar, using Node.js and its library "socket.io".
 
+![Screenshot](/Screenshots/Screenshot.png?raw=true "Screenshot")
+
 To run the server:
 
 1. Make sure Node.js is installed.
@@ -16,6 +18,8 @@ To run a client:
 2. Specify the server URL, if necessary.
 3. Specify a user name.
 4. Click the connect button.
+
+Alternately, the file Local.html implements a single-player, non-networked version for testing purposes.
 
 To play:
 

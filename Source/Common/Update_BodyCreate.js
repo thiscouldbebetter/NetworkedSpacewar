@@ -12,5 +12,5 @@ function Update_BodyCreate(body)
 		{
 			world.bodiesToSpawn.push(this.body);
 		}
-	}
+	};
 }

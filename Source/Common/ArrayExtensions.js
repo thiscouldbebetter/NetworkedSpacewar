@@ -14,7 +14,7 @@ function ArrayExtensions()
 		}
 
 		return this;
-	}
+	};
 
 	Array.prototype.append = function(other)
 	{
@@ -24,7 +24,7 @@ function ArrayExtensions()
 		}
 
 		return this;
-	}
+	};
 
 	Array.prototype.clone = function()
 	{
@@ -37,13 +37,13 @@ function ArrayExtensions()
 			returnValues.push(itemCloned);
 		}
 
-		return returnValues;	
-	}
+		return returnValues;
+	};
 
 	Array.prototype.contains = function(itemToFind)
 	{
 		return (this.indexOf(itemToFind) >= 0);
-	}
+	};
 
 	Array.prototype.members = function(memberName)
 	{
@@ -57,12 +57,12 @@ function ArrayExtensions()
 		}
 
 		return returnValues;
-	}
+	};
 
 	Array.prototype.removeAt = function(indexToRemoveAt)
 	{
 		this.splice(indexToRemoveAt, 1);
-	}
+	};
 
 	Array.prototype.remove = function(itemToRemove)
 	{
@@ -70,5 +70,5 @@ function ArrayExtensions()
 		{
 			this.removeAt(this.indexOf(itemToRemove));
 		}
-	}
+	};
 }

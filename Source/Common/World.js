@@ -20,7 +20,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 	World.build = function(arenaSize, planetSize, shipSize, bulletSize)
 	{
-		var actions = 
+		var actions =
 		[
 			new Action
 			(
@@ -41,7 +41,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 					);
 				}
 			),
-			
+
 			new Action
 			(
 				"Fire",
@@ -53,7 +53,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 					device.use(world, body, device);
 				}
 			),
-			
+
 			new Action
 			(
 				"Jump",
@@ -126,7 +126,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		var bodyDefnPlanet = BodyDefn.planet(planetSize);
 
 		var worldSize = new Coords(1, 1).multiplyScalar(arenaSize);
-		
+
 		var bodyPlanet = new Body
 		(
 			"Planet", // id
@@ -135,7 +135,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			worldSize.clone().divideScalar(2), // pos
 			new Coords(1, 0) // orientation
 		);
-		
+
 		var returnValue = new World
 		(
 			"World0",
@@ -155,12 +155,12 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		);
 
 		return returnValue;
-	}
-	
+	};
+
 	World.default = function()
 	{
 		return World.build(128, 10, 3, 1);
-	}
+	};
 
 	// instance methods
 
@@ -172,20 +172,20 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			this.bodies[body.id] = null;
 			delete this.bodies[body.id];
 		}
-	}
+	};
 
 	World.prototype.bodySpawn = function(body)
 	{
 		this.bodies.push(body);
 		this.bodies[body.id] = body;
 		body.initializeForWorld(this);
-	}
+	};
 
 	World.prototype.millisecondsPerTick = function()
 	{
 		return Math.floor(1000 / this.ticksPerSecond);
-	}
-	
+	};
+
 	World.prototype.overwriteWith = function(other)
 	{
 		this.name = other.name;
@@ -194,8 +194,8 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		this.actions = other.actions;
 		this.bodyDefns = other.bodyDefns;
 		this.bodies = other.bodies;
-	}
-		
+	};
+
 	World.prototype.updateForTick_Remove = function()
 	{
 		// hack
@@ -204,9 +204,9 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		// by the time this attempts to remove it,
 		// so it can't remove it, but the list is cleared anyway,
 		// so it forgets it needs to remove it,
-		// so once it actually gets created it lasts forever. 
+		// so once it actually gets created it lasts forever.
 		var bodyIDsThatCannotYetBeRemoved = [];
-		
+
 		for(var i = 0; i < this.bodyIDsToRemove.length; i++)
 		{
 			var bodyID = this.bodyIDsToRemove[i];
@@ -221,7 +221,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			}
 		}
 		this.bodyIDsToRemove = bodyIDsThatCannotYetBeRemoved;
-	}
+	};
 
 	World.prototype.updateForTick_Spawn = function()
 	{
@@ -231,8 +231,8 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			this.bodySpawn(body);
 		}
 		this.bodiesToSpawn.length = 0;
-	}
-	
+	};
+
 	World.prototype.updateForTick_UpdatesApply = function(updatesToApply)
 	{
 		for (var i = 0; i < updatesToApply.length; i++)
@@ -241,5 +241,19 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			update.updateWorld(this);
 		}
 		updatesToApply.length = 0;
-	}
+	};
+
+	// drawable
+
+	World.prototype.drawToDisplay = function(display)
+	{
+		display.clear();
+
+		var bodies = this.bodies;
+		for (var i = 0; i < bodies.length; i++)
+		{
+			var body = bodies[i];
+			body.drawToDisplay(display, this);
+		}
+	};
 }

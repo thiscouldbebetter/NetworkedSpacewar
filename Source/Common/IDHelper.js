@@ -10,5 +10,5 @@ function IDHelper()
 	IDHelper.IDNext = function()
 	{
 		return "_" + IDHelper._idNext++;
-	}
+	};
 }

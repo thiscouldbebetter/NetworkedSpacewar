@@ -6,6 +6,8 @@ function Display(divID, size)
 
 	this.colorBack = "White";
 	this.colorFore = "Gray";
+
+	this._drawPos = new Coords();
 }
 
 {
@@ -16,73 +18,48 @@ function Display(divID, size)
 
 		this.graphics.strokeStyle = this.colorFore;
 		this.graphics.strokeRect(0, 0, this.size.x, this.size.y);
-	}
+	};
 
-	Display.prototype.drawTextAtPos = function(text, drawPos)
+	Display.prototype.drawCircle = function(center, radius, color)
+	{
+		var g = this.graphics;
+		g.strokeStyle = color;
+		g.beginPath();
+		g.arc(center.x, center.y, radius, 0, Math.PI * 2);
+		g.stroke();
+	};
+
+	Display.prototype.drawRay = function(vertex, orientation, length, color)
+	{
+		var g = this.graphics;
+		g.strokeStyle = color;
+		g.beginPath();
+		g.moveTo(vertex.x, vertex.y);
+		var drawPos =
+			this._drawPos.overwriteWith
+			(
+				orientation
+			).multiplyScalar
+			(
+				length
+			).add
+			(
+				vertex
+			);
+
+		g.lineTo(drawPos.x, drawPos.y);
+		g.stroke();
+	};
+
+	Display.prototype.drawText = function(text, drawPos)
 	{
 		this.graphics.fillStyle = this.colorFore;
 		this.graphics.fillText
 		(
-			text, 
+			text,
 			drawPos.x, drawPos.y
 		);
-	}
-
-	Display.prototype.drawWorld = function(world)
-	{
-		this.clear();
-
-		var drawPos = new Coords();
-		var drawPos2 = new Coords();
-
-		for (var i = 0; i < world.bodies.length; i++)
-		{
-			var body = world.bodies[i];
-			var bodyPos = body.pos;
-			var bodyDefn = body.defn(world);
-			var bodySize = bodyDefn.radius;
-
-			this.graphics.strokeStyle = bodyDefn.color;
-
-			drawPos.overwriteWith
-			(
-				bodyPos
-			);
-
-			this.drawTextAtPos(body.name, drawPos);
-
-			this.graphics.beginPath();
-			this.graphics.arc
-			(
-				drawPos.x, drawPos.y, // center
-				bodySize, // radius
-				0, Math.PI * 2 // start, stop angles
-			);
-			this.graphics.stroke();
-
-			if (bodyDefn.speedMax != 0) // hack
-			{
-				this.graphics.beginPath();
-
-				this.graphics.moveTo(drawPos.x, drawPos.y);
-
-				drawPos2.overwriteWith
-				(
-					body.orientation
-				).multiplyScalar
-				(
-					bodySize * 2
-				).add
-				(
-					drawPos
-				);
-
-				this.graphics.lineTo(drawPos2.x, drawPos2.y);
-	
-				this.graphics.stroke();
-			}
-		}		
-	}
+	};
 
 	Display.prototype.initialize = function(document)
 	{
@@ -97,5 +74,5 @@ function Display(divID, size)
 		divDisplay.appendChild(canvas);
 
 		this.domElement = canvas;
-	}
+	};
 }

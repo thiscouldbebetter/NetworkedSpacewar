@@ -1,21 +1,21 @@
 
 function BodyDefn
 (
-	name, 
+	name,
 	categoryNames,
-	color, 
+	color,
 	integrityMax,
 	ticksToLive,
 	massInKg,
-	speedMax, 
-	accelerationPerTick, 
-	turnRate, 
+	speedMax,
+	accelerationPerTick,
+	turnRate,
 	energyMax,
 	energyPerTick,
-	radius, 
+	radius,
 	activity,
 	actionNames,
-	devices, 
+	devices,
 	collide
 )
 {
@@ -41,7 +41,7 @@ function BodyDefn
 	BodyDefn.planet = function(radius)
 	{
 		var color = ColorHelper.random();
-		
+
 		var activityGravitate = new Activity
 		(
 			"Gravitate",
@@ -63,18 +63,18 @@ function BodyDefn
 								planet.pos
 							);
 							var distance = displacement.magnitude();
-							
+
 							if (distance > 0)
 							{
 								var bodyOtherDefn = bodyOther.defn(world);
-								
+
 								var direction = displacement.divideScalar
 								(
 									distance
 								);
-								
+
 								var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
-								
+
 								var accelDueToGravity = direction.multiplyScalar
 								(
 									gravityConstantInPixels2OverKg2 * planetDefn.massInKg
@@ -82,7 +82,7 @@ function BodyDefn
 								(
 									distance * distance
 								);
-								
+
 								bodyOther.accel.subtract(accelDueToGravity);
 							}
 						}
@@ -99,13 +99,13 @@ function BodyDefn
 			Number.POSITIVE_INFINITY, // integrityMax
 			null, // ticksToLive
 			6 * Math.pow(10, 24), // massInKg (Earth actual)
-			0, // speedMax 
+			0, // speedMax
 			0, // accelerationPerTick
 			0, // turnRate
 			0, // energyMax
 			0, // energyPerTick
 			radius, // radius
-			activityGravitate, 
+			activityGravitate,
 			[], // actionNames
 			[], // devices
 			function collide(world, collider, other)
@@ -115,11 +115,11 @@ function BodyDefn
 				(
 					planet.pos
 				);
-				
+
 				var distance = displacement.magnitude();
-			
+
 				var direction = displacement.divideScalar(distance);
-				
+
 				other.pos.overwriteWith
 				(
 					planet.pos
@@ -127,22 +127,21 @@ function BodyDefn
 				(
 					direction.clone().multiplyScalar
 					(
-						planet.defn(world).radius 
+						planet.defn(world).radius
 						+ other.defn(world).radius
 					)
 				);
-				
+
 				var speedAlongRadius = other.vel.dotProduct(direction);
-	
+
 				var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
-	
+
 				other.accel.subtract(accelOfReflection);
 			}
 		);
 
 		return returnValue;
-
-	}
+	};
 
 	BodyDefn.player = function(name, radius)
 	{
@@ -158,9 +157,9 @@ function BodyDefn
 				{
 					return;
 				}
-				
+
 				activity.actionNames.length = 0;
-		
+
 				var bodyDefn = actor.defn(world);
 
 				var inputNamesActive = inputHelper.inputNamesActive;
@@ -199,7 +198,7 @@ function BodyDefn
 			1, // integrityMax
 			null, // ticksToLive
 			10000, // massInKg (10 tonnes)
-			radius, // speedMax 
+			radius, // speedMax
 			radius / 20, // accelerationPerTick
 			.15, // turnRate
 			1, // energyMax
@@ -216,7 +215,7 @@ function BodyDefn
 		);
 
 		return returnValue;
-	}
+	};
 
 	BodyDefn.projectile = function(radius)
 	{
@@ -224,12 +223,12 @@ function BodyDefn
 		(
 			"Projectile", // name
 			[], // categoryNames
-			"Brown", // color 
+			"Brown", // color
 			1, // integrityMax
 			10, // ticksToLive
 			0, // massInKg
 			8 * radius, // speedMax
-			0, // accelerationPerTick 
+			0, // accelerationPerTick
 			0, // turnRate
 			0, // energyMax
 			0, // energyPerTick
@@ -244,31 +243,30 @@ function BodyDefn
 				other.integrity--;
 			}
 		);
-	}
-	
+	};
+
 	// instance methods
-	
+
 	BodyDefn.prototype.clone = function()
 	{
 		return new BodyDefn
 		(
-			this.name, 
+			this.name,
 			this.categoryNames,
-			this.color, 
+			this.color,
 			this.integrityMax,
 			this.ticksToLive,
 			this.massInKg,
-			this.speedMax, 
-			this.accelerationPerTick, 
-			this.turnRate, 
+			this.speedMax,
+			this.accelerationPerTick,
+			this.turnRate,
 			this.energyMax,
 			this.energyPerTick,
-			this.radius, 
+			this.radius,
 			this.activity.clone(),
 			this.actionNames,
-			this.devices, 
+			this.devices,
 			this.collide
 		);
-	}
-	
+	};
 }
