@@ -3,7 +3,7 @@ Networked Spacewar
 
 A networked version of the classic game Spacewar, using Node.js and its library "socket.io".
 
-![Screenshot](/Screenshots/Screenshot.png?raw=true "Screenshot")
+![Screenshot](Screenshot.png?raw=true "Screenshot")
 
 To run the server:
 
