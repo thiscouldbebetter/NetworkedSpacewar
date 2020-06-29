@@ -11,22 +11,61 @@ function Display(divID, size)
 }
 
 {
-	Display.prototype.clear = function()
+	Display.prototype.clear = function(colorBack)
 	{
-		this.graphics.fillStyle = this.colorBack;
+		colorBack = colorBack || this.colorBack;
+		this.graphics.fillStyle = colorBack;
 		this.graphics.fillRect(0, 0, this.size.x, this.size.y);
 
 		this.graphics.strokeStyle = this.colorFore;
 		this.graphics.strokeRect(0, 0, this.size.x, this.size.y);
 	};
 
-	Display.prototype.drawCircle = function(center, radius, color)
+	Display.prototype.drawCircle = function(center, radius, colorFill, colorBorder)
 	{
 		var g = this.graphics;
-		g.strokeStyle = color;
+
 		g.beginPath();
 		g.arc(center.x, center.y, radius, 0, Math.PI * 2);
-		g.stroke();
+
+		if (colorFill != null)
+		{
+			g.fillStyle = colorFill;
+			g.fill();
+		}
+		if (colorBorder != null)
+		{
+			g.strokeStyle = colorBorder;
+			g.stroke();
+		}
+	};
+
+	Display.prototype.drawPolygon = function(vertices, colorFill, colorBorder)
+	{
+		var g = this.graphics;
+
+		g.beginPath();
+
+		var vertex = vertices[0];
+		g.moveTo(vertex.x, vertex.y);
+
+		for (var i = 1; i < vertices.length; i++)
+		{
+			var vertex = vertices[i];
+			g.lineTo(vertex.x, vertex.y);
+		}
+		g.closePath();
+
+		if (colorFill != null)
+		{
+			g.fillStyle = colorFill;
+			g.fill();
+		}
+		if (colorBorder != null)
+		{
+			g.strokeStyle = colorBorder;
+			g.stroke();
+		}
 	};
 
 	Display.prototype.drawRay = function(vertex, orientation, length, color)

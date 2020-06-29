@@ -16,7 +16,8 @@ function BodyDefn
 	activity,
 	actionNames,
 	devices,
-	collide
+	collide,
+	visual
 )
 {
 	this.name = name;
@@ -35,6 +36,7 @@ function BodyDefn
 	this.actionNames = actionNames;
 	this.devices = devices;
 	this.collide = collide;
+	this.visual = visual;
 }
 
 {
@@ -42,54 +44,88 @@ function BodyDefn
 	{
 		var color = ColorHelper.random();
 
-		var activityGravitate = new Activity
-		(
-			"Gravitate",
-			// perform
-			function(world, inputHelper, actor, activity)
+		var gravitatePerform = function(world, inputHelper, actor, activity)
+		{
+			var planet = actor;
+			var planetDefn = planet.defn(world);
+			var bodiesOther = world.bodies;
+			for (var i = 0; i < bodiesOther.length; i++)
 			{
-				var planet = actor;
-				var planetDefn = planet.defn(world);
-				var bodiesOther = world.bodies;
-				for (var i = 0; i < bodiesOther.length; i++)
+				var bodyOther = bodiesOther[i];
+				if (bodyOther != planet)
 				{
-					var bodyOther = bodiesOther[i];
-					if (bodyOther != planet)
+					if (bodyOther.massInKg != 0)
 					{
-						if (bodyOther.massInKg != 0)
+						var displacement = bodyOther.loc.pos.clone().subtract
+						(
+							planet.loc.pos
+						);
+						var distance = displacement.magnitude();
+
+						if (distance > 0)
 						{
-							var displacement = bodyOther.pos.clone().subtract
+							var bodyOtherDefn = bodyOther.defn(world);
+
+							var direction = displacement.divideScalar
 							(
-								planet.pos
+								distance
 							);
-							var distance = displacement.magnitude();
 
-							if (distance > 0)
-							{
-								var bodyOtherDefn = bodyOther.defn(world);
+							var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
 
-								var direction = displacement.divideScalar
-								(
-									distance
-								);
+							var accelDueToGravity = direction.multiplyScalar
+							(
+								gravityConstantInPixels2OverKg2 * planetDefn.massInKg
+							).divideScalar
+							(
+								distance * distance
+							);
 
-								var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
-
-								var accelDueToGravity = direction.multiplyScalar
-								(
-									gravityConstantInPixels2OverKg2 * planetDefn.massInKg
-								).divideScalar
-								(
-									distance * distance
-								);
-
-								bodyOther.accel.subtract(accelDueToGravity);
-							}
+							bodyOther.accel.subtract(accelDueToGravity);
 						}
 					}
 				}
 			}
+		};
+
+		var activityGravitate = new Activity
+		(
+			"Gravitate",
+			gravitatePerform
 		);
+
+		var collide = function(world, collider, other)
+		{
+			var planet = collider;
+			var displacement = other.loc.pos.clone().subtract
+			(
+				planet.loc.pos
+			);
+
+			var distance = displacement.magnitude();
+
+			var direction = displacement.divideScalar(distance);
+
+			other.loc.pos.overwriteWith
+			(
+				planet.loc.pos
+			).add
+			(
+				direction.clone().multiplyScalar
+				(
+					planet.defn(world).radius
+					+ other.defn(world).radius
+				)
+			);
+
+			var speedAlongRadius = other.vel.dotProduct(direction);
+
+			var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
+
+			other.accel.subtract(accelOfReflection);
+		};
+
+		var visual = new VisualShape(new ShapeCircle(radius), color);
 
 		var returnValue = new BodyDefn
 		(
@@ -108,36 +144,8 @@ function BodyDefn
 			activityGravitate,
 			[], // actionNames
 			[], // devices
-			function collide(world, collider, other)
-			{
-				var planet = collider;
-				var displacement = other.pos.clone().subtract
-				(
-					planet.pos
-				);
-
-				var distance = displacement.magnitude();
-
-				var direction = displacement.divideScalar(distance);
-
-				other.pos.overwriteWith
-				(
-					planet.pos
-				).add
-				(
-					direction.clone().multiplyScalar
-					(
-						planet.defn(world).radius
-						+ other.defn(world).radius
-					)
-				);
-
-				var speedAlongRadius = other.vel.dotProduct(direction);
-
-				var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
-
-				other.accel.subtract(accelOfReflection);
-			}
+			collide,
+			visual
 		);
 
 		return returnValue;
@@ -190,6 +198,13 @@ function BodyDefn
 			}
 		);
 
+		var visual = new VisualGroup
+		([
+			new VisualShape(new ShapeCircle(radius), color),
+			new VisualShape(new ShapeRay(radius * 2), color),
+			new VisualText(name, color)
+		]);
+
 		var returnValue = new BodyDefn
 		(
 			name,
@@ -211,7 +226,8 @@ function BodyDefn
 				Device.gun(),
 				Device.jump(),
 			],
-			null // collide
+			null, // collide
+			visual
 		);
 
 		return returnValue;
@@ -219,11 +235,14 @@ function BodyDefn
 
 	BodyDefn.projectile = function(radius)
 	{
+		var color = "Yellow";
+		var visual = new VisualShape(new ShapeCircle(radius), color);
+
 		return new BodyDefn
 		(
 			"Projectile", // name
 			[], // categoryNames
-			"Brown", // color
+			color,
 			1, // integrityMax
 			10, // ticksToLive
 			0, // massInKg
@@ -241,7 +260,8 @@ function BodyDefn
 			{
 				this.integrity = 0;
 				other.integrity--;
-			}
+			},
+			visual
 		);
 	};
 
@@ -266,7 +286,8 @@ function BodyDefn
 			this.activity.clone(),
 			this.actionNames,
 			this.devices,
-			this.collide
+			this.collide,
+			this.visual
 		);
 	};
 }

@@ -18,15 +18,19 @@ function ClientConnection(server, clientID, socket)
 		this.handleEvent_ClientIdentifyingSelf.bind(this)
 	);
 }
-{	
-	ClientConnection.prototype.handleEvent_ClientDisconnected = function()
+{
+	ClientConnection.prototype.handleEvent_ClientDisconnected = function(e)
 	{
-		console.log("Someone left the server.")
 		var bodies = this.server.world.bodies;
 		var bodyToDestroy = bodies[this.clientID];
-		if (bodyToDestroy != null)
+		if (bodyToDestroy == null)
+		{
+			console.log(this.clientID + " left the server.");
+		}
+		else
 		{
 			bodyToDestroy.integrity = 0;
+			console.log(bodyToDestroy.name + " left the server.");
 		}
 	}
 	
@@ -61,8 +65,11 @@ function ClientConnection(server, clientID, socket)
 			this.clientID, // id
 			clientName, // name
 			bodyDefnForClient.name,
-			new Coords().randomize().multiply(world.size),
-			new Coords().randomize().normalize()
+			new Location
+			(
+				new Coords().randomize().multiply(world.size), // pos
+				new Coords().randomize().normalize() // ori
+			)
 		);
 		
 		var updateBodyCreate = new Update_BodyCreate(bodyForClient);

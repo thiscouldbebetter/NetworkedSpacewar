@@ -32,9 +32,10 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 					var bodyDefn = body.defn(world);
 					var acceleration = bodyDefn.accelerationPerTick;
 
+					var bodyLoc = body.loc;
 					body.accel.add
 					(
-						body.orientation.clone().multiplyScalar
+						bodyLoc.orientation.clone().multiplyScalar
 						(
 							acceleration
 						)
@@ -84,17 +85,18 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 					var bodyDefn = body.defn(world);
 					var turnRate = bodyDefn.turnRate;
 
-					body.orientation.subtract
+					var bodyLoc = body.loc;
+					bodyLoc.orientation.subtract
 					(
-						body.right.clone().multiplyScalar
+						bodyLoc.right.clone().multiplyScalar
 						(
 							turnRate
 						)
 					).normalize();
 
-					body.right.overwriteWith
+					bodyLoc.right.overwriteWith
 					(
-						body.orientation
+						bodyLoc.orientation
 					).right();
 				}
 			),
@@ -108,14 +110,15 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 					var bodyDefn = body.defn(world);
 					var turnRate = bodyDefn.turnRate;
 
-					body.orientation.add
+					var bodyLoc = body.loc;
+					bodyLoc.orientation.add
 					(
-						body.right.clone().multiplyScalar(turnRate)
+						bodyLoc.right.clone().multiplyScalar(turnRate)
 					).normalize();
 
-					body.right.overwriteWith
+					bodyLoc.right.overwriteWith
 					(
-						body.orientation
+						bodyLoc.orientation
 					).right();
 				}
 			),
@@ -132,8 +135,11 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			"Planet", // id
 			"", // name
 			bodyDefnPlanet.name,
-			worldSize.clone().divideScalar(2), // pos
-			new Coords(1, 0) // orientation
+			new Location
+			(
+				worldSize.clone().divideScalar(2), // pos
+				new Coords(1, 0) // orientation
+			)
 		);
 
 		var returnValue = new World
@@ -247,7 +253,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 	World.prototype.drawToDisplay = function(display)
 	{
-		display.clear();
+		display.clear("Black");
 
 		var bodies = this.bodies;
 		for (var i = 0; i < bodies.length; i++)

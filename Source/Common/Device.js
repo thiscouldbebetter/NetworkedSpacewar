@@ -41,27 +41,32 @@ function Device(name, ticksToCharge, energyToUse, use)
 
 				var projectileID = "P" + IDHelper.IDNext();
 
+				var bodyLoc = body.loc;
 				var projectile = new Body
 				(
 					projectileID,
 					"", // no name
 					projectileDefn.name,
-					body.pos.clone().add
+					new Location
 					(
-						body.orientation.clone().multiplyScalar
+						// pos
+						bodyLoc.pos.clone().add
 						(
-							bodyDefn.radius * 1.1
-						)
-					).add
-					(
-						body.vel
-					),
-					body.orientation.clone()
+							bodyLoc.orientation.clone().multiplyScalar
+							(
+								bodyDefn.radius * 1.1
+							)
+						).add
+						(
+							body.vel
+						),
+						bodyLoc.orientation.clone() // ori
+					)
 				);
 
 				projectile.vel.overwriteWith
 				(
-					body.orientation
+					bodyLoc.orientation
 				).multiplyScalar
 				(
 					projectileDefn.speedMax
@@ -100,7 +105,7 @@ function Device(name, ticksToCharge, energyToUse, use)
 
 				body.energy -= device.energyToUse;
 
-				body.pos.randomize().multiply
+				body.loc.pos.randomize().multiply
 				(
 					world.size
 				);

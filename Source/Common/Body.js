@@ -1,15 +1,13 @@
 
-function Body(id, name, defnName, pos, orientation)
+function Body(id, name, defnName, loc)
 {
 	this.id = id;
 	this.name = name;
 	this.defnName = defnName;
-	this.pos = pos;
-	this.orientation = orientation;
+	this.loc = loc;
 
 	this.vel = new Coords(0, 0);
 	this.accel = new Coords(0, 0);
-	this.right = this.orientation.clone().right();
 }
 
 {
@@ -50,11 +48,9 @@ function Body(id, name, defnName, pos, orientation)
 	Body.prototype.overwriteWith = function(other)
 	{
 		this.defnName = other.defnName;
-		this.pos.overwriteWith(other.pos);
-		this.orientation.overwriteWith(other.orientation);
+		this.loc.overwriteWith(other.loc);
 		this.vel.overwriteWith(other.vel);
 		this.accel.overwriteWith(other.accel);
-		this.right.overwriteWith(other.right);
 	};
 
 	Body.prototype.updateForTick_Actions = function(world)
@@ -98,9 +94,9 @@ function Body(id, name, defnName, pos, orientation)
 		{
 			var bodyOther = bodies[j];
 
-			var distanceFromThisToOther = bodyOther.pos.clone().subtract
+			var distanceFromThisToOther = bodyOther.loc.pos.clone().subtract
 			(
-				this.pos
+				this.loc.pos
 			).magnitude();
 
 			var sumOfRadii =
@@ -152,7 +148,7 @@ function Body(id, name, defnName, pos, orientation)
 			bodyDefn.speedMax
 		);
 
-		this.pos.add
+		this.loc.pos.add
 		(
 			this.vel
 		).wrapToRange
@@ -166,7 +162,7 @@ function Body(id, name, defnName, pos, orientation)
 		{
 			var update = new Update_Physics
 			(
-				this.id, this.pos, this.orientation
+				this.id, this.loc
 			);
 
 			world.updatesOutgoing.push(update);
@@ -174,21 +170,10 @@ function Body(id, name, defnName, pos, orientation)
 	};
 
 	// drawable
+
 	Body.prototype.drawToDisplay = function(display, world)
 	{
-		var body = this;
-
-		var bodyPos = body.pos;
-		var bodyDefn = body.defn(world);
-		var bodySize = bodyDefn.radius;
-		var bodyColor = bodyDefn.color;
-
-		display.drawText(body.name, bodyPos, bodyColor);
-		display.drawCircle(bodyPos, bodySize, bodyColor);
-
-		if (bodyDefn.speedMax != 0) // hack
-		{
-			display.drawRay(bodyPos, body.orientation, bodySize * 2, bodyColor)
-		}
+		var defn = this.defn(world);
+		defn.visual.draw(display, this);
 	};
 }

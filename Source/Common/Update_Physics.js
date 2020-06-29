@@ -1,9 +1,8 @@
 
-function Update_Physics(bodyID, pos, orientation)
+function Update_Physics(bodyID, loc)
 {
 	this.bodyID = bodyID;
-	this.pos = pos;
-	this.orientation = orientation;
+	this.loc = loc;
 }
 
 {
@@ -14,9 +13,7 @@ function Update_Physics(bodyID, pos, orientation)
 		var body = world.bodies[this.bodyID];
 		if (body != null)
 		{
-			body.pos.overwriteWith(this.pos);
-			body.orientation.overwriteWith(this.orientation);
-			body.right.overwriteWith(this.orientation).right();
+			body.loc.overwriteWith(this.loc);
 		}
 	};
 
@@ -31,8 +28,11 @@ function Update_Physics(bodyID, pos, orientation)
 		var returnValue = new Update_Physics
 		(
 			parts[1],
-			new Coords(parseFloat(parts[2]), parseFloat(parts[3])), // pos
-			new Coords(parseFloat(parts[4]), parseFloat(parts[5])) // orientation
+			new Location
+			(
+				new Coords(parseFloat(parts[2]), parseFloat(parts[3])), // pos
+				new Coords(parseFloat(parts[4]), parseFloat(parts[5])) // orientation
+			)
 		);
 
 		return returnValue;
@@ -43,8 +43,8 @@ function Update_Physics(bodyID, pos, orientation)
 		var returnValue =
 			Update_Physics.UpdateCode + ";"
 			+ this.bodyID + ";"
-			+ this.pos.x + ";" + this.pos.y + ";"
-			+ this.orientation.x + ";" + this.orientation.y;
+			+ this.loc.pos.x + ";" + this.loc.pos.y + ";"
+			+ this.loc.orientation.x + ";" + this.loc.orientation.y;
 
 		return returnValue;
 	};

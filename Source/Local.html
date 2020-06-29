@@ -11,6 +11,7 @@
 <script type="text/javascript" src="Common/ColorHelper.js"></script>
 <script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
+<script type="text/javascript" src="Common/Location.js"></script>
 <script type="text/javascript" src="Common/Log.js"></script>
 <script type="text/javascript" src="Common/Display.js"></script>
 <script type="text/javascript" src="Common/IDHelper.js"></script>
@@ -18,11 +19,20 @@
 <script type="text/javascript" src="Common/Serializer.js"></script>
 <script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
+<script type="text/javascript" src="Common/ShapeCircle.js"></script>
+<script type="text/javascript" src="Common/ShapeRay.js"></script>
+<script type="text/javascript" src="Common/ShapeRectangle.js"></script>
+<script type="text/javascript" src="Common/TransformLocate.js"></script>
+<script type="text/javascript" src="Common/TransformOrient.js"></script>
+<script type="text/javascript" src="Common/TransformTranslate.js"></script>
 <script type="text/javascript" src="Common/Update_Actions.js"></script>
 <script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
 <script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
 <script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
 <script type="text/javascript" src="Common/Update_Physics.js"></script>
+<script type="text/javascript" src="Common/VisualGroup.js"></script>
+<script type="text/javascript" src="Common/VisualShape.js"></script>
+<script type="text/javascript" src="Common/VisualText.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
 
 <!-- imports ends -->
@@ -57,8 +67,11 @@ function Local()
 			this.clientID,
 			this.clientID,
 			bodyDefnForUser.name,
-			new Coords(10, 10),
-			new Coords(1, 0)
+			new Location
+			(
+				new Coords(10, 10), // pos
+				new Coords(1, 0) // vel
+			)
 		);
 		
 		update = new Update_BodyCreate(bodyForUser);

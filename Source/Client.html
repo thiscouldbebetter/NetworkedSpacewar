@@ -11,6 +11,7 @@
 <script type="text/javascript" src="Common/ColorHelper.js"></script>
 <script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
+<script type="text/javascript" src="Common/Location.js"></script>
 <script type="text/javascript" src="Common/Log.js"></script>
 <script type="text/javascript" src="Common/Display.js"></script>
 <script type="text/javascript" src="Common/IDHelper.js"></script>
@@ -18,11 +19,20 @@
 <script type="text/javascript" src="Common/Serializer.js"></script>
 <script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
+<script type="text/javascript" src="Common/ShapeCircle.js"></script>
+<script type="text/javascript" src="Common/ShapeRay.js"></script>
+<script type="text/javascript" src="Common/ShapeRectangle.js"></script>
+<script type="text/javascript" src="Common/TransformLocate.js"></script>
+<script type="text/javascript" src="Common/TransformOrient.js"></script>
+<script type="text/javascript" src="Common/TransformTranslate.js"></script>
 <script type="text/javascript" src="Common/Update_Actions.js"></script>
 <script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
 <script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
 <script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
 <script type="text/javascript" src="Common/Update_Physics.js"></script>
+<script type="text/javascript" src="Common/VisualGroup.js"></script>
+<script type="text/javascript" src="Common/VisualShape.js"></script>
+<script type="text/javascript" src="Common/VisualText.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
 
 <script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
@@ -31,19 +41,22 @@
 
 <div id="divUI">
 
+	<h3>Networked Spacewar</h3>
+
+	<p>Enter a unique name and click Connect to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
 	<label>Server:</label>
 	<input id="inputServiceURL" value="http://localhost:8089"></input>
 	<br />
-	
+
 	<label>Name:</label>
 	<input id="inputName" value=""></input>
 	<br />
 
 	<button onclick="buttonConnect_Clicked();">Connect</button>
 	<br />
-	
+
 	<div id="divDisplay"></div>
-	
+
 </div>
 
 <script type="text/javascript">
@@ -130,14 +143,14 @@ function Client()
 		if (bodyForUser != null)
 		{
 			var activity = bodyForUser.activity;
-			
+
 			activity.perform
 			(
 				world, this.inputHelper, bodyForUser, activity
 			);
 		}
 
-		this.display.drawWorld(world);
+		world.drawToDisplay(this.display);
 	}
 
 	Client.prototype.updateForTick_UpdatesOutgoingSend = function()
