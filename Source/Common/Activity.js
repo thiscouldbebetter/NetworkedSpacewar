@@ -1,15 +1,16 @@
 
-function Activity(name, perform)
+class Activity
 {
-	this.name = name;
-	this.perform = perform;
+	constructor(name, perform)
+	{
+		this.name = name;
+		this.perform = perform;
 
-	this.actionNames = [];
-}
+		this.actionNames = [];
+	}
 
-{
-	Activity.prototype.clone = function()
+	clone()
 	{
 		return new Activity(this.name, this.perform);
-	};
+	}
 }

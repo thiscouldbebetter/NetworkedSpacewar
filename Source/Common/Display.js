@@ -1,17 +1,18 @@
 
-function Display(divID, size)
+class Display
 {
-	this.divID = divID;
-	this.size = size;
+	constructor(divID, size)
+	{
+		this.divID = divID;
+		this.size = size;
 
-	this.colorBack = "White";
-	this.colorFore = "Gray";
+		this.colorBack = "White";
+		this.colorFore = "Gray";
 
-	this._drawPos = new Coords();
-}
+		this._drawPos = new Coords();
+	}
 
-{
-	Display.prototype.clear = function(colorBack)
+	clear(colorBack)
 	{
 		colorBack = colorBack || this.colorBack;
 		this.graphics.fillStyle = colorBack;
@@ -19,9 +20,9 @@ function Display(divID, size)
 
 		this.graphics.strokeStyle = this.colorFore;
 		this.graphics.strokeRect(0, 0, this.size.x, this.size.y);
-	};
+	}
 
-	Display.prototype.drawCircle = function(center, radius, colorFill, colorBorder)
+	drawCircle(center, radius, colorFill, colorBorder)
 	{
 		var g = this.graphics;
 
@@ -38,9 +39,9 @@ function Display(divID, size)
 			g.strokeStyle = colorBorder;
 			g.stroke();
 		}
-	};
+	}
 
-	Display.prototype.drawPolygon = function(vertices, colorFill, colorBorder)
+	drawPolygon(vertices, colorFill, colorBorder)
 	{
 		var g = this.graphics;
 
@@ -66,9 +67,9 @@ function Display(divID, size)
 			g.strokeStyle = colorBorder;
 			g.stroke();
 		}
-	};
+	}
 
-	Display.prototype.drawRay = function(vertex, orientation, length, color)
+	drawRay(vertex, orientation, length, color)
 	{
 		var g = this.graphics;
 		g.strokeStyle = color;
@@ -88,9 +89,9 @@ function Display(divID, size)
 
 		g.lineTo(drawPos.x, drawPos.y);
 		g.stroke();
-	};
+	}
 
-	Display.prototype.drawText = function(text, drawPos)
+	drawText(text, drawPos)
 	{
 		this.graphics.fillStyle = this.colorFore;
 		this.graphics.fillText
@@ -98,9 +99,9 @@ function Display(divID, size)
 			text,
 			drawPos.x, drawPos.y
 		);
-	};
+	}
 
-	Display.prototype.initialize = function(document)
+	initialize(document)
 	{
 		var canvas = document.createElement("canvas");
 		canvas.width = this.size.x;
@@ -113,5 +114,5 @@ function Display(divID, size)
 		divDisplay.appendChild(canvas);
 
 		this.domElement = canvas;
-	};
+	}
 }

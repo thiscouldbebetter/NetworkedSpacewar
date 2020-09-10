@@ -1,10 +1,12 @@
 
-function TransformTranslate(displacement)
+class TransformTranslate
 {
-	this.displacement = displacement;
-}
-{
-	TransformTranslate.prototype.applyToPoints = function(points)
+	constructor(displacement)
+	{
+		this.displacement = displacement;
+	}
+
+	applyToPoints(points)
 	{
 		points.forEach(point => {
 			point.add(this.displacement);

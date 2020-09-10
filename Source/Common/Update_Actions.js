@@ -1,14 +1,15 @@
 
-function Update_Actions(bodyID, actionNames)
+class Update_Actions
 {
-	this.bodyID = bodyID;
-	this.actionNames = actionNames;
-}
+	constructor(bodyID, actionNames)
+	{
+		this.bodyID = bodyID;
+		this.actionNames = actionNames;
+	}
 
-{
 	// methods
 
-	Update_Actions.prototype.updateWorld = function(world)
+	updateWorld(world)
 	{
 		var body = world.bodies[this.bodyID];
 
@@ -16,15 +17,18 @@ function Update_Actions(bodyID, actionNames)
 		{
 			body.ticksSinceActionPerformed = 0;
 			body.activity.actionNames.length = 0;
-			body.activity.actionNames.append(this.actionNames);
+			body.activity.actionNames.push(...this.actionNames);
 		}
-	};
+	}
 
 	// serialization
 
-	Update_Actions.UpdateCode = "A";
+	static updateCode()
+	{
+		return "A";
+	}
 
-	Update_Actions.prototype.deserialize = function(updateSerialized)
+	deserialize(updateSerialized)
 	{
 		var parts = updateSerialized.split(";");
 
@@ -35,15 +39,15 @@ function Update_Actions(bodyID, actionNames)
 		);
 
 		return returnValue
-	};
+	}
 
-	Update_Actions.prototype.serialize = function()
+	serialize()
 	{
 		var returnValue =
-			Update_Actions.UpdateCode + ";"
+			Update_Actions.updateCode() + ";"
 			+ this.bodyID + ";"
 			+ this.actionNames.join(";");
 
 		return returnValue;
-	};
+	}
 }

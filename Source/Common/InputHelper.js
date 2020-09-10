@@ -1,20 +1,16 @@
 
-function InputHelper()
+class InputHelper
 {
-	// do nothing
-}
-
-{
-	InputHelper.prototype.initialize = function(document)
+	initialize(document)
 	{
 		this.inputNamesActive = [];
 		document.body.onkeydown = this.handleEventKeyDown.bind(this);
 		document.body.onkeyup = this.handleEventKeyUp.bind(this);
-	};
+	}
 
 	// events
 
-	InputHelper.prototype.handleEventKeyDown = function(event)
+	handleEventKeyDown(event)
 	{
 		var inputName = event.key;
 		if (this.inputNamesActive[inputName] == null)
@@ -22,12 +18,12 @@ function InputHelper()
 			this.inputNamesActive.push(inputName);
 			this.inputNamesActive[inputName] = inputName;
 		}
-	};
+	}
 
-	InputHelper.prototype.handleEventKeyUp = function(event)
+	handleEventKeyUp(event)
 	{
 		var inputName = event.key;
-		this.inputNamesActive.remove(inputName);
+		ArrayHelper.remove(this.inputNamesActive, inputName);
 		delete this.inputNamesActive[inputName];
-	};
+	}
 }

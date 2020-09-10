@@ -1,15 +1,17 @@
 
-function VisualGroup(children)
+class VisualGroup
 {
-	this.children = children;
-}
-{
-	VisualGroup.prototype.clone = function()
+	constructor(children)
+	{
+		this.children = children;
+	}
+
+	clone()
 	{
 		return new VisualGroup(this.children.clone());
 	}
 
-	VisualGroup.prototype.draw = function(display, body)
+	draw(display, body)
 	{
 		for (var i = 0; i < this.children.length; i++)
 		{

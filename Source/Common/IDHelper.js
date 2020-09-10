@@ -1,14 +1,22 @@
 
-function IDHelper()
+class IDHelper
 {
-	// static class
-}
-
-{
-	IDHelper._idNext = 0;
-
-	IDHelper.IDNext = function()
+	constructor()
 	{
-		return "_" + IDHelper._idNext++;
-	};
+		this._idNext = 0;
+	}
+
+	static Instance()
+	{
+		if (IDHelper._instance == null)
+		{
+			IDHelper._instance = new IDHelper();
+		}
+		return IDHelper._instance;
+	}
+
+	idNext()
+	{
+		return "_" + this._idNext++;
+	}
 }

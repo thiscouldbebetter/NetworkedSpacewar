@@ -1,19 +1,20 @@
 
-function Body(id, name, defnName, loc)
+class Body
 {
-	this.id = id;
-	this.name = name;
-	this.defnName = defnName;
-	this.loc = loc;
+	constructor(id, name, defnName, loc)
+	{
+		this.id = id;
+		this.name = name;
+		this.defnName = defnName;
+		this.loc = loc;
 
-	this.vel = new Coords(0, 0);
-	this.accel = new Coords(0, 0);
-}
+		this.vel = new Coords(0, 0);
+		this.accel = new Coords(0, 0);
+	}
 
-{
 	// instance methods
 
-	Body.prototype.collideWith = function(world, other)
+	collideWith(world, other)
 	{
 		var bodyDefnThis = this.defn(world);
 		var bodyDefnOther = other.defn(world);
@@ -26,34 +27,34 @@ function Body(id, name, defnName, loc)
 		{
 			bodyDefnOther.collide(world, other, this);
 		}
-	};
+	}
 
-	Body.prototype.defn = function(world)
+	defn(world)
 	{
 		var returnValue = world.bodyDefns[this.defnName];
 		return returnValue;
-	};
+	}
 
-	Body.prototype.initializeForWorld = function(world)
+	initializeForWorld(world)
 	{
 		var bodyDefn = this.defn(world);
 		this.integrity = bodyDefn.integrityMax;
 		this.ticksToLive = bodyDefn.ticksToLive;
 		this.energy = 0;
 		this.ticksSinceActionPerformed = 0;
-		this.devices = bodyDefn.devices.clone().addLookups("name");
+		this.devices = ArrayHelper.addLookups(ArrayHelper.clone(bodyDefn.devices), "name");
 		this.activity = bodyDefn.activity;
-	};
+	}
 
-	Body.prototype.overwriteWith = function(other)
+	overwriteWith(other)
 	{
 		this.defnName = other.defnName;
 		this.loc.overwriteWith(other.loc);
 		this.vel.overwriteWith(other.vel);
 		this.accel.overwriteWith(other.accel);
-	};
+	}
 
-	Body.prototype.updateForTick_Actions = function(world)
+	updateForTick_Actions(world)
 	{
 		if (this.activity != null)
 		{
@@ -84,9 +85,9 @@ function Body(id, name, defnName, loc)
 				this.energy = bodyDefn.energyMax;
 			}
 		}
-	};
+	}
 
-	Body.prototype.updateForTick_Collisions = function(world, i)
+	updateForTick_Collisions(world, i)
 	{
 		var bodies = world.bodies;
 
@@ -108,9 +109,9 @@ function Body(id, name, defnName, loc)
 				this.collideWith(world, bodyOther);
 			}
 		}
-	};
+	}
 
-	Body.prototype.updateForTick_Integrity = function(world)
+	updateForTick_Integrity(world)
 	{
 		if (this.ticksToLive != null)
 		{
@@ -123,9 +124,9 @@ function Body(id, name, defnName, loc)
 
 		if (this.integrity <= 0)
 		{
-			if (this.defn(world).categoryNames.contains("Player") == true)
+			if (this.defn(world).categoryNames.indexOf("Player") >= 0)
 			{
-				Log.write(this.name + " was destroyed.")
+				Log.Instance().write(this.name + " was destroyed.")
 			}
 			var update = new Update_BodyRemove
 			(
@@ -134,9 +135,9 @@ function Body(id, name, defnName, loc)
 			world.updatesImmediate.push(update);
 			world.updatesOutgoing.push(update);
 		}
-	};
+	}
 
-	Body.prototype.updateForTick_Physics = function(world)
+	updateForTick_Physics(world)
 	{
 		var bodyDefn = this.defn(world);
 
@@ -167,13 +168,13 @@ function Body(id, name, defnName, loc)
 
 			world.updatesOutgoing.push(update);
 		}
-	};
+	}
 
 	// drawable
 
-	Body.prototype.drawToDisplay = function(display, world)
+	drawToDisplay(display, world)
 	{
 		var defn = this.defn(world);
 		defn.visual.draw(display, this);
-	};
+	}
 }

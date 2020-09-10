@@ -1,18 +1,19 @@
 
-function Device(name, ticksToCharge, energyToUse, use)
+class Device
 {
-	this.name = name;
-	this.ticksToCharge = ticksToCharge;
-	this.energyToUse = energyToUse;
-	this.use = use;
+	constructor(name, ticksToCharge, energyToUse, use)
+	{
+		this.name = name;
+		this.ticksToCharge = ticksToCharge;
+		this.energyToUse = energyToUse;
+		this.use = use;
 
-	this.ticksSinceUsed = 0;
-}
+		this.ticksSinceUsed = 0;
+	}
 
-{
 	// static methods
 
-	Device.gun = function()
+	static gun()
 	{
 		var returnValue = new Device
 		(
@@ -39,7 +40,7 @@ function Device(name, ticksToCharge, energyToUse, use)
 
 				var projectileDefn = world.bodyDefns["Projectile"];
 
-				var projectileID = "P" + IDHelper.IDNext();
+				var projectileID = "P" + IDHelper.Instance().idNext();
 
 				var bodyLoc = body.loc;
 				var projectile = new Body
@@ -79,9 +80,9 @@ function Device(name, ticksToCharge, energyToUse, use)
 		);
 
 		return returnValue;
-	};
+	}
 
-	Device.jump = function()
+	static jump()
 	{
 		var returnValue = new Device
 		(
@@ -113,17 +114,17 @@ function Device(name, ticksToCharge, energyToUse, use)
 		);
 
 		return returnValue;
-	};
+	}
 
 	// instance methods
 
-	Device.prototype.clone = function()
+	clone()
 	{
 		return new Device(this.name, this.ticksToCharge, this.energyToUse, this.use);
-	};
+	}
 
-	Device.prototype.updateForTick = function(world, body)
+	updateForTick(world, body)
 	{
 		this.ticksSinceUsed++;
-	};
+	}
 }

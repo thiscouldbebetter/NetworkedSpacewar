@@ -1,16 +1,18 @@
 
-function VisualShape(shape, color)
+class VisualShape
 {
-	this.shape = shape;
-	this.color = color;
-}
-{
-	VisualShape.prototype.clone = function()
+	constructor(shape, color)
+	{
+		this.shape = shape;
+		this.color = color;
+	}
+
+	clone()
 	{
 		return new VisualShape(this.shape.clone(), this.color);
 	}
 
-	VisualShape.prototype.draw = function(display, body)
+	draw(display, body)
 	{
 		this.shape.draw(display, body.loc, this.color);
 	}

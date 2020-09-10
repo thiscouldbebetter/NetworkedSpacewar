@@ -3,7 +3,7 @@
 
 <!-- imports -->
 
-<script type="text/javascript" src="Common/ArrayExtensions.js"></script>
+<script type="text/javascript" src="Common/ArrayHelper.js"></script>
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
@@ -225,7 +225,7 @@ function Client()
 		else // terse
 		{
 			var updateCode = firstChar;
-			if (updateCode == Update_Physics.UpdateCode)
+			if (updateCode == Update_Physics.updateCode())
 			{
 				serializer = new Update_Physics();
 			}

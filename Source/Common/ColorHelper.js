@@ -1,11 +1,7 @@
 
-function ColorHelper()
+class ColorHelper
 {
-	// static class
-}
-
-{
-	ColorHelper.random = function()
+	static random()
 	{
 		var hueMax = 360;
 		var hue = Math.floor(Math.random() * hueMax);
@@ -14,5 +10,5 @@ function ColorHelper()
 			"hsl(" + hue + ", 100%, 50%)";
 
 		return returnValue;
-	};
+	}
 }

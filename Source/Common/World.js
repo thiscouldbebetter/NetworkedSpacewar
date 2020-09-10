@@ -1,30 +1,36 @@
 
-function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
+class World
 {
-	this.name = name;
-	this.ticksPerSecond = ticksPerSecond;
-	this.size = size;
-	this.actions = actions.addLookups("name").addLookups("inputName");
-	this.bodyDefns = bodyDefns.addLookups("name");
+	constructor
+	(
+		name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial
+	)
+	{
+		this.name = name;
+		this.ticksPerSecond = ticksPerSecond;
+		this.size = size;
+		this.actions = ArrayHelper.addLookups(actions, "name");
+		ArrayHelper.addLookups(this.actions, "inputName");
+		this.bodyDefns = ArrayHelper.addLookups(bodyDefns, "name");
 
-	this.bodies = [];
+		this.bodies = [];
 
-	this.bodiesToSpawn = bodiesInitial.slice();
-	this.bodyIDsToRemove = [];
+		this.bodiesToSpawn = bodiesInitial.slice();
+		this.bodyIDsToRemove = [];
 
-	this.updatesImmediate = [];
-	this.updatesOutgoing = [];
-}
-{
+		this.updatesImmediate = [];
+		this.updatesOutgoing = [];
+	}
+
 	// static methods
 
-	World.build = function(arenaSize, planetSize, shipSize, bulletSize)
+	static build(arenaSize, planetSize, shipSize, bulletSize)
 	{
 		var actions =
 		[
 			new Action
 			(
-				"Accelerate",
+				"T", // thrust
 				"w", // inputName
 				// perform
 				function(world, body)
@@ -45,7 +51,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 			new Action
 			(
-				"Fire",
+				"F", // fire
 				"f", // inputName
 				// peform
 				function(world, body)
@@ -57,7 +63,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 			new Action
 			(
-				"Jump",
+				"J", // hyperjump
 				"j", // inputName
 				function(world, body)
 				{
@@ -68,7 +74,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 			new Action
 			(
-				"Quit",
+				"Q", // quit
 				"Escape", // inputName
 				function(world, body)
 				{
@@ -78,7 +84,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 			new Action
 			(
-				"TurnLeft",
+				"L", // turn left
 				"a", // inputName
 				function(world, body)
 				{
@@ -103,7 +109,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 
 			new Action
 			(
-				"TurnRight",
+				"R", // turn right
 				"d", // inputName
 				function(world, body)
 				{
@@ -124,7 +130,7 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			),
 		];
 
-		var actionNames = actions.members("name");
+		var actionNames = actions.map(x => x.name);
 
 		var bodyDefnPlanet = BodyDefn.planet(planetSize);
 
@@ -161,38 +167,38 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		);
 
 		return returnValue;
-	};
+	}
 
-	World.default = function()
+	static create()
 	{
 		return World.build(128, 10, 3, 1);
-	};
+	}
 
 	// instance methods
 
-	World.prototype.bodyRemove = function(body)
+	bodyRemove(body)
 	{
 		if (body != null)
 		{
-			this.bodies.remove(body);
+			ArrayHelper.remove(this.bodies, body);
 			this.bodies[body.id] = null;
 			delete this.bodies[body.id];
 		}
-	};
+	}
 
-	World.prototype.bodySpawn = function(body)
+	bodySpawn(body)
 	{
 		this.bodies.push(body);
 		this.bodies[body.id] = body;
 		body.initializeForWorld(this);
-	};
+	}
 
-	World.prototype.millisecondsPerTick = function()
+	millisecondsPerTick()
 	{
 		return Math.floor(1000 / this.ticksPerSecond);
-	};
+	}
 
-	World.prototype.overwriteWith = function(other)
+	overwriteWith(other)
 	{
 		this.name = other.name;
 		this.ticksPerSecond = other.ticksPerSecond;
@@ -200,9 +206,9 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 		this.actions = other.actions;
 		this.bodyDefns = other.bodyDefns;
 		this.bodies = other.bodies;
-	};
+	}
 
-	World.prototype.updateForTick_Remove = function()
+	updateForTick_Remove()
 	{
 		// hack
 		// If a client is paused, the updates build up,
@@ -227,9 +233,9 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			}
 		}
 		this.bodyIDsToRemove = bodyIDsThatCannotYetBeRemoved;
-	};
+	}
 
-	World.prototype.updateForTick_Spawn = function()
+	updateForTick_Spawn()
 	{
 		for (var i = 0; i < this.bodiesToSpawn.length; i++)
 		{
@@ -237,9 +243,9 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			this.bodySpawn(body);
 		}
 		this.bodiesToSpawn.length = 0;
-	};
+	}
 
-	World.prototype.updateForTick_UpdatesApply = function(updatesToApply)
+	updateForTick_UpdatesApply(updatesToApply)
 	{
 		for (var i = 0; i < updatesToApply.length; i++)
 		{
@@ -247,11 +253,11 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			update.updateWorld(this);
 		}
 		updatesToApply.length = 0;
-	};
+	}
 
 	// drawable
 
-	World.prototype.drawToDisplay = function(display)
+	drawToDisplay(display)
 	{
 		display.clear("Black");
 
@@ -261,5 +267,5 @@ function World(name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial)
 			var body = bodies[i];
 			body.drawToDisplay(display, this);
 		}
-	};
+	}
 }

@@ -1,15 +1,17 @@
 
-function ShapeRay(length)
+class ShapeRay
 {
-	this.length = length;
-}
-{
-	ShapeRay.prototype.clone = function()
+	constructor(length)
+	{
+		this.length = length;
+	}
+
+	clone()
 	{
 		return new ShapeRay(this.length);
 	}
 
-	ShapeRay.prototype.draw = function(display, loc, color)
+	draw(display, loc, color)
 	{
 		display.drawRay(loc.pos, loc.orientation, this.length, color);
 	}

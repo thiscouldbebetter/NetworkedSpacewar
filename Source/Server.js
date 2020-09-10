@@ -1,10 +1,46 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 var fs = require("fs");
 var commonFiles = fs.readdirSync("./Common");
+var classesByName = new Map();
 for (var i = 0; i < commonFiles.length; i++)
 {
 	var fileName = commonFiles[i];
-	eval(fs.readFileSync("./Common/" + fileName).toString());
+	var className = fileName.split(".")[0];
+	var fileAsString = fs.readFileSync("./Common/" + fileName).toString();
+	var fileAsStringWrapped = "(" + fileAsString + ")";
+	var fileAsClass = eval(fileAsStringWrapped);
+	classesByName[className] = fileAsClass;
 }
+
+var Action = classesByName["Action"];
+var Activity = classesByName["Activity"];
+var ArrayHelper = classesByName["ArrayHelper"];
+var Body = classesByName["Body"];
+var BodyDefn = classesByName["BodyDefn"];
+var ColorHelper = classesByName["ColorHelper"];
+var Coords = classesByName["Coords"];
+var Device = classesByName["Device"];
+var IDHelper = classesByName["IDHelper"];
+var Location = classesByName["Location"];
+var Log = classesByName["Log"];
+var Serializer = classesByName["Serializer"];
+var SerializerNode = classesByName["SerializerNode"];
+var Session = classesByName["Session"];
+var ShapeCircle = classesByName["ShapeCircle"];
+var ShapeRay = classesByName["ShapeRay"];
+var VisualGroup = classesByName["VisualGroup"];
+var VisualShape = classesByName["VisualShape"];
+var VisualText = classesByName["VisualText"];
+var Update_Actions = classesByName["Update_Actions"];
+var Update_BodyCreate = classesByName["Update_BodyCreate"];
+var Update_BodyRemove = classesByName["Update_BodyRemove"];
+var Update_BodyDefnRegister = classesByName["Update_BodyDefnRegister"];
+var Update_Physics = classesByName["Update_Physics"];
+var World = classesByName["World"];
+
+//import World from './Common/World.js';
 
 function ClientConnection(server, clientID, socket)
 {
@@ -33,20 +69,20 @@ function ClientConnection(server, clientID, socket)
 			console.log(bodyToDestroy.name + " left the server.");
 		}
 	}
-	
+
 	ClientConnection.prototype.handleEvent_ClientIdentifyingSelf = function(clientName)
 	{
 		this.clientName = clientName;
-		
+
 		var server = this.server;
 
 		var clientConnection = server.clientConnections[this.clientID];
 		var socketToClient = clientConnection.socket;
-		
+
 		var session = new Session(this.clientID, server.world);
 		var sessionSerialized = server.serializer.serialize(session);
 		socketToClient.emit("sessionEstablished", sessionSerialized);
-	
+
 		var world = server.world;
 		var bodyDefnPlayer = world.bodyDefns["_Player"];
 		var bodyDefnForClient = bodyDefnPlayer.clone();
@@ -71,31 +107,30 @@ function ClientConnection(server, clientID, socket)
 				new Coords().randomize().normalize() // ori
 			)
 		);
-		
+
 		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
 		world.updatesOutgoing.push(updateBodyCreate);
 		updateBodyCreate.updateWorld(world);
-		
+
 		socketToClient.on
 		(
 			"update",
 			this.handleEvent_ClientUpdateReceived.bind(this)
 		);
-		
+
 		socketToClient.on
 		(
 			"disconnect",
 			this.handleEvent_ClientDisconnected.bind(this)
 		);
-		
+
 		console.log(clientName + " joined the server.");
 	}
-	
+
 	ClientConnection.prototype.handleEvent_ClientUpdateReceived = function(updateSerialized)
 	{
 		var serializer;
 		var firstChar = updateSerialized[0];
-		
 		if (firstChar == "{") // JSON
 		{
 			serializer = this.server.serializer;
@@ -103,19 +138,19 @@ function ClientConnection(server, clientID, socket)
 		else // terse
 		{
 			var updateCode = firstChar;
-			if (updateCode == Update_Actions.UpdateCode)
+			if (updateCode == Update_Actions.updateCode())
 			{
 				serializer = new Update_Actions();
 			}
 		}
-		
+
 		var update = serializer.deserialize
 		(
 			updateSerialized
 		);
-				
+
 		update.updateWorld(this.server.world);
-	}	
+	}
 }
 
 function Server(portToListenOn, world)
@@ -132,7 +167,7 @@ function Server(portToListenOn, world)
 
 		this.serializer = new Serializer;
 
-		this.clientID = IDHelper.IDNext();
+		this.clientID = IDHelper.Instance().idNext();
 
 		this.updatesIncoming = [];
 
@@ -156,7 +191,7 @@ function Server(portToListenOn, world)
 		(
 			this.updateForTick.bind(this),
 			this.world.millisecondsPerTick()
-		);	
+		);
 	}
 
 	Server.prototype.updateForTick = function()
@@ -222,17 +257,17 @@ function Server(portToListenOn, world)
 	{
 		var clientIndex = this.clientConnections.length;
 		var clientID = "C_" + clientIndex;
-		
+
 		var clientConnection = new ClientConnection(this, clientID, socketToClient);
 		this.clientConnections.push(clientConnection);
 		this.clientConnections[clientID] = clientConnection;
-	
+
 		socketToClient.emit("connected", clientID);
-	}		
+	}
 }
 
 function main()
-{	
+{
 	var args = process.argv;
 
 	for (var a = 2; a < args.length; a++)
@@ -255,7 +290,7 @@ function main()
 		"-s" : "3",
 		"-b" : "1"
 	};
-		
+
 	for (var argName in argNameToDefaultLookup)
 	{
 		if (args[argName] == null)
@@ -264,13 +299,13 @@ function main()
 			args[argName] = argValueDefault;
 		}
 	}
-	
+
 	var servicePort = parseInt(args["--port"]);
 	var arenaSize = parseInt(args["-a"]);
 	var planetSize = parseInt(args["-p"]);
 	var shipSize = parseInt(args["-s"]);
 	var bulletSize = parseInt(args["-b"]);
-	
+
 	var world = World.build
 	(
 		arenaSize, planetSize, shipSize, bulletSize

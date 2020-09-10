@@ -1,46 +1,47 @@
 
-function BodyDefn
-(
-	name,
-	categoryNames,
-	color,
-	integrityMax,
-	ticksToLive,
-	massInKg,
-	speedMax,
-	accelerationPerTick,
-	turnRate,
-	energyMax,
-	energyPerTick,
-	radius,
-	activity,
-	actionNames,
-	devices,
-	collide,
-	visual
-)
+class BodyDefn
 {
-	this.name = name;
-	this.categoryNames = categoryNames;
-	this.color = color;
-	this.integrityMax = integrityMax;
-	this.ticksToLive = ticksToLive;
-	this.massInKg = massInKg;
-	this.speedMax = speedMax;
-	this.accelerationPerTick = accelerationPerTick;
-	this.turnRate = turnRate;
-	this.energyMax = energyMax;
-	this.energyPerTick = energyPerTick;
-	this.radius = radius;
-	this.activity = activity;
-	this.actionNames = actionNames;
-	this.devices = devices;
-	this.collide = collide;
-	this.visual = visual;
-}
+	constructor
+	(
+		name,
+		categoryNames,
+		color,
+		integrityMax,
+		ticksToLive,
+		massInKg,
+		speedMax,
+		accelerationPerTick,
+		turnRate,
+		energyMax,
+		energyPerTick,
+		radius,
+		activity,
+		actionNames,
+		devices,
+		collide,
+		visual
+	)
+	{
+		this.name = name;
+		this.categoryNames = categoryNames;
+		this.color = color;
+		this.integrityMax = integrityMax;
+		this.ticksToLive = ticksToLive;
+		this.massInKg = massInKg;
+		this.speedMax = speedMax;
+		this.accelerationPerTick = accelerationPerTick;
+		this.turnRate = turnRate;
+		this.energyMax = energyMax;
+		this.energyPerTick = energyPerTick;
+		this.radius = radius;
+		this.activity = activity;
+		this.actionNames = actionNames;
+		this.devices = devices;
+		this.collide = collide;
+		this.visual = visual;
+	}
 
-{
-	BodyDefn.planet = function(radius)
+	static planet(radius)
 	{
 		var color = ColorHelper.random();
 
@@ -149,9 +150,9 @@ function BodyDefn
 		);
 
 		return returnValue;
-	};
+	}
 
-	BodyDefn.player = function(name, radius)
+	static player(name, radius)
 	{
 		var color = ColorHelper.random();
 
@@ -178,7 +179,7 @@ function BodyDefn
 					if (action != null)
 					{
 						var actionName = action.name;
-						if (bodyDefn.actionNames.contains(actionName) == true)
+						if (bodyDefn.actionNames.indexOf(actionName) >= 0)
 						{
 							activity.actionNames.push(actionName);
 						}
@@ -220,7 +221,7 @@ function BodyDefn
 			.1, // energyPerTick
 			radius, // radius
 			activityUserInputAccept, // activity
-			[ "Accelerate", "Fire", "Jump", "TurnLeft", "TurnRight" ], // actionNames
+			[ "T", "F", "J", "L", "R" ], // actionNames
 			// devices
 			[
 				Device.gun(),
@@ -231,9 +232,9 @@ function BodyDefn
 		);
 
 		return returnValue;
-	};
+	}
 
-	BodyDefn.projectile = function(radius)
+	static projectile(radius)
 	{
 		var color = "Yellow";
 		var visual = new VisualShape(new ShapeCircle(radius), color);
@@ -263,11 +264,11 @@ function BodyDefn
 			},
 			visual
 		);
-	};
+	}
 
 	// instance methods
 
-	BodyDefn.prototype.clone = function()
+	clone()
 	{
 		return new BodyDefn
 		(
@@ -289,5 +290,5 @@ function BodyDefn
 			this.collide,
 			this.visual
 		);
-	};
+	}
 }

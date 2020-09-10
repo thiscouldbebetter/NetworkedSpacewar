@@ -1,15 +1,16 @@
 
-function SerializerNode(objectWrapped)
+class SerializerNode
 {
-	this.objectWrappedTypeName = null;
-	this.id = null;
-	this.isReference = null;
+	constructor(objectWrapped)
+	{
+		this.objectWrappedTypeName = null;
+		this.id = null;
+		this.isReference = null;
 
-	this.objectWrapped = objectWrapped;
-}
+		this.objectWrapped = objectWrapped;
+	}
 
-{
-	SerializerNode.prototype.wrap = function
+	wrap
 	(
 		objectsAlreadyWrapped, objectIndexToNodeLookup
 	)
@@ -108,9 +109,9 @@ function SerializerNode(objectWrapped)
 
 		return this;
 
-	}; // end method
+	} // end method
 
-	SerializerNode.prototype.prototypesAssign = function()
+	prototypesAssign()
 	{
 		if (this.children != null)
 		{
@@ -128,9 +129,9 @@ function SerializerNode(objectWrapped)
 				}
 			}
 		}
-	};
+	}
 
-	SerializerNode.prototype.unwrap = function(nodesAlreadyProcessed)
+	unwrap(nodesAlreadyProcessed)
 	{
 		if (this.isReference == true)
 		{
@@ -193,5 +194,5 @@ function SerializerNode(objectWrapped)
 		}
 
 		return this.objectWrapped;
-	};
+	}
 }

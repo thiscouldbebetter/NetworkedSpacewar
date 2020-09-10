@@ -1,37 +1,36 @@
 
-function Coords(x, y)
+class Coords
 {
-	this.x = x;
-	this.y = y;
-}
+	constructor(x, y)
+	{
+		this.x = x;
+		this.y = y;
+	}
 
-{
-	// constants
-
-	Coords.NumberOfDimensions = 2;
+	static NumberOfDimensions() { return 2 };
 
 	// instance methods
 
-	Coords.prototype.add = function(other)
+	add(other)
 	{
 		this.x += other.x;
 		this.y += other.y;
 		return this;
-	};
+	}
 
-	Coords.prototype.clear = function()
+	clear()
 	{
 		this.x = 0;
 		this.y = 0;
 		return this;
-	};
+	}
 
-	Coords.prototype.clone = function()
+	clone()
 	{
 		return new Coords(this.x, this.y);
-	};
+	}
 
-	Coords.prototype.dimension = function(dimensionIndex)
+	dimension(dimensionIndex)
 	{
 		var returnValue;
 
@@ -45,86 +44,86 @@ function Coords(x, y)
 		}
 
 		return returnValue;
-	};
+	}
 
-	Coords.prototype.divide = function(other)
+	divide(other)
 	{
 		this.x /= other.x;
 		this.y /= other.y;
 		return this;
-	};
+	}
 
-	Coords.prototype.divideScalar = function(scalar)
+	divideScalar(scalar)
 	{
 		this.x /= scalar;
 		this.y /= scalar;
 		return this;
-	};
+	}
 
-	Coords.prototype.dotProduct = function(other)
+	dotProduct(other)
 	{
 		return this.x * other.x  + this.y * other.y;
-	};
+	}
 
-	Coords.prototype.magnitude = function()
+	magnitude()
 	{
 		return Math.sqrt(this.x * this.x + this.y * this.y);
-	};
+	}
 
-	Coords.prototype.multiply = function(other)
+	multiply(other)
 	{
 		this.x *= other.x;
 		this.y *= other.y;
 		return this;
-	};
+	}
 
-	Coords.prototype.multiplyScalar = function(scalar)
+	multiplyScalar(scalar)
 	{
 		this.x *= scalar;
 		this.y *= scalar;
 		return this;
-	};
+	}
 
-	Coords.prototype.normalize = function()
+	normalize()
 	{
 		return this.divideScalar(this.magnitude());
-	};
+	}
 
-	Coords.prototype.overwriteWith = function(other)
+	overwriteWith(other)
 	{
 		this.x = other.x;
 		this.y = other.y;
 		return this;
-	};
+	}
 
-	Coords.prototype.randomize = function()
+	randomize()
 	{
 		this.x = Math.random();
 		this.y = Math.random();
 		return this;
-	};
+	}
 
-	Coords.prototype.right = function()
+	right()
 	{
 		var temp = this.y;
 		this.y = this.x;
 		this.x = 0 - temp;
 		return this;
-	};
+	}
 
-	Coords.prototype.subtract = function(other)
+	subtract(other)
 	{
 		this.x -= other.x;
 		this.y -= other.y;
 		return this;
-	};
+	}
 
-	Coords.prototype.toString = function()
+	toString()
 	{
 		return "(" + this.x + "," + this.y + ")";
-	};
+	}
 
-	Coords.prototype.trimToMagnitude = function(magnitudeMax)
+	trimToMagnitude(magnitudeMax)
 	{
 		var magnitude = this.magnitude();
 
@@ -140,9 +139,9 @@ function Coords(x, y)
 		}
 
 		return this;
-	};
+	}
 
-	Coords.prototype.wrapToRange = function(max)
+	wrapToRange(max)
 	{
 		while (this.x < 0)
 		{
@@ -161,5 +160,5 @@ function Coords(x, y)
 			this.y -= max.y;
 		}
 		return this;
-	};
+	}
 }

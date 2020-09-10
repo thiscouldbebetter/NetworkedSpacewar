@@ -1,27 +1,31 @@
 
-function Update_Physics(bodyID, loc)
+class Update_Physics
 {
-	this.bodyID = bodyID;
-	this.loc = loc;
-}
+	constructor(bodyID, loc)
+	{
+		this.bodyID = bodyID;
+		this.loc = loc;
+	}
 
-{
 	// instance methods
 
-	Update_Physics.prototype.updateWorld = function(world)
+	updateWorld(world)
 	{
 		var body = world.bodies[this.bodyID];
 		if (body != null)
 		{
 			body.loc.overwriteWith(this.loc);
 		}
-	};
+	}
 
 	// serialization
 
-	Update_Physics.UpdateCode = "P";
+	static updateCode()
+	{
+		return "P";
+	}
 
-	Update_Physics.prototype.deserialize = function(updateSerialized)
+	deserialize(updateSerialized)
 	{
 		var parts = updateSerialized.split(";");
 
@@ -36,16 +40,16 @@ function Update_Physics(bodyID, loc)
 		);
 
 		return returnValue;
-	};
+	}
 
-	Update_Physics.prototype.serialize = function()
+	serialize()
 	{
 		var returnValue =
-			Update_Physics.UpdateCode + ";"
+			Update_Physics.updateCode() + ";"
 			+ this.bodyID + ";"
 			+ this.loc.pos.x + ";" + this.loc.pos.y + ";"
 			+ this.loc.orientation.x + ";" + this.loc.orientation.y;
 
 		return returnValue;
-	};
+	}
 }

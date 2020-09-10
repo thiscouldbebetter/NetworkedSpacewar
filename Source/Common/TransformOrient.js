@@ -1,10 +1,12 @@
 
-function TransformOrient(orientation)
+class TransformOrient
 {
-	this.orientation = orientation;
-}
-{
-	TransformOrient.prototype.applyToPoints = function(points)
+	constructor(orientation)
+	{
+		this.orientation = orientation;
+	}
+
+	applyToPoints(points)
 	{
 		points.forEach(point => {
 			// todo

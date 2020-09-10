@@ -1,16 +1,18 @@
 
-function VisualText(text, color)
+class VisualText
 {
-	this.text = text;
-	this.color = color;
-}
-{
-	VisualText.prototype.clone = function()
+	constructor(text, color)
+	{
+		this.text = text;
+		this.color = color;
+	}
+
+	clone()
 	{
 		return new VisualText(this.text, this.color);
 	}
 
-	VisualText.prototype.draw = function(display, body)
+	draw(display, body)
 	{
 		display.drawText(this.text, body, this.color);
 	}

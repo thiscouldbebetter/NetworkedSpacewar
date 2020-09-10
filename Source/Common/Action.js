@@ -1,9 +1,10 @@
 
-// classes
-
-function Action(name, inputName, perform)
+class Action
 {
-	this.name = name;
-	this.inputName = inputName;
-	this.perform = perform;
+	constructor(name, inputName, perform)
+	{
+		this.name = name;
+		this.inputName = inputName;
+		this.perform = perform;
+	}
 }

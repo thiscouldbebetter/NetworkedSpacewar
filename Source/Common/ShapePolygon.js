@@ -1,17 +1,19 @@
 
-function ShapePolygon(vertices)
+class ShapePolygon
 {
-	this.verticesAtRest = vertices;
+	constructor(vertices)
+	{
+		this.verticesAtRest = vertices;
 
-	this.veritcesTransformed = this.verticesAtRest.clone();
-}
-{
-	ShapePolygon.prototype.clone = function()
+		this.veritcesTransformed = this.verticesAtRest.clone();
+	}
+
+	clone()
 	{
 		return new ShapePolygon(this.vertices.clone());
 	}
 
-	ShapePolygon.prototype.draw = function(display, loc, color)
+	draw(display, loc, color)
 	{
 		this.verticesTransformed.overwriteWith(this.verticesAtRest);
 		this.transform.loc.overwriteWith(loc);

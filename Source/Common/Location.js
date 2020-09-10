@@ -1,21 +1,23 @@
 
-function Location(pos, orientation)
+class Location
 {
-	this.pos = pos || new Coords(0, 0);
-	this.orientation = orientation || new Coords(1, 0);
+	constructor(pos, orientation)
+	{
+		this.pos = pos || new Coords(0, 0);
+		this.orientation = orientation || new Coords(1, 0);
 
-	this.right = this.orientation.clone().right();
-}
-{
-	Location.prototype.clone = function()
+		this.right = this.orientation.clone().right();
+	}
+
+	clone()
 	{
 		return new Location(this.pos.clone(), this.orientation.clone());
-	};
+	}
 
-	Location.prototype.overwriteWith = function(other)
+	overwriteWith(other)
 	{
 		this.pos.overwriteWith(other.pos);
 		this.orientation.overwriteWith(other.orientation);
 		this.right.overwriteWith(other.right);
-	};
+	}
 }

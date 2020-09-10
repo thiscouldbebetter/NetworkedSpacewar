@@ -3,7 +3,7 @@
 
 <!-- imports -->
 
-<script type="text/javascript" src="Common/ArrayExtensions.js"></script>
+<script type="text/javascript" src="Common/ArrayHelper.js"></script>
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
@@ -50,7 +50,7 @@ function Local()
 {
 	Local.prototype.initialize = function()
 	{
-		this.clientID = "_" + IDHelper.IDNext();
+		this.clientID = "_" + IDHelper.Instance().idNext();
 
 		this.updatesIncoming = [];
 
@@ -92,10 +92,10 @@ function Local()
 
 	Local.prototype.start = function()
 	{
-		this.clientID = IDHelper.IDNext();
+		this.clientID = IDHelper.Instance().idNext();
 		this.document = document;
 
-		this.world = World.default();
+		this.world = World.create();
 
 		this.initialize();
 	};

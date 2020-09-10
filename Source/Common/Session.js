@@ -1,6 +1,9 @@
 
-function Session(idOfBodyControlledByUser, world)
+class Session
 {
-	this.idOfBodyControlledByUser = idOfBodyControlledByUser;
-	this.world = world;
+	constructor(idOfBodyControlledByUser, world)
+	{
+		this.idOfBodyControlledByUser = idOfBodyControlledByUser;
+		this.world = world;
+	}
 }
