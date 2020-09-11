@@ -81,45 +81,46 @@ function buttonConnect_Clicked()
 	}
 	else
 	{
-		Client.Instance.connect(serviceURL, name);
+		Client.Instance().connect(serviceURL, name);
 	}
-	
 }
 
 // classes
 
-function Client()
+class Client
 {
-	 // do nothing
-}
-{
-	// isntance
-	
-	Client.Instance = new Client();
-	
+	static Instance()
+	{
+		if (Client._instance == null)
+		{
+			Client._instance = new Client();
+		}
+		return Client._instance;
+	}
+
 	// methods
 
-	Client.prototype.connect = function(serviceURLToConnectTo, clientName)
+	connect(serviceURLToConnectTo, clientName)
 	{
 		this.serviceURL = serviceURLToConnectTo;
 		this.clientName = clientName;
-	
+
 		if (this.socketToServer != null)
 		{
 			this.socketToServer.disconnect();
 			this.socketToServer = null;
 		}
-		
+
 		this.socketToServer = io.connect(this.serviceURL);
-		
+
 		this.socketToServer.on
 		(
 			"connected", 
 			this.handleEvent_ServerConnected.bind(this)
-		);	
+		);
 	}
-	
-	Client.prototype.updateForTick = function()
+
+	updateForTick()
 	{
 		var world = this.session.world;
 
@@ -134,7 +135,7 @@ function Client()
 		this.updateForTick_UpdatesOutgoingSend();
 	}
 
-	Client.prototype.updateForTick_Client = function()
+	updateForTick_Client()
 	{
 		var world = this.session.world;
 
@@ -153,7 +154,7 @@ function Client()
 		world.drawToDisplay(this.display);
 	}
 
-	Client.prototype.updateForTick_UpdatesOutgoingSend = function()
+	updateForTick_UpdatesOutgoingSend()
 	{
 		var world = this.session.world;
 
@@ -168,8 +169,8 @@ function Client()
 	}
 
 	// events
-	
-	Client.prototype.handleEvent_ServerConnected = function(clientID)
+
+	handleEvent_ServerConnected(clientID)
 	{
 		this.clientID = clientID;
 		
@@ -181,24 +182,24 @@ function Client()
 			this.handleEvent_SessionEstablished.bind(this)
 		);
 	}
-	
-	Client.prototype.handleEvent_SessionEstablished = function(sessionSerialized)
+
+	handleEvent_SessionEstablished(sessionSerialized)
 	{
 		this.serializer = new Serializer();
-		
+
 		var session = this.serializer.deserialize(sessionSerialized);
-		
+
 		this.session = session;
 		var world = this.session.world;
-		
+
 		this.inputHelper = new InputHelper();
 		this.inputHelper.initialize(document);
 
 		this.display = new Display("divDisplay", world.size);
 		this.display.initialize(document);
-	
+
 		this.updatesIncoming = []; 
-	
+
 		this.socketToServer.on
 		(
 			"update", 
@@ -211,9 +212,8 @@ function Client()
 			world.millisecondsPerTick()
 		);
 	}
-	
 
-	Client.prototype.handleEvent_UpdateReceived = function(updateSerialized)
+	handleEvent_UpdateReceived(updateSerialized)
 	{
 		var serializer;
 		var firstChar = updateSerialized[0];

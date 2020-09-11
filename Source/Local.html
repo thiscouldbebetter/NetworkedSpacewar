@@ -43,12 +43,9 @@
 
 <script type="text/javascript">
 
-function Local()
+class Local
 {
-	// do nothing
-}
-{
-	Local.prototype.initialize = function()
+	initialize()
 	{
 		this.clientID = "_" + IDHelper.Instance().idNext();
 
@@ -90,7 +87,7 @@ function Local()
 		this.display.initialize(document);
 	};
 
-	Local.prototype.start = function()
+	start()
 	{
 		this.clientID = IDHelper.Instance().idNext();
 		this.document = document;
@@ -100,7 +97,7 @@ function Local()
 		this.initialize();
 	};
 
-	Local.prototype.updateForTick = function()
+	updateForTick()
 	{
 		var world = this.world;
 
@@ -117,7 +114,7 @@ function Local()
 		this.updateForTick_UpdatesOutgoingSend();
 	};
 
-	Local.prototype.updateForTick_Client = function()
+	updateForTick_Client()
 	{
 		var world = this.world;
 
@@ -135,7 +132,7 @@ function Local()
 		this.world.drawToDisplay(this.display);
 	};
 
-	Local.prototype.updateForTick_Server = function()
+	updateForTick_Server()
 	{
 		var world = this.world;
 		var bodies = world.bodies;
@@ -155,7 +152,7 @@ function Local()
 		}
 	};
 
-	Local.prototype.updateForTick_UpdatesOutgoingSend = function()
+	updateForTick_UpdatesOutgoingSend()
 	{
 		var world = this.world;
 

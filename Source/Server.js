@@ -40,22 +40,22 @@ var Update_BodyDefnRegister = classesByName["Update_BodyDefnRegister"];
 var Update_Physics = classesByName["Update_Physics"];
 var World = classesByName["World"];
 
-//import World from './Common/World.js';
-
-function ClientConnection(server, clientID, socket)
+class ClientConnection
 {
-	this.server = server;
-	this.clientID = clientID;
-	this.socket = socket;
+	constructor(server, clientID, socket)
+	{
+		this.server = server;
+		this.clientID = clientID;
+		this.socket = socket;
 
-	this.socket.on
-	(
-		"identify", 
-		this.handleEvent_ClientIdentifyingSelf.bind(this)
-	);
-}
-{
-	ClientConnection.prototype.handleEvent_ClientDisconnected = function(e)
+		this.socket.on
+		(
+			"identify", 
+			this.handleEvent_ClientIdentifyingSelf.bind(this)
+		);
+	}
+
+	handleEvent_ClientDisconnected(e)
 	{
 		var bodies = this.server.world.bodies;
 		var bodyToDestroy = bodies[this.clientID];
@@ -70,7 +70,7 @@ function ClientConnection(server, clientID, socket)
 		}
 	}
 
-	ClientConnection.prototype.handleEvent_ClientIdentifyingSelf = function(clientName)
+	handleEvent_ClientIdentifyingSelf(clientName)
 	{
 		this.clientName = clientName;
 
@@ -127,7 +127,7 @@ function ClientConnection(server, clientID, socket)
 		console.log(clientName + " joined the server.");
 	}
 
-	ClientConnection.prototype.handleEvent_ClientUpdateReceived = function(updateSerialized)
+	handleEvent_ClientUpdateReceived(updateSerialized)
 	{
 		var serializer;
 		var firstChar = updateSerialized[0];
@@ -153,13 +153,15 @@ function ClientConnection(server, clientID, socket)
 	}
 }
 
-function Server(portToListenOn, world)
+class Server
 {
-	this.portToListenOn = portToListenOn;
-	this.world = world;
-}
-{
-	Server.prototype.initialize = function()
+	constructor(portToListenOn, world)
+	{
+		this.portToListenOn = portToListenOn;
+		this.world = world;
+	}
+
+	initialize()
 	{
 		this.clientConnections = [];
 		
@@ -194,7 +196,7 @@ function Server(portToListenOn, world)
 		);
 	}
 
-	Server.prototype.updateForTick = function()
+	updateForTick()
 	{
 		var world = this.world;
 
@@ -211,7 +213,7 @@ function Server(portToListenOn, world)
 		this.updateForTick_UpdatesOutgoingSend();
 	}
 
-	Server.prototype.updateForTick_Server = function()
+	updateForTick_Server()
 	{
 		var world = this.world;
 		var bodies = world.bodies;
@@ -231,7 +233,7 @@ function Server(portToListenOn, world)
 		}
 	}
 
-	Server.prototype.updateForTick_UpdatesOutgoingSend = function()
+	updateForTick_UpdatesOutgoingSend()
 	{
 		var world = this.world;
 
@@ -253,7 +255,7 @@ function Server(portToListenOn, world)
 
 	// events
 
-	Server.prototype.handleEvent_ClientConnecting = function(socketToClient)
+	handleEvent_ClientConnecting(socketToClient)
 	{
 		var clientIndex = this.clientConnections.length;
 		var clientID = "C_" + clientIndex;
