@@ -1,18 +1,25 @@
 
 class InputHelper
 {
-	initialize(document)
+	constructor()
 	{
-		this.inputNamesActive = [];
-		document.body.onkeydown = this.handleEventKeyDown.bind(this);
-		document.body.onkeyup = this.handleEventKeyUp.bind(this);
+		this.mousePos = new Coords();
 	}
 
-	// events
-
-	handleEventKeyDown(event)
+	initialize(document, display)
 	{
-		var inputName = event.key;
+		this.inputNamesActive = [];
+		var body = document.body;
+		body.onkeydown = this.handleEventKeyDown.bind(this);
+		body.onkeyup = this.handleEventKeyUp.bind(this);
+
+		var canvas = display.domElement;
+		canvas.onmousedown = this.handleEventMouseDown.bind(this);
+		canvas.onmousemove = this.handleEventMouseMove.bind(this);
+	}
+
+	inputAdd(inputName)
+	{
 		if (this.inputNamesActive[inputName] == null)
 		{
 			this.inputNamesActive.push(inputName);
@@ -20,10 +27,48 @@ class InputHelper
 		}
 	}
 
-	handleEventKeyUp(event)
+	inputRemove(inputName)
 	{
-		var inputName = event.key;
-		ArrayHelper.remove(this.inputNamesActive, inputName);
+		var index = this.inputNamesActive.indexOf(inputName);
+		if (index >= 0)
+		{
+			this.inputNamesActive.splice(index, 1);
+		}
 		delete this.inputNamesActive[inputName];
 	}
+
+	// events
+
+	handleEventKeyDown(event)
+	{
+		this.inputAdd(event.key);
+	}
+
+	handleEventKeyUp(event)
+	{
+		this.inputRemove(event.key);
+	}
+
+	handleEventMouseDown(event)
+	{
+		var canvasClientRect = event.target.getClientRects()[0];
+		this.mousePos.overwriteWithDimensions
+		(
+			event.clientX - canvasClientRect.x,
+			event.clientY - canvasClientRect.y
+		);
+		this.inputAdd("MouseDown");
+	}
+
+	handleEventMouseMove(event)
+	{
+		var canvasClientRect = event.target.getClientRects()[0];
+		this.mousePos.overwriteWithDimensions
+		(
+			event.clientX - canvasClientRect.x,
+			event.clientY - canvasClientRect.y
+		);
+		this.inputAdd("MouseMove");
+	}
+
 }

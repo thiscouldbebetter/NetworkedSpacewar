@@ -104,6 +104,7 @@ class Display
 	initialize(document)
 	{
 		var canvas = document.createElement("canvas");
+		canvas.id = "canvasDisplay";
 		canvas.width = this.size.x;
 		canvas.height = this.size.y;
 

@@ -192,11 +192,11 @@ class Client
 		this.session = session;
 		var world = this.session.world;
 
-		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document);
-
 		this.display = new Display("divDisplay", world.size);
 		this.display.initialize(document);
+
+		this.inputHelper = new InputHelper();
+		this.inputHelper.initialize(document, this.display);
 
 		this.updatesIncoming = []; 
 

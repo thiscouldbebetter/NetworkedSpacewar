@@ -96,6 +96,13 @@ class Coords
 		return this;
 	}
 
+	overwriteWithDimensions(x, y)
+	{
+		this.x = x;
+		this.y = y;
+		return this;
+	}
+
 	randomize()
 	{
 		this.x = Math.random();
