@@ -80,11 +80,11 @@ class Local
 			this.world.millisecondsPerTick()
 		);
 
-		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document);
-
 		this.display = new Display("divDisplay", this.world.size);
 		this.display.initialize(document);
+
+		this.inputHelper = new InputHelper();
+		this.inputHelper.initialize(document);
 	};
 
 	start()
