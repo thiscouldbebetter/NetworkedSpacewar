@@ -11,7 +11,7 @@ class Update_Actions
 
 	updateWorld(world)
 	{
-		var body = world.bodies[this.bodyID];
+		var body = world.bodiesByName.get(this.bodyID);
 
 		if (body != null)
 		{

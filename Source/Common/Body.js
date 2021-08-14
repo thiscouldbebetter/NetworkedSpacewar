@@ -8,8 +8,8 @@ class Body
 		this.defnName = defnName;
 		this.loc = loc;
 
-		this.vel = new Coords(0, 0);
-		this.accel = new Coords(0, 0);
+		this.vel = Coords.zeroes();
+		this.accel = Coords.zeroes();
 	}
 
 	// instance methods
@@ -31,7 +31,7 @@ class Body
 
 	defn(world)
 	{
-		var returnValue = world.bodyDefns[this.defnName];
+		var returnValue = world.bodyDefnsByName.get(this.defnName);
 		return returnValue;
 	}
 
@@ -42,7 +42,9 @@ class Body
 		this.ticksToLive = bodyDefn.ticksToLive;
 		this.energy = 0;
 		this.ticksSinceActionPerformed = 0;
-		this.devices = ArrayHelper.addLookups(ArrayHelper.clone(bodyDefn.devices), "name");
+		this.devices = ArrayHelper.clone(bodyDefn.devices);
+		this.devicesByName =
+			ArrayHelper.addLookupsByName(this.devices);
 		this.activity = bodyDefn.activity;
 	}
 
@@ -67,7 +69,7 @@ class Body
 			for (var a = 0; a < actionNames.length; a++)
 			{
 				var actionName = actionNames[a];
-				var action = world.actions[actionName];
+				var action = world.actionsByName.get(actionName);
 				action.perform(world, this);
 			}
 
@@ -144,7 +146,7 @@ class Body
 		this.vel.add
 		(
 			this.accel
-		).trimToMagnitude
+		).trimToMagnitudeMax
 		(
 			bodyDefn.speedMax
 		);
@@ -152,7 +154,7 @@ class Body
 		this.loc.pos.add
 		(
 			this.vel
-		).wrapToRange
+		).wrapToRangeMax
 		(
 			world.size
 		);

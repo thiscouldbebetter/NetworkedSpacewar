@@ -1,23 +1,29 @@
 
 class Location
 {
-	constructor(pos, orientation)
+	constructor(pos, forwardInTurns)
 	{
-		this.pos = pos || new Coords(0, 0);
-		this.orientation = orientation || new Coords(1, 0);
+		this.pos = pos || Coords.zeroes();
 
-		this.right = this.orientation.clone().right();
+		var forwardAsPolar = new Polar(forwardInTurns, 1);
+console.log(forwardAsPolar);
+		var forwardAsCoords = forwardAsPolar.toCoords(Coords.create());
+console.log(forwardAsCoords);
+		this.orientation = Orientation.fromForward(forwardAsCoords);
 	}
 
 	clone()
 	{
-		return new Location(this.pos.clone(), this.orientation.clone());
+		return new Location
+		(
+			this.pos.clone(), this.orientation.forward.headingInTurns()
+		);
 	}
 
 	overwriteWith(other)
 	{
 		this.pos.overwriteWith(other.pos);
 		this.orientation.overwriteWith(other.orientation);
-		this.right.overwriteWith(other.right);
+		return this;
 	}
 }

@@ -3,19 +3,27 @@
 
 <!-- imports -->
 
-<script type="text/javascript" src="Common/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Framework/Source/Geometry/Coords.js"></script>
+<script type="text/javascript" src="Common/Framework/Source/Geometry/Orientation.js"></script>
+<script type="text/javascript" src="Common/Framework/Source/Geometry/Polar.js"></script>
+
+<script type="text/javascript" src="Common/Framework/Source/Helpers/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Framework/Source/Helpers/NumberHelper.js"></script>
+
+<script type="text/javascript" src="Common/Framework/Source/Utility/IDHelper.js"></script>
+
+<script type="text/javascript" src="Imports.js"></script>
+
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
 <script type="text/javascript" src="Common/BodyDefn.js"></script>
 <script type="text/javascript" src="Common/ColorHelper.js"></script>
-<script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
+<script type="text/javascript" src="Common/InputHelper.js"></script>
 <script type="text/javascript" src="Common/Location.js"></script>
 <script type="text/javascript" src="Common/Log.js"></script>
 <script type="text/javascript" src="Common/Display.js"></script>
-<script type="text/javascript" src="Common/IDHelper.js"></script>
-<script type="text/javascript" src="Common/InputHelper.js"></script>
 <script type="text/javascript" src="Common/Serializer.js"></script>
 <script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
@@ -67,7 +75,7 @@ class Local
 			new Location
 			(
 				new Coords(10, 10), // pos
-				new Coords(1, 0) // vel
+				0 // forwardInTurns
 			)
 		);
 		
@@ -84,8 +92,8 @@ class Local
 		this.display.initialize(document);
 
 		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document);
-	};
+		this.inputHelper.initialize(document, this.display);
+	}
 
 	start()
 	{
@@ -95,11 +103,12 @@ class Local
 		this.world = World.create();
 
 		this.initialize();
-	};
+	}
 
 	updateForTick()
 	{
 		var world = this.world;
+		world.ticksSoFar++;
 
 		world.updateForTick_UpdatesApply(this.updatesIncoming);
 
@@ -112,13 +121,13 @@ class Local
 		this.updateForTick_Server();
 
 		this.updateForTick_UpdatesOutgoingSend();
-	};
+	}
 
 	updateForTick_Client()
 	{
 		var world = this.world;
 
-		var bodyForUser = world.bodies[this.clientID];
+		var bodyForUser = world.bodiesByName.get(this.clientID);
 
 		if (bodyForUser != null)
 		{
@@ -130,7 +139,7 @@ class Local
 		}
 
 		this.world.drawToDisplay(this.display);
-	};
+	}
 
 	updateForTick_Server()
 	{
@@ -150,7 +159,7 @@ class Local
 			var body = bodies[i];
 			body.updateForTick_Collisions(world, i);
 		}
-	};
+	}
 
 	updateForTick_UpdatesOutgoingSend()
 	{
@@ -163,7 +172,7 @@ class Local
 			this.updatesIncoming.push(update);
 		}
 		world.updatesOutgoing.length = 0;
-	};
+	}
 }
 
 new Local().start();

@@ -13,6 +13,6 @@ class ShapeRay
 
 	draw(display, loc, color)
 	{
-		display.drawRay(loc.pos, loc.orientation, this.length, color);
+		display.drawRay(loc.pos, loc.orientation.forward, this.length, color);
 	}
 }

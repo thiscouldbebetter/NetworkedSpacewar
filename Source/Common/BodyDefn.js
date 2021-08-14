@@ -175,7 +175,8 @@ class BodyDefn
 				for (var i = 0; i < inputNamesActive.length; i++)
 				{
 					var inputNameActive = inputNamesActive[i];
-					var action = world.actions[inputNameActive];
+					var action =
+						world.actionsByInputName.get(inputNameActive);
 					if (action != null)
 					{
 						var actionName = action.name;

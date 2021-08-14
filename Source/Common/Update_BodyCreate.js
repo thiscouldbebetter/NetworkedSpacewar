@@ -8,7 +8,7 @@ class Update_BodyCreate
 
 	updateWorld(world)
 	{
-		var bodyExisting = world.bodies[this.body.id];
+		var bodyExisting = world.bodiesByName.get(this.body.id);
 		if (bodyExisting == null)
 		{
 			world.bodiesToSpawn.push(this.body);

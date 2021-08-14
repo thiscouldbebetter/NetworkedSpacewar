@@ -3,18 +3,23 @@
 
 <!-- imports -->
 
+<!-- These should be imported from Common/Framework/, but currently cannot be. -->
+<script type="text/javascript" src="Common/Coords.js"></script>
+<script type="text/javascript" src="Common/Orientation.js"></script>
+<script type="text/javascript" src="Common/Polar.js"></script>
 <script type="text/javascript" src="Common/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/NumberHelper.js"></script>
+<script type="text/javascript" src="Common/IDHelper.js"></script>
+
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
 <script type="text/javascript" src="Common/BodyDefn.js"></script>
 <script type="text/javascript" src="Common/ColorHelper.js"></script>
-<script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
 <script type="text/javascript" src="Common/Location.js"></script>
 <script type="text/javascript" src="Common/Log.js"></script>
 <script type="text/javascript" src="Common/Display.js"></script>
-<script type="text/javascript" src="Common/IDHelper.js"></script>
 <script type="text/javascript" src="Common/InputHelper.js"></script>
 <script type="text/javascript" src="Common/Serializer.js"></script>
 <script type="text/javascript" src="Common/SerializerNode.js"></script>
@@ -139,7 +144,10 @@ class Client
 	{
 		var world = this.session.world;
 
-		var bodyForUser = world.bodies[this.session.idOfBodyControlledByUser];
+		var bodyForUser = world.bodiesByName.get
+		(
+			this.session.idOfBodyControlledByUser
+		);
 
 		if (bodyForUser != null)
 		{
@@ -190,7 +198,7 @@ class Client
 		var session = this.serializer.deserialize(sessionSerialized);
 
 		this.session = session;
-		var world = this.session.world;
+		var world = this.session.world.initialize();
 
 		this.display = new Display("divDisplay", world.size);
 		this.display.initialize(document);

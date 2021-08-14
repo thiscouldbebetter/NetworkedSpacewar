@@ -11,7 +11,7 @@ class Update_Physics
 
 	updateWorld(world)
 	{
-		var body = world.bodies[this.bodyID];
+		var body = world.bodiesByName.get(this.bodyID);
 		if (body != null)
 		{
 			body.loc.overwriteWith(this.loc);
@@ -29,13 +29,24 @@ class Update_Physics
 	{
 		var parts = updateSerialized.split(";");
 
+		var bodyId = parts[1];
+
+		// To save bandwidth, round the pos to the nearest pixel,
+		// because the display will anyway.
+		var pos = new Coords
+		(
+			parseFloat(parts[2]), parseFloat(parts[3])
+		).roundToDecimalPlaces(0);
+
+		var headingInTurns = parseFloat(parts[4]);
+
 		var returnValue = new Update_Physics
 		(
-			parts[1],
+			bodyId,
 			new Location
 			(
-				new Coords(parseFloat(parts[2]), parseFloat(parts[3])), // pos
-				new Coords(parseFloat(parts[4]), parseFloat(parts[5])) // orientation
+				pos,
+				headingInTurns
 			)
 		);
 
@@ -44,11 +55,15 @@ class Update_Physics
 
 	serialize()
 	{
+		var pos = this.loc.pos;
+		var forward = this.loc.orientation.forward;
+		var forwardInTurns = forward.headingInTurns();
+
 		var returnValue =
 			Update_Physics.updateCode() + ";"
 			+ this.bodyID + ";"
-			+ this.loc.pos.x + ";" + this.loc.pos.y + ";"
-			+ this.loc.orientation.x + ";" + this.loc.orientation.y;
+			+ pos.x + ";" + pos.y + ";"
+			+ forwardInTurns
 
 		return returnValue;
 	}

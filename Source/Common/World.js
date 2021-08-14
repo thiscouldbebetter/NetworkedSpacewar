@@ -9,9 +9,10 @@ class World
 		this.name = name;
 		this.ticksPerSecond = ticksPerSecond;
 		this.size = size;
-		this.actions = ArrayHelper.addLookups(actions, "name");
-		ArrayHelper.addLookups(this.actions, "inputName");
-		this.bodyDefns = ArrayHelper.addLookups(bodyDefns, "name");
+
+		this.actions = actions;
+
+		this.bodyDefns = bodyDefns;
 
 		this.bodies = [];
 
@@ -20,6 +21,21 @@ class World
 
 		this.updatesImmediate = [];
 		this.updatesOutgoing = [];
+
+		this.ticksSoFar = 0;
+
+		this.lookupsBuild();
+	}
+
+	lookupsBuild()
+	{
+		this.actionsByName = ArrayHelper.addLookupsByName(this.actions);
+		this.actionsByInputName =
+			ArrayHelper.addLookups(this.actions, (e) => e.inputName);
+
+		this.bodyDefnsByName = ArrayHelper.addLookupsByName(this.bodyDefns);
+
+		this.bodiesByName = ArrayHelper.addLookupsByName(this.bodies);
 	}
 
 	// static methods
@@ -33,7 +49,7 @@ class World
 				"T", // thrust
 				"w", // inputName
 				// perform
-				function(world, body)
+				(world, body) =>
 				{
 					var bodyDefn = body.defn(world);
 					var acceleration = bodyDefn.accelerationPerTick;
@@ -41,7 +57,7 @@ class World
 					var bodyLoc = body.loc;
 					body.accel.add
 					(
-						bodyLoc.orientation.clone().multiplyScalar
+						bodyLoc.orientation.forward.clone().multiplyScalar
 						(
 							acceleration
 						)
@@ -54,9 +70,9 @@ class World
 				"F", // fire
 				"f", // inputName
 				// peform
-				function(world, body)
+				(world, body) =>
 				{
-					var device = body.devices["Gun"];
+					var device = body.devicesByName.get("Gun");
 					device.use(world, body, device);
 				}
 			),
@@ -65,9 +81,9 @@ class World
 			(
 				"J", // hyperjump
 				"j", // inputName
-				function(world, body)
+				(world, body) =>
 				{
-					var device = body.devices["Jump"];
+					var device = body.devicesByName.get("Jump");
 					device.use(world, body, device);
 				}
 			),
@@ -76,7 +92,7 @@ class World
 			(
 				"Q", // quit
 				"Escape", // inputName
-				function(world, body)
+				(world, body) =>
 				{
 					body.integrity = 0;
 				}
@@ -86,24 +102,29 @@ class World
 			(
 				"L", // turn left
 				"a", // inputName
-				function(world, body)
+				(world, body) =>
 				{
 					var bodyDefn = body.defn(world);
 					var turnRate = bodyDefn.turnRate;
 
 					var bodyLoc = body.loc;
-					bodyLoc.orientation.subtract
+					var bodyOri = bodyLoc.orientation;
+					var bodyForward = bodyOri.forward;
+					var bodyRight = bodyOri.right;
+					bodyForward.subtract
 					(
-						bodyLoc.right.clone().multiplyScalar
+						bodyRight.clone().multiplyScalar
 						(
 							turnRate
 						)
 					).normalize();
 
-					bodyLoc.right.overwriteWith
+					bodyRight.overwriteWith
 					(
-						bodyLoc.orientation
+						bodyForward
 					).right();
+
+					bodyOri.orthogonalize();
 				}
 			),
 
@@ -111,21 +132,29 @@ class World
 			(
 				"R", // turn right
 				"d", // inputName
-				function(world, body)
+				(world, body) =>
 				{
 					var bodyDefn = body.defn(world);
 					var turnRate = bodyDefn.turnRate;
 
 					var bodyLoc = body.loc;
-					bodyLoc.orientation.add
+					var bodyOri = bodyLoc.orientation;
+					var bodyForward = bodyOri.forward;
+					var bodyRight = bodyOri.right;
+					bodyForward.add
 					(
-						bodyLoc.right.clone().multiplyScalar(turnRate)
+						bodyRight.clone().multiplyScalar
+						(
+							turnRate
+						)
 					).normalize();
 
-					bodyLoc.right.overwriteWith
+					bodyRight.overwriteWith
 					(
-						bodyLoc.orientation
+						bodyForward
 					).right();
+
+					bodyOri.orthogonalize();
 				}
 			),
 		];
@@ -144,7 +173,7 @@ class World
 			new Location
 			(
 				worldSize.clone().divideScalar(2), // pos
-				new Coords(1, 0) // orientation
+				0, // forwardInTurns
 			)
 		);
 
@@ -181,16 +210,21 @@ class World
 		if (body != null)
 		{
 			ArrayHelper.remove(this.bodies, body);
-			this.bodies[body.id] = null;
-			delete this.bodies[body.id];
+			this.bodiesByName.delete(body.id);
 		}
 	}
 
 	bodySpawn(body)
 	{
 		this.bodies.push(body);
-		this.bodies[body.id] = body;
+		this.bodiesByName.set(body.id, body);
 		body.initializeForWorld(this);
+	}
+
+	initialize()
+	{
+		this.lookupsBuild();
+		return this;
 	}
 
 	millisecondsPerTick()
@@ -222,7 +256,7 @@ class World
 		for(var i = 0; i < this.bodyIDsToRemove.length; i++)
 		{
 			var bodyID = this.bodyIDsToRemove[i];
-			var body = this.bodies[bodyID];
+			var body = this.bodiesByName.get(bodyID);
 			if (body == null)
 			{
 				bodyIDsThatCannotYetBeRemoved.push(bodyID);

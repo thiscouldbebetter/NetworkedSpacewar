@@ -1,44 +1,37 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-var fs = require("fs");
-var commonFiles = fs.readdirSync("./Common");
-var classesByName = new Map();
-for (var i = 0; i < commonFiles.length; i++)
-{
-	var fileName = commonFiles[i];
-	var className = fileName.split(".")[0];
-	var fileAsString = fs.readFileSync("./Common/" + fileName).toString();
-	var fileAsStringWrapped = "(" + fileAsString + ")";
-	var fileAsClass = eval(fileAsStringWrapped);
-	classesByName[className] = fileAsClass;
-}
+var classesByName = readAndCompileClassFiles();
 
-var Action = classesByName["Action"];
-var Activity = classesByName["Activity"];
-var ArrayHelper = classesByName["ArrayHelper"];
-var Body = classesByName["Body"];
-var BodyDefn = classesByName["BodyDefn"];
-var ColorHelper = classesByName["ColorHelper"];
-var Coords = classesByName["Coords"];
-var Device = classesByName["Device"];
-var IDHelper = classesByName["IDHelper"];
-var Location = classesByName["Location"];
-var Log = classesByName["Log"];
-var Serializer = classesByName["Serializer"];
-var SerializerNode = classesByName["SerializerNode"];
-var Session = classesByName["Session"];
-var ShapeCircle = classesByName["ShapeCircle"];
-var ShapeRay = classesByName["ShapeRay"];
-var VisualGroup = classesByName["VisualGroup"];
-var VisualShape = classesByName["VisualShape"];
-var VisualText = classesByName["VisualText"];
-var Update_Actions = classesByName["Update_Actions"];
-var Update_BodyCreate = classesByName["Update_BodyCreate"];
-var Update_BodyRemove = classesByName["Update_BodyRemove"];
-var Update_BodyDefnRegister = classesByName["Update_BodyDefnRegister"];
-var Update_Physics = classesByName["Update_Physics"];
-var World = classesByName["World"];
+var Action = classesByName.get("Action");
+var Activity = classesByName.get("Activity");
+var ArrayHelper = classesByName.get("ArrayHelper");
+var Body = classesByName.get("Body");
+var BodyDefn = classesByName.get("BodyDefn");
+var ColorHelper = classesByName.get("ColorHelper");
+var Coords = classesByName.get("Coords");
+var Device = classesByName.get("Device");
+var IDHelper = classesByName.get("IDHelper");
+var Location = classesByName.get("Location");
+var Log = classesByName.get("Log");
+var NumberHelper = classesByName.get("NumberHelper");
+var Orientation = classesByName.get("Orientation");
+var Polar = classesByName.get("Polar")
+var RandomizerSystem = classesByName.get("RandomizerSystem");
+var Serializer = classesByName.get("Serializer");
+var SerializerNode = classesByName.get("SerializerNode");
+var Session = classesByName.get("Session");
+var ShapeCircle = classesByName.get("ShapeCircle");
+var ShapeRay = classesByName.get("ShapeRay");
+var VisualGroup = classesByName.get("VisualGroup");
+var VisualShape = classesByName.get("VisualShape");
+var VisualText = classesByName.get("VisualText");
+var Update_Actions = classesByName.get("Update_Actions");
+var Update_BodyCreate = classesByName.get("Update_BodyCreate");
+var Update_BodyRemove = classesByName.get("Update_BodyRemove");
+var Update_BodyDefnRegister = classesByName.get("Update_BodyDefnRegister");
+var Update_Physics = classesByName.get("Update_Physics");
+var World = classesByName.get("World");
 
 class ClientConnection
 {
@@ -57,8 +50,8 @@ class ClientConnection
 
 	handleEvent_ClientDisconnected(e)
 	{
-		var bodies = this.server.world.bodies;
-		var bodyToDestroy = bodies[this.clientID];
+		var bodiesByName = this.server.world.bodiesByName;
+		var bodyToDestroy = bodiesByName.get(this.clientID);
 		if (bodyToDestroy == null)
 		{
 			console.log(this.clientID + " left the server.");
@@ -84,7 +77,7 @@ class ClientConnection
 		socketToClient.emit("sessionEstablished", sessionSerialized);
 
 		var world = server.world;
-		var bodyDefnPlayer = world.bodyDefns["_Player"];
+		var bodyDefnPlayer = world.bodyDefnsByName.get("_Player");
 		var bodyDefnForClient = bodyDefnPlayer.clone();
 		bodyDefnForClient.name = this.clientID;
 		bodyDefnForClient.color = ColorHelper.random();
@@ -96,16 +89,19 @@ class ClientConnection
 		updateBodyDefnRegister.updateWorld(world);
 		world.updatesOutgoing.push(updateBodyDefnRegister);
 
+		var posRandom = new Coords().randomize().multiply(world.size);
+		var forwardInTurnsRandom = Math.random();
+		var locRandom = new Location
+		(
+			posRandom, forwardInTurnsRandom
+		);
+
 		var bodyForClient = new Body
 		(
 			this.clientID, // id
 			clientName, // name
 			bodyDefnForClient.name,
-			new Location
-			(
-				new Coords().randomize().multiply(world.size), // pos
-				new Coords().randomize().normalize() // ori
-			)
+			locRandom
 		);
 
 		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
@@ -317,3 +313,43 @@ function main()
 }
 
 main();
+
+
+// Helpers.
+
+function readAndCompileClassFiles()
+{
+	var fs = require("fs");
+
+	var commonDirectoryPath = "./Common";
+
+	var sourceFilePathsWithinCommon = fs.readdirSync(commonDirectoryPath);
+
+	var sourceFilePathsAbsolute = sourceFilePathsWithinCommon.map
+	(
+		x => commonDirectoryPath + "/" + x
+	);
+
+	var fileExtensionJs = ".js";
+
+	sourceFilePathsAbsolute =
+		sourceFilePathsAbsolute.filter(x => x.endsWith(fileExtensionJs));
+
+	var classesByName = new Map();
+
+	for (var i = 0; i < sourceFilePathsAbsolute.length; i++)
+	{
+		var sourceFilePathAbsolute = sourceFilePathsAbsolute[i];
+		var filePathAsParts = sourceFilePathAbsolute.split("/");
+		var fileName = filePathAsParts[filePathAsParts.length - 1];
+		var className = fileName.split(".")[0];
+		var codeBlockToCompile =
+			fs.readFileSync(sourceFilePathAbsolute).toString();
+		var codeBlockToCompileWrapped =
+			"(" + codeBlockToCompile + ")";
+		var classCompiled = eval(codeBlockToCompileWrapped);
+		classesByName.set(className, classCompiled);
+	}
+
+	return classesByName;
+}

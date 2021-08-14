@@ -9,6 +9,6 @@ class Update_BodyDefnRegister
 	updateWorld(world)
 	{
 		world.bodyDefns.push(this.bodyDefn);
-		world.bodyDefns[this.bodyDefn.name] = this.bodyDefn;
+		world.bodyDefnsByName.set(this.bodyDefn.name, this.bodyDefn);
 	}
 }
