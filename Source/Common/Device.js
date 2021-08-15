@@ -48,7 +48,7 @@ class Device
 				var projectile = new Body
 				(
 					projectileID,
-					"", // no name
+					"Proj" + IDHelper.Instance().idNext(), // todo
 					projectileDefn.name,
 					new Location
 					(

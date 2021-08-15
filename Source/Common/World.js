@@ -3,12 +3,19 @@ class World
 {
 	constructor
 	(
-		name, ticksPerSecond, size, actions, bodyDefns, bodiesInitial
+		name,
+		ticksPerSecond,
+		size,
+		playersMax,
+		actions,
+		bodyDefns,
+		bodiesInitial
 	)
 	{
 		this.name = name;
 		this.ticksPerSecond = ticksPerSecond;
 		this.size = size;
+		this.playersMax = playersMax;
 
 		this.actions = actions;
 
@@ -40,7 +47,7 @@ class World
 
 	// static methods
 
-	static build(arenaSize, planetSize, shipSize, bulletSize)
+	static build(playersMax, arenaSize, planetSize, shipSize, bulletSize)
 	{
 		var actions =
 		[
@@ -182,6 +189,7 @@ class World
 			"World0",
 			20, // ticksPerSecond
 			worldSize,
+			playersMax,
 			actions,
 			// bodyDefns
 			[

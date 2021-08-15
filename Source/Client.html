@@ -3,41 +3,50 @@
 
 <!-- imports -->
 
-<!-- These should be imported from Common/Framework/, but currently cannot be. -->
-<script type="text/javascript" src="Common/Coords.js"></script>
-<script type="text/javascript" src="Common/Orientation.js"></script>
-<script type="text/javascript" src="Common/Polar.js"></script>
-<script type="text/javascript" src="Common/ArrayHelper.js"></script>
-<script type="text/javascript" src="Common/NumberHelper.js"></script>
-<script type="text/javascript" src="Common/IDHelper.js"></script>
+<script type="text/javascript" src="Common/Display/ColorHelper.js"></script>
+<script type="text/javascript" src="Common/Display/Display.js"></script>
+
+<script type="text/javascript" src="Common/Display/Visuals/VisualGroup.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualShape.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualText.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Coords.js"></script>
+<script type="text/javascript" src="Common/Geometry/Coords_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Location.js"></script>
+<script type="text/javascript" src="Common/Geometry/Polar.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeCircle.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRay.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRectangle.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformLocate.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformOrient.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformTranslate.js"></script>
+
+<script type="text/javascript" src="Common/Helpers/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Helpers/NumberHelper.js"></script>
+
+<script type="text/javascript" src="Common/Storage/Serializer.js"></script>
+<script type="text/javascript" src="Common/Storage/SerializerNode.js"></script>
+
+<script type="text/javascript" src="Common/Updates/Update_Actions.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyCreate.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyDefnRegister.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyRemove.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Physics.js"></script>
+
+<script type="text/javascript" src="Common/Utility/IDHelper.js"></script>
+<script type="text/javascript" src="Common/Utility/Log.js"></script>
 
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
 <script type="text/javascript" src="Common/BodyDefn.js"></script>
-<script type="text/javascript" src="Common/ColorHelper.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
-<script type="text/javascript" src="Common/Location.js"></script>
-<script type="text/javascript" src="Common/Log.js"></script>
-<script type="text/javascript" src="Common/Display.js"></script>
 <script type="text/javascript" src="Common/InputHelper.js"></script>
-<script type="text/javascript" src="Common/Serializer.js"></script>
-<script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
-<script type="text/javascript" src="Common/ShapeCircle.js"></script>
-<script type="text/javascript" src="Common/ShapeRay.js"></script>
-<script type="text/javascript" src="Common/ShapeRectangle.js"></script>
-<script type="text/javascript" src="Common/TransformLocate.js"></script>
-<script type="text/javascript" src="Common/TransformOrient.js"></script>
-<script type="text/javascript" src="Common/TransformTranslate.js"></script>
-<script type="text/javascript" src="Common/Update_Actions.js"></script>
-<script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
-<script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
-<script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
-<script type="text/javascript" src="Common/Update_Physics.js"></script>
-<script type="text/javascript" src="Common/VisualGroup.js"></script>
-<script type="text/javascript" src="Common/VisualShape.js"></script>
-<script type="text/javascript" src="Common/VisualText.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
 
 <script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
@@ -53,8 +62,12 @@
 	<input id="inputServiceURL" value="http://localhost:8089"></input>
 	<br />
 
-	<label>Name:</label>
-	<input id="inputName" value=""></input>
+	<label>Player Name:</label>
+	<input id="inputUserName" value=""></input>
+	<br />
+
+	<label>Password (if required):</label>
+	<input id="inputUserPassword" type="password" value=""></input>
 	<br />
 
 	<button onclick="buttonConnect_Clicked();">Connect</button>
@@ -73,20 +86,23 @@ function buttonConnect_Clicked()
 	var inputServiceURL = document.getElementById("inputServiceURL");
 	var serviceURL = inputServiceURL.value;
 
-	var inputName = document.getElementById("inputName");
-	var name = inputName.value;
-	
+	var inputUserName = document.getElementById("inputUserName");
+	var userName = inputUserName.value;
+
+	var inputUserPassword = document.getElementById("inputUserPassword");
+	var userPassword = inputUserPassword.value;
+
 	if (serviceURL.length == 0)
 	{
 		alert("No server specified!")
 	}
-	else if (name.length == 0)
+	else if (userName.length == 0)
 	{
 		alert("No name specified!")
 	}
 	else
 	{
-		Client.Instance().connect(serviceURL, name);
+		Client.Instance().connect(serviceURL, userName, userPassword);
 	}
 }
 
@@ -105,10 +121,11 @@ class Client
 
 	// methods
 
-	connect(serviceURLToConnectTo, clientName)
+	connect(serviceURLToConnectTo, clientName, clientPassword)
 	{
 		this.serviceURL = serviceURLToConnectTo;
 		this.clientName = clientName;
+		this.clientPassword = clientPassword;
 
 		if (this.socketToServer != null)
 		{
@@ -122,6 +139,12 @@ class Client
 		(
 			"connected", 
 			this.handleEvent_ServerConnected.bind(this)
+		);
+
+		this.socketToServer.on
+		(
+			"serverError", // A bad name, but "error" seems to be reserved.
+			this.handleEvent_ServerError.bind(this)
 		);
 	}
 
@@ -181,14 +204,22 @@ class Client
 	handleEvent_ServerConnected(clientID)
 	{
 		this.clientID = clientID;
-		
-		this.socketToServer.emit("identify", this.clientName);
+
+		var clientNameColonPassword =
+			this.clientName + ":" + this.clientPassword;
+
+		this.socketToServer.emit("identify", clientNameColonPassword);
 
 		this.socketToServer.on
 		(
 			"sessionEstablished", 
 			this.handleEvent_SessionEstablished.bind(this)
 		);
+	}
+
+	handleEvent_ServerError(errorMessage)
+	{
+		alert("Server error: " + errorMessage);
 	}
 
 	handleEvent_SessionEstablished(sessionSerialized)
