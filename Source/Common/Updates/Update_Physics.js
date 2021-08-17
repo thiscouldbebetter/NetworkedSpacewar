@@ -31,12 +31,10 @@ class Update_Physics
 
 		var bodyId = parts[1];
 
-		// To save bandwidth, round the pos to the nearest pixel,
-		// because the display will anyway.
 		var pos = new Coords
 		(
 			parseFloat(parts[2]), parseFloat(parts[3])
-		).roundToDecimalPlaces(0);
+		);
 
 		var headingInTurns = parseFloat(parts[4]);
 
@@ -57,12 +55,18 @@ class Update_Physics
 	{
 		var pos = this.loc.pos;
 		var forward = this.loc.orientation.forward;
-		var forwardInTurns = forward.headingInTurns();
+		var forwardInTurns = NumberHelper.roundToDecimalPlaces
+		(
+			forward.headingInTurns(), 2
+		);
+
+		var posX = Math.round(pos.x);
+		var posY = Math.round(pos.y);
 
 		var returnValue =
 			Update_Physics.updateCode() + ";"
 			+ this.bodyID + ";"
-			+ pos.x + ";" + pos.y + ";"
+			+ posX + ";" + posY + ";"
 			+ forwardInTurns
 
 		return returnValue;

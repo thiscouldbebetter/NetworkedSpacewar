@@ -258,7 +258,7 @@ class BodyDefn
 			[], // actionNames
 			[], // devices
 			// collide
-			function(world, collider, other)
+			(world, collider, other) =>
 			{
 				this.integrity = 0;
 				other.integrity--;

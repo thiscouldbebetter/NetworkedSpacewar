@@ -1,5 +1,65 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+// Bootstrap classes.
+
+class CodeCompiler
+{
+	readAndCompileClassFilesInDirectory
+	(
+		filesystemProvider, directoryPath, classesByName
+	)
+	{
+		var fileAndSubdirectoryNamesInDirectory =
+			filesystemProvider.fileAndSubdirectoryNamesInDirectoryAtPath
+			(
+				directoryPath
+			);
+
+		var fileExtensionJs = ".js";
+
+		var subdirectoryNamesInDirectory =
+			fileAndSubdirectoryNamesInDirectory.filter
+			(
+				x => (x.indexOf(".") == -1)
+				&& (x.startsWith("_") == false) 
+			);
+
+		for (var i = 0; i < subdirectoryNamesInDirectory.length; i++)
+		{
+			var subdirectoryName = subdirectoryNamesInDirectory[i];
+			var subdirectoryPath = directoryPath + subdirectoryName + "/";
+			this.readAndCompileClassFilesInDirectory
+			(
+				filesystemProvider, subdirectoryPath, classesByName
+			);
+		}
+
+		var codeFileNamesInDirectory =
+			fileAndSubdirectoryNamesInDirectory.filter
+			(
+				x => x.endsWith(fileExtensionJs)
+			);
+
+		var codeFilePaths = codeFileNamesInDirectory.map
+		(
+			x => directoryPath + x
+		);
+
+		for (var i = 0; i < codeFilePaths.length; i++)
+		{
+			var codeFilePath = codeFilePaths[i];
+			var filePathAsParts = codeFilePath.split("/");
+			var fileName = filePathAsParts[filePathAsParts.length - 1];
+			var className = fileName.split(".")[0];
+			var codeBlockToCompile =
+				filesystemProvider.fileReadFromPath(codeFilePath);
+			var codeBlockToCompileWrapped =
+				"(" + codeBlockToCompile + ")";
+			var classCompiled = eval(codeBlockToCompileWrapped);
+			classesByName.set(className, classCompiled);
+		}
+
+		return classesByName;
+	}
+}
 
 class FilesystemProviderFS
 {
@@ -23,39 +83,17 @@ class FilesystemProviderFS
 		this.fs.writeFileSync(filePath, stringToWrite);
 	}
 }
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 var fs = require("fs");
 var filesystemProvider = new FilesystemProviderFS(fs);
 
-class HasherCrypto
-{
-	constructor(crypto)
-	{
-		this.crypto = crypto;
-	}
-
-	hashString(stringToHash)
-	{
-		var stringHashed =
-			this.crypto.createHash
-			(
-				"sha256"
-			).update
-			(
-				stringToHash
-			).digest
-			(
-				"hex"
-			);
-
-		return stringHashed;
-	}
-}
-var crypto = require("crypto");
-var hasher = new HasherCrypto(crypto);
-
 var commonDirectoryPath = "./Common/";
 
-var classesByName = readAndCompileClassFilesInDirectory
+var compiler = new CodeCompiler();
+var classesByName = compiler.readAndCompileClassFilesInDirectory
 (
 	filesystemProvider, commonDirectoryPath, new Map()
 );
@@ -63,11 +101,14 @@ var classesByName = readAndCompileClassFilesInDirectory
 var Action = classesByName.get("Action");
 var Activity = classesByName.get("Activity");
 var ArrayHelper = classesByName.get("ArrayHelper");
+var Base64Converter = classesByName.get("Base64Converter");
 var Body = classesByName.get("Body");
 var BodyDefn = classesByName.get("BodyDefn");
+var ClientConnection = classesByName.get("ClientConnection");
 var ColorHelper = classesByName.get("ColorHelper");
 var Coords = classesByName.get("Coords");
 var Device = classesByName.get("Device");
+var HasherCrypto = classesByName.get("HasherCrypto");
 var IDHelper = classesByName.get("IDHelper");
 var Location = classesByName.get("Location");
 var Log = classesByName.get("Log");
@@ -88,160 +129,11 @@ var Update_BodyCreate = classesByName.get("Update_BodyCreate");
 var Update_BodyRemove = classesByName.get("Update_BodyRemove");
 var Update_BodyDefnRegister = classesByName.get("Update_BodyDefnRegister");
 var Update_Physics = classesByName.get("Update_Physics");
+var User = classesByName.get("User");
 var World = classesByName.get("World");
 
-class Base64Converter
-{
-	static fromBase64(base64ToConvert)
-	{
-		return Buffer.from(base64ToConvert, "base64").toString();
-	}
-
-	static toBase64(stringToConvert)
-	{
-		return Buffer.from(stringToConvert).toString("base64");
-	}
-}
-
-class ClientConnection
-{
-	constructor(server, clientID, socket)
-	{
-		this.server = server;
-		this.clientID = clientID;
-		this.socket = socket;
-
-		this.socket.on
-		(
-			"identify", 
-			this.handleEvent_ClientIdentifyingSelf.bind(this)
-		);
-	}
-
-	handleEvent_ClientDisconnected(e)
-	{
-		var bodiesByName = this.server.world.bodiesByName;
-		var bodyToDestroy = bodiesByName.get(this.clientID);
-		if (bodyToDestroy == null)
-		{
-			console.log(this.clientID + " left the server.");
-		}
-		else
-		{
-			bodyToDestroy.integrity = 0;
-			console.log(bodyToDestroy.name + " left the server.");
-		}
-	}
-
-	handleEvent_ClientIdentifyingSelf(clientNameColonPassword)
-	{
-		var server = this.server;
-
-		var clientNameAndPassword = clientNameColonPassword.split(":");
-		var clientName = clientNameAndPassword[0];
-		var clientPassword = clientNameAndPassword[1];
-
-		var usersKnownByName = server.usersKnownByName;
-		var areUserAndPasswordValid =
-		(
-			usersKnownByName.has(clientName)
-			&& usersKnownByName.get(clientName).isPasswordValid(clientPassword)
-		);
-
-		var clientConnection = server.clientConnections[this.clientID];
-		var socketToClient = clientConnection.socket;
-
-		if
-		(
-			server.areAnonymousUsersAllowed == false
-			&& areUserAndPasswordValid == false
-		)
-		{
-			var errorMessage =
-				"Invalid username or password for name: " + clientName;
-			console.log(errorMessage);
-			socketToClient.emit("serverError", errorMessage);
-			return;
-		}
-
-		this.clientName = clientName;
-
-		var session = new Session(this.clientID, server.world);
-		var sessionSerialized = server.serializer.serialize(session);
-		socketToClient.emit("sessionEstablished", sessionSerialized);
-
-		var world = server.world;
-		var bodyDefnPlayer = world.bodyDefnsByName.get("_Player");
-		var bodyDefnForClient = bodyDefnPlayer.clone();
-		bodyDefnForClient.name = this.clientID;
-		bodyDefnForClient.color = ColorHelper.random();
-
-		var updateBodyDefnRegister = new Update_BodyDefnRegister
-		(
-			bodyDefnForClient
-		);
-		updateBodyDefnRegister.updateWorld(world);
-		world.updatesOutgoing.push(updateBodyDefnRegister);
-
-		var posRandom = new Coords().randomize().multiply(world.size);
-		var forwardInTurnsRandom = Math.random();
-		var locRandom = new Location
-		(
-			posRandom, forwardInTurnsRandom
-		);
-
-		var bodyForClient = new Body
-		(
-			this.clientID, // id
-			clientName, // name
-			bodyDefnForClient.name,
-			locRandom
-		);
-
-		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
-		world.updatesOutgoing.push(updateBodyCreate);
-		updateBodyCreate.updateWorld(world);
-
-		socketToClient.on
-		(
-			"update",
-			this.handleEvent_ClientUpdateReceived.bind(this)
-		);
-
-		socketToClient.on
-		(
-			"disconnect",
-			this.handleEvent_ClientDisconnected.bind(this)
-		);
-
-		console.log(clientName + " joined the server.");
-	}
-
-	handleEvent_ClientUpdateReceived(updateSerialized)
-	{
-		var serializer;
-		var firstChar = updateSerialized[0];
-		if (firstChar == "{") // JSON
-		{
-			serializer = this.server.serializer;
-		}
-		else // terse
-		{
-			var updateCode = firstChar;
-			if (updateCode == Update_Actions.updateCode())
-			{
-				serializer = new Update_Actions();
-			}
-		}
-
-		var update = serializer.deserialize
-		(
-			updateSerialized
-		);
-
-		update.updateWorld(this.server.world);
-	}
-}
+var crypto = require("crypto");
+var hasher = new HasherCrypto(crypto);
 
 class Server
 {
@@ -345,9 +237,10 @@ class Server
 	{
 		var world = this.world;
 
-		for (var i = 0; i < world.updatesOutgoing.length; i++)
+		var updates = world.updatesOutgoing;
+		for (var i = 0; i < updates.length; i++)
 		{
-			var update = world.updatesOutgoing[i];
+			var update = updates[i];
 			var serializer = (update.serialize == null ? this.serializer : update);
 			var updateSerialized = serializer.serialize(update);
 
@@ -358,7 +251,7 @@ class Server
 				socketToClient.emit("update", updateSerialized);
 			}
 		}
-		world.updatesOutgoing.length = 0;
+		updates.length = 0;
 	}
 
 	// events
@@ -368,7 +261,8 @@ class Server
 		var clientIndex = this.clientConnections.length;
 		var clientID = "C_" + clientIndex;
 
-		var clientConnection = new ClientConnection(this, clientID, socketToClient);
+		var clientConnection =
+			new ClientConnection(this, clientID, socketToClient);
 		this.clientConnections.push(clientConnection);
 		this.clientConnections[clientID] = clientConnection;
 
@@ -376,110 +270,10 @@ class Server
 	}
 }
 
-class User
-{
-	constructor(name, passwordSalt, passwordSaltedAndHashedAsBase64)
-	{
-		this.name = name;
-		this.passwordSalt = passwordSalt;
-		this.passwordSaltedAndHashedAsBase64 =
-			passwordSaltedAndHashedAsBase64;
-	}
-
-	isPasswordValid(passwordToCheck)
-	{
-		var passwordToCheckSaltedAndHashedAsBase64 =
-			this.passwordSaltHashAndBase64(passwordToCheck, this.passwordSalt);
-		var returnValue =
-		(
-			passwordToCheckSaltedAndHashedAsBase64
-				== this.passwordSaltedAndHashedAsBase64
-		);
-		return returnValue;
-	}
-
-	passwordSaltHashAndBase64(passwordInPlaintext, salt)
-	{
-		var passwordSalted = passwordInPlaintext + salt;
-		var passwordSaltedAndHashed = hasher.hashString(passwordSalted);
-		var passwordSaltedAndHashedAsBase64 =
-			Base64Converter.toBase64(passwordSaltedAndHashed);
-		return passwordSaltedAndHashedAsBase64;
-	}
-
-	passwordSet(passwordInPlaintext)
-	{
-		this.passwordSalt = Math.random().toString(16).substring(2);
-		this.passwordSaltedAndHashedAsBase64 =
-			passwordSaltHashAndBase64(passwordInPlaintext, this.passwordSalt);
-		return this;
-	}
-
-	// String conversions for UsersKnown file.
-
-	static fromString_UserKnown(userAsString)
-	{
-		var delimiter = ";";
-
-		var parts = userAsString.split(delimiter);
-		var userName = parts[0];
-		var userPasswordSalt = parts[1];
-		var userPasswordSaltedAndHashedAsBase64 = parts[2];
-		var returnValue = new User
-		(
-			userName,
-			userPasswordSalt,
-			userPasswordSaltedAndHashedAsBase64
-		);
-		return returnValue;
-	}
-
-	static manyFromFilesystemProviderAndPath(filesystemProvider, filePath)
-	{
-		var usersKnownAsString =
-			filesystemProvider.fileReadFromPath(filePath);
-		var users = User.manyFromUsersKnownAsString(usersKnownAsString);
-		return users;
-	}
-
-	static manyFromUsersKnownAsString(usersKnownAsString)
-	{
-		var newline = "\n";
-
-		var usersKnownAsLines = usersKnownAsString.split(newline);
-
-		usersKnownAsLines = usersKnownAsLines.filter
-		(
-			x =>
-				x.startsWith("//") == false
-				&& x.trim() != ""
-		);
-
-		var users = usersKnownAsLines.map
-		(
-			userAsString => User.fromString_UserKnown(userAsString)
-		);
-		return users;
-	}
-
-	toString_UserKnown()
-	{
-		var delimiter = ";";
-
-		var returnValue = 
-		[
-			this.name,
-			this.passwordSalt,
-			this.passwordSaltedAndHashedAsBase64
-		].join(delimiter);
-
-		return returnValue;
-	}
-}
-
 function main()
 {
 	var args = process.argv;
+	var argsByName = new Map();
 
 	for (var a = 2; a < args.length; a++)
 	{
@@ -490,44 +284,55 @@ function main()
 		var argName = argParts[0];
 		var argValue = argParts[1];
 
-		args[argName] = argValue;
+		argsByName.set(argName, argValue);
 	}
 
-	var argNameToDefaultLookup = 
-	{
-		"--anonymous-users-allowed" : "false",
-		"--arena-size" : "128",
-		"--bullet-size" : "1",
-		"--planet-size" : "10",
-		"--port" : "8089",
-		"--ship-size" : "3",
-		"--players-max" : "2"
-	};
+	var argDefaultsByName = new Map
+	([
+		[ "--anonymous-users-allowed", "false" ],
+		[ "--arena-size", "128" ],
+		[ "--bullet-size", "1" ],
+		[ "--planet-size", "10" ],
+		[ "--port", "8089" ],
+		[ "--ship-size", "3" ],
+		[ "--players-max", "2" ]
+	]);
 
-	for (var argName in argNameToDefaultLookup)
-	{
-		if (args[argName] == null)
+	argDefaultsByName.forEach
+	(
+		(argValueDefault, argName) =>
 		{
-			var argValueDefault = argNameToDefaultLookup[argName];
-			args[argName] = argValueDefault;
+			if (argsByName.has(argName) == false)
+			{
+				argsByName.set(argName, argValueDefault);
+			}
 		}
-	}
+	);
 
-	var servicePort = parseInt(args["--port"]);
+	console.log("args:");
+	argsByName.forEach
+	(
+		(argValue, argName) =>
+		{
+			console.log(argName + ": " + argValue);
+		}
+	);
+
+	var servicePort = parseInt(argsByName.get("--port"));
 
 	var areAnonymousUsersAllowed =
-		(args["--anonymous-users-allowed"] == "true");
+		(argsByName.get("--anonymous-users-allowed") == "true");
 
 	var usersKnown = User.manyFromFilesystemProviderAndPath
 	(
 		filesystemProvider, "UsersKnown.txt"
 	);
 
-	var playersMax = parseInt(args["--players-max"]);
-	var arenaSize = parseInt(args["--arena-size"]);
-	var planetSize = parseInt(args["--planet-size"]);
-	var shipSize = parseInt(args["--ship-size"]);
-	var bulletSize = parseInt(args["-bullet-size"]);
+	var playersMax = parseInt(argsByName.get("--players-max"));
+	var arenaSize = parseInt(argsByName.get("--arena-size"));
+	var planetSize = parseInt(argsByName.get("--planet-size"));
+	var shipSize = parseInt(argsByName.get("--ship-size"));
+	var bulletSize = parseInt(argsByName.get("--bullet-size"));
 
 	var world = World.build
 	(
@@ -543,63 +348,3 @@ function main()
 }
 
 main();
-
-// Helpers.
-
-function readAndCompileClassFilesInDirectory
-(
-	filesystemProvider, directoryPath, classesByName
-)
-{
-	var fileAndSubdirectoryNamesInDirectory =
-		filesystemProvider.fileAndSubdirectoryNamesInDirectoryAtPath
-		(
-			directoryPath
-		);
-
-	var fileExtensionJs = ".js";
-
-	var subdirectoryNamesInDirectory =
-		fileAndSubdirectoryNamesInDirectory.filter
-		(
-			x => (x.indexOf(".") == -1)
-			&& (x.startsWith("_") == false) 
-		);
-
-	for (var i = 0; i < subdirectoryNamesInDirectory.length; i++)
-	{
-		var subdirectoryName = subdirectoryNamesInDirectory[i];
-		var subdirectoryPath = directoryPath + subdirectoryName + "/";
-		readAndCompileClassFilesInDirectory
-		(
-			filesystemProvider, subdirectoryPath, classesByName
-		);
-	}
-
-	var codeFileNamesInDirectory =
-		fileAndSubdirectoryNamesInDirectory.filter
-		(
-			x => x.endsWith(fileExtensionJs)
-		);
-
-	var codeFilePaths = codeFileNamesInDirectory.map
-	(
-		x => directoryPath + x
-	);
-
-	for (var i = 0; i < codeFilePaths.length; i++)
-	{
-		var codeFilePath = codeFilePaths[i];
-		var filePathAsParts = codeFilePath.split("/");
-		var fileName = filePathAsParts[filePathAsParts.length - 1];
-		var className = fileName.split(".")[0];
-		var codeBlockToCompile =
-			filesystemProvider.fileReadFromPath(codeFilePath);
-		var codeBlockToCompileWrapped =
-			"(" + codeBlockToCompile + ")";
-		var classCompiled = eval(codeBlockToCompileWrapped);
-		classesByName.set(className, classCompiled);
-	}
-
-	return classesByName;
-}

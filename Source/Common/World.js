@@ -29,7 +29,7 @@ class World
 		this.updatesImmediate = [];
 		this.updatesOutgoing = [];
 
-		this.ticksSoFar = 0;
+		this.timerTicksSoFar = 0;
 
 		this.lookupsBuild();
 	}
@@ -47,7 +47,10 @@ class World
 
 	// static methods
 
-	static build(playersMax, arenaSize, planetSize, shipSize, bulletSize)
+	static build
+	(
+		playersMax, arenaSize, planetSize, shipSize, bulletSize
+	)
 	{
 		var actions =
 		[
@@ -208,7 +211,11 @@ class World
 
 	static create()
 	{
-		return World.build(128, 10, 3, 1);
+		return World.build
+		(
+			// playersMax, arenaSize, planetSize, shipSize, bulletSize
+			2, 128, 10, 3, 1
+		);
 	}
 
 	// instance methods
@@ -289,6 +296,8 @@ class World
 
 	updateForTick_UpdatesApply(updatesToApply)
 	{
+		this.timerTicksSoFar++;
+
 		for (var i = 0; i < updatesToApply.length; i++)
 		{
 			var update = updatesToApply[i];

@@ -16,7 +16,8 @@ To run a client:
 
 1. Open Client.html in a web browser that runs JavaScript.
 2. Specify the server URL, if necessary.
-3. Specify a user name.
+3. Specify a valid user name.  The users "one" and "two" are built in.
+4. Enter the password for the user.  For "one" and "two", this is "Password1!";
 4. Click the connect button.
 
 Alternately, the file Local.html implements a single-player, non-networked version for testing purposes.
