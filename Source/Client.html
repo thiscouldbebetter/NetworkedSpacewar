@@ -58,7 +58,7 @@
 
 	<h3>Networked Spacewar</h3>
 
-	<p>Enter a unique name and click Connect to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
+	<p>Enter a unique name and click the Connect button to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
 	<label>Server:</label>
 	<input id="inputServiceURL" value="http://localhost:8089"></input>
 	<br />
@@ -71,7 +71,7 @@
 	<input id="inputUserPassword" type="password" value=""></input>
 	<br />
 
-	<button onclick="buttonConnect_Clicked();">Connect</button>
+	<button onclick="buttonConnectOrDisconnect_Clicked();">Connect/Disconnect</button>
 	<br />
 
 	<div id="divDisplay"></div>
@@ -82,28 +82,37 @@
 
 // ui event handlers
 
-function buttonConnect_Clicked()
+function buttonConnectOrDisconnect_Clicked()
 {
-	var inputServiceURL = document.getElementById("inputServiceURL");
-	var serviceURL = inputServiceURL.value;
+	var client = Client.Instance();
 
-	var inputUserName = document.getElementById("inputUserName");
-	var userName = inputUserName.value;
-
-	var inputUserPassword = document.getElementById("inputUserPassword");
-	var userPassword = inputUserPassword.value;
-
-	if (serviceURL.length == 0)
+	if (client.isConnected())
 	{
-		alert("No server specified!")
-	}
-	else if (userName.length == 0)
-	{
-		alert("No name specified!")
+		client.clientDisconnectSend();
 	}
 	else
 	{
-		Client.Instance().connect(serviceURL, userName, userPassword);
+		var inputServiceURL = document.getElementById("inputServiceURL");
+		var serviceURL = inputServiceURL.value;
+
+		var inputUserName = document.getElementById("inputUserName");
+		var userName = inputUserName.value;
+
+		var inputUserPassword = document.getElementById("inputUserPassword");
+		var userPassword = inputUserPassword.value;
+
+		if (serviceURL.length == 0)
+		{
+			alert("No server specified!")
+		}
+		else if (userName.length == 0)
+		{
+			alert("No name specified!")
+		}
+		else
+		{
+			client.connect(serviceURL, userName, userPassword);
+		}
 	}
 }
 

@@ -60,8 +60,8 @@ class Update_Physics
 			forward.headingInTurns(), 2
 		);
 
-		var posX = Math.round(pos.x);
-		var posY = Math.round(pos.y);
+		var posX = NumberHelper.roundToDecimalPlaces(pos.x, 1);
+		var posY = NumberHelper.roundToDecimalPlaces(pos.y, 1);
 
 		var returnValue =
 			Update_Physics.updateCode() + ";"

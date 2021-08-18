@@ -101,6 +101,12 @@ class Display
 		);
 	}
 
+	finalize(document)
+	{
+		var divDisplay = document.getElementById(this.divID);
+		divDisplay.innerHTML = "";
+	}
+
 	initialize(document)
 	{
 		var canvas = document.createElement("canvas");
