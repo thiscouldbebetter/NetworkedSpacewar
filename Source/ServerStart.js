@@ -1,7 +1,18 @@
-// Bootstrap classes.
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+// Read the class definitions from the filesystem.
+// It's very tempting to replace all this mess
+// with a bunch of import calls,
+// but adding the exports to the class definitions
+// makes them unreadable from Local.html.
 
 class CodeCompiler
 {
+	// The classes created with eval() here
+	// don't work if this is imported,
+	// rather than actually declared in the calling scope.
+
 	readAndCompileClassFilesInDirectory
 	(
 		filesystemProvider, directoryPath, classesByName
@@ -61,77 +72,64 @@ class CodeCompiler
 	}
 }
 
-class FilesystemProviderFS
-{
-	constructor(fs)
-	{
-		this.fs = fs;
-	}
-
-	fileAndSubdirectoryNamesInDirectoryAtPath(directoryPath)
-	{
-		return this.fs.readdirSync(directoryPath);
-	}
-
-	fileReadFromPath(filePath)
-	{
-		return this.fs.readFileSync(filePath).toString();
-	}
-
-	writeStringToFileAtPath(stringToWrite, filePath)
-	{
-		this.fs.writeFileSync(filePath, stringToWrite);
-	}
-}
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
+import { FilesystemProviderFs } from "./Common/_Bootstrap/FilesystemProviderFs.js";
 var fs = require("fs");
-var filesystemProvider = new FilesystemProviderFS(fs);
+var filesystemProvider = new FilesystemProviderFs(fs);
+
+var compiler = new CodeCompiler(filesystemProvider);
 
 var commonDirectoryPath = "./Common/";
 
-var compiler = new CodeCompiler();
 var classesByName = compiler.readAndCompileClassFilesInDirectory
 (
-	filesystemProvider, commonDirectoryPath, new Map()
+	filesystemProvider,
+	commonDirectoryPath,
+	new Map()
 );
 
 var Action = classesByName.get("Action");
 var Activity = classesByName.get("Activity");
-var ArrayHelper = classesByName.get("ArrayHelper");
-var Base64Converter = classesByName.get("Base64Converter");
 var Body = classesByName.get("Body");
 var BodyDefn = classesByName.get("BodyDefn");
 var ClientConnection = classesByName.get("ClientConnection");
-var ColorHelper = classesByName.get("ColorHelper");
-var Coords = classesByName.get("Coords");
 var Device = classesByName.get("Device");
-var HasherCrypto = classesByName.get("HasherCrypto");
-var IDHelper = classesByName.get("IDHelper");
-var Location = classesByName.get("Location");
-var Log = classesByName.get("Log");
-var NumberHelper = classesByName.get("NumberHelper");
-var Orientation = classesByName.get("Orientation");
-var Polar = classesByName.get("Polar")
-var RandomizerSystem = classesByName.get("RandomizerSystem");
-var Serializer = classesByName.get("Serializer");
-var SerializerNode = classesByName.get("SerializerNode");
 var Server = classesByName.get("Server");
 var Session = classesByName.get("Session");
-var ShapeCircle = classesByName.get("ShapeCircle");
-var ShapeRay = classesByName.get("ShapeRay");
+var User = classesByName.get("User");
+var World = classesByName.get("World");
+
+var ColorHelper = classesByName.get("ColorHelper");
+
 var VisualGroup = classesByName.get("VisualGroup");
 var VisualShape = classesByName.get("VisualShape");
 var VisualText = classesByName.get("VisualText");
+
+var Coords = classesByName.get("Coords");
+var Location = classesByName.get("Location");
+var Orientation = classesByName.get("Orientation");
+var Polar = classesByName.get("Polar");
+
+var ShapeCircle = classesByName.get("ShapeCircle");
+var ShapeRay = classesByName.get("ShapeRay");
+
+var ArrayHelper = classesByName.get("ArrayHelper");
+var NumberHelper = classesByName.get("NumberHelper");
+
+var Serializer = classesByName.get("Serializer");
+var SerializerNode = classesByName.get("SerializerNode");
+
 var Update_Actions = classesByName.get("Update_Actions");
 var Update_BodyCreate = classesByName.get("Update_BodyCreate");
 var Update_BodyRemove = classesByName.get("Update_BodyRemove");
 var Update_BodyDefnRegister = classesByName.get("Update_BodyDefnRegister");
 var Update_Physics = classesByName.get("Update_Physics");
-var User = classesByName.get("User");
-var World = classesByName.get("World");
+
+var Base64Converter = classesByName.get("Base64Converter");
+var HasherCrypto = classesByName.get("HasherCrypto");
+var IDHelper = classesByName.get("IDHelper");
+var Log = classesByName.get("Log");
+var RandomizerSystem = classesByName.get("RandomizerSystem");
+
 
 function main()
 {

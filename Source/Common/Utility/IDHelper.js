@@ -1,3 +1,4 @@
+
 class IDHelper {
 	constructor() {
 		this._idNext = 0;
