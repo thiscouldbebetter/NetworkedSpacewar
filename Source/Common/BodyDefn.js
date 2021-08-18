@@ -45,86 +45,11 @@ class BodyDefn
 	{
 		var color = ColorHelper.random();
 
-		var gravitatePerform = function(world, inputHelper, actor, activity)
-		{
-			var planet = actor;
-			var planetDefn = planet.defn(world);
-			var bodiesOther = world.bodies;
-			for (var i = 0; i < bodiesOther.length; i++)
-			{
-				var bodyOther = bodiesOther[i];
-				if (bodyOther != planet)
-				{
-					if (bodyOther.massInKg != 0)
-					{
-						var displacement = bodyOther.loc.pos.clone().subtract
-						(
-							planet.loc.pos
-						);
-						var distance = displacement.magnitude();
-
-						if (distance > 0)
-						{
-							var bodyOtherDefn = bodyOther.defn(world);
-
-							var direction = displacement.divideScalar
-							(
-								distance
-							);
-
-							var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
-
-							var accelDueToGravity = direction.multiplyScalar
-							(
-								gravityConstantInPixels2OverKg2 * planetDefn.massInKg
-							).divideScalar
-							(
-								distance * distance
-							);
-
-							bodyOther.accel.subtract(accelDueToGravity);
-						}
-					}
-				}
-			}
-		};
-
 		var activityGravitate = new Activity
 		(
 			"Gravitate",
-			gravitatePerform
+			BodyDefn.planet_Gravitate
 		);
-
-		var collide = function(world, collider, other)
-		{
-			var planet = collider;
-			var displacement = other.loc.pos.clone().subtract
-			(
-				planet.loc.pos
-			);
-
-			var distance = displacement.magnitude();
-
-			var direction = displacement.divideScalar(distance);
-
-			other.loc.pos.overwriteWith
-			(
-				planet.loc.pos
-			).add
-			(
-				direction.clone().multiplyScalar
-				(
-					planet.defn(world).radius
-					+ other.defn(world).radius
-				)
-			);
-
-			var speedAlongRadius = other.vel.dotProduct(direction);
-
-			var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
-
-			other.accel.subtract(accelOfReflection);
-		};
 
 		var visual = new VisualShape(new ShapeCircle(radius), color);
 
@@ -145,11 +70,87 @@ class BodyDefn
 			activityGravitate,
 			[], // actionNames
 			[], // devices
-			collide,
+			BodyDefn.planet_Collide,
 			visual
 		);
 
 		return returnValue;
+	}
+
+	static planet_Collide(world, collider, other)
+	{
+		var planet = collider;
+		var displacement = other.loc.pos.clone().subtract
+		(
+			planet.loc.pos
+		);
+
+		var distance = displacement.magnitude();
+
+		var direction = displacement.divideScalar(distance);
+
+		other.loc.pos.overwriteWith
+		(
+			planet.loc.pos
+		).add
+		(
+			direction.clone().multiplyScalar
+			(
+				planet.defn(world).radius
+				+ other.defn(world).radius
+			)
+		);
+
+		var speedAlongRadius = other.vel.dotProduct(direction);
+
+		var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
+
+		other.accel.subtract(accelOfReflection);
+	};
+
+
+	static planet_Gravitate(world, inputHelper, actor, activity)
+	{
+		var planet = actor;
+		var planetDefn = planet.defn(world);
+		var bodiesOther = world.bodies;
+		for (var i = 0; i < bodiesOther.length; i++)
+		{
+			var bodyOther = bodiesOther[i];
+			if (bodyOther != planet)
+			{
+				if (bodyOther.massInKg != 0)
+				{
+					var displacement = bodyOther.loc.pos.clone().subtract
+					(
+						planet.loc.pos
+					);
+					var distance = displacement.magnitude();
+
+					if (distance > 0)
+					{
+						var bodyOtherDefn = bodyOther.defn(world);
+
+						var direction = displacement.divideScalar
+						(
+							distance
+						);
+
+						var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
+
+						var accelDueToGravity = direction.multiplyScalar
+						(
+							gravityConstantInPixels2OverKg2 * planetDefn.massInKg
+						).divideScalar
+						(
+							distance * distance
+						);
+
+						bodyOther.accel.subtract(accelDueToGravity);
+					}
+				}
+			}
+		}
 	}
 
 	static player(name, radius)

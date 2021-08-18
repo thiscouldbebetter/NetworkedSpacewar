@@ -156,7 +156,24 @@ class SerializerNode
 			}
 			else if (typeName == Function.name)
 			{
-				this.objectWrapped = eval("(" + this.objectWrapped + ")");
+				var functionCode = this.objectWrapped;
+
+				// Fix methods and "big arrow" functions so eval() works on them.
+
+				var functionKeyword = "function";
+				if (functionCode.indexOf(functionKeyword) != 0)
+				{
+					functionCode = functionKeyword + " " + functionCode;
+				}
+
+				var bigArrowKeyword = "=>"; // Alternate syntax for functions.
+				if (functionCode.indexOf(bigArrowKeyword) >= 0)
+				{
+					functionCode =
+						functionCode.split(bigArrowKeyword).join("");
+				}
+				
+				this.objectWrapped = eval("(" + functionCode + ")");
 			}
 			else if
 			(

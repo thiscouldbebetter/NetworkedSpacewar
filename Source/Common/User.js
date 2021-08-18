@@ -9,10 +9,14 @@ class User
 			passwordSaltedAndHashedAsBase64;
 	}
 
-	isPasswordValid(passwordToCheck)
+	isPasswordValid(hasher, passwordToCheck)
 	{
 		var passwordToCheckSaltedAndHashedAsBase64 =
-			this.passwordSaltHashAndBase64(passwordToCheck, this.passwordSalt);
+			this.passwordSaltHashAndBase64
+			(
+				hasher, passwordToCheck, this.passwordSalt
+			);
+
 		var returnValue =
 		(
 			passwordToCheckSaltedAndHashedAsBase64
@@ -21,7 +25,7 @@ class User
 		return returnValue;
 	}
 
-	passwordSaltHashAndBase64(passwordInPlaintext, salt)
+	passwordSaltHashAndBase64(hasher, passwordInPlaintext, salt)
 	{
 		var passwordSalted = passwordInPlaintext + salt;
 		var passwordSaltedAndHashed = hasher.hashString(passwordSalted);

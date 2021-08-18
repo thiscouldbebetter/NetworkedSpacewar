@@ -118,6 +118,7 @@ var Polar = classesByName.get("Polar")
 var RandomizerSystem = classesByName.get("RandomizerSystem");
 var Serializer = classesByName.get("Serializer");
 var SerializerNode = classesByName.get("SerializerNode");
+var Server = classesByName.get("Server");
 var Session = classesByName.get("Session");
 var ShapeCircle = classesByName.get("ShapeCircle");
 var ShapeRay = classesByName.get("ShapeRay");
@@ -131,144 +132,6 @@ var Update_BodyDefnRegister = classesByName.get("Update_BodyDefnRegister");
 var Update_Physics = classesByName.get("Update_Physics");
 var User = classesByName.get("User");
 var World = classesByName.get("World");
-
-var crypto = require("crypto");
-var hasher = new HasherCrypto(crypto);
-
-class Server
-{
-	constructor
-	(
-		portToListenOn,
-		areAnonymousUsersAllowed,
-		usersKnown,
-		world
-	)
-	{
-		this.portToListenOn = portToListenOn;
-		this.areAnonymousUsersAllowed = areAnonymousUsersAllowed;
-		this.usersKnown = usersKnown;
-		this.world = world;
-
-		this.usersKnownByName =
-			ArrayHelper.addLookupsByName(this.usersKnown);
-	}
-
-	initialize()
-	{
-		this.clientConnections = [];
-		
-		Log.IsEnabled = true;
-
-		this.serializer = new Serializer;
-
-		this.clientID = IDHelper.Instance().idNext();
-
-		this.updatesIncoming = [];
-
-		var socketIO = require("socket.io");
-		var io = socketIO.listen
-		(
-			this.portToListenOn,
-			{ log: false }
-		);
-
-		io.sockets.on
-		(
-			"connection", 
-			this.handleEvent_ClientConnecting.bind(this)
-		);
-
-		console.log("Server started at " + new Date().toLocaleTimeString());
-		console.log
-		(
-			"Anoymous users are "
-			+ (this.areAnonymousUsersAllowed ? "" : "NOT ")
-			+ "allowed."
-		)
-		console.log("World:" + JSON.stringify(this.world));
-		console.log("Listening on port " + this.portToListenOn + "...");
-
-		setInterval
-		(
-			this.updateForTick.bind(this),
-			this.world.millisecondsPerTick()
-		);
-	}
-
-	updateForTick()
-	{
-		var world = this.world;
-
-		world.updateForTick_UpdatesApply(this.updatesIncoming);
-
-		world.updateForTick_Spawn();
-
-		this.updateForTick_Server();
-
-		world.updateForTick_UpdatesApply(world.updatesImmediate);
-
-		world.updateForTick_Remove();
-
-		this.updateForTick_UpdatesOutgoingSend();
-	}
-
-	updateForTick_Server()
-	{
-		var world = this.world;
-		var bodies = world.bodies;
-
-		for (var i = 0; i < bodies.length; i++)
-		{
-			var body = bodies[i];
-			body.updateForTick_Integrity(world);
-			body.updateForTick_Actions(world);
-			body.updateForTick_Physics(world);
-		}
-
-		for (var i = 0; i < bodies.length; i++)
-		{
-			var body = bodies[i];
-			body.updateForTick_Collisions(world, i);
-		}
-	}
-
-	updateForTick_UpdatesOutgoingSend()
-	{
-		var world = this.world;
-
-		var updates = world.updatesOutgoing;
-		for (var i = 0; i < updates.length; i++)
-		{
-			var update = updates[i];
-			var serializer = (update.serialize == null ? this.serializer : update);
-			var updateSerialized = serializer.serialize(update);
-
-			for (var c = 0; c < this.clientConnections.length; c++)
-			{
-				var clientConnection = this.clientConnections[c];
-				var socketToClient = clientConnection.socket;
-				socketToClient.emit("update", updateSerialized);
-			}
-		}
-		updates.length = 0;
-	}
-
-	// events
-
-	handleEvent_ClientConnecting(socketToClient)
-	{
-		var clientIndex = this.clientConnections.length;
-		var clientID = "C_" + clientIndex;
-
-		var clientConnection =
-			new ClientConnection(this, clientID, socketToClient);
-		this.clientConnections.push(clientConnection);
-		this.clientConnections[clientID] = clientConnection;
-
-		socketToClient.emit("connected", clientID);
-	}
-}
 
 function main()
 {
@@ -339,9 +202,19 @@ function main()
 		playersMax, arenaSize, planetSize, shipSize, bulletSize
 	);
 
+	var crypto = require("crypto");
+	var hasher = new HasherCrypto(crypto);
+
+	var socketIo = require("socket.io");
+
 	var server = new Server
 	(
-		servicePort, areAnonymousUsersAllowed, usersKnown, world
+		servicePort,
+		areAnonymousUsersAllowed,
+		hasher,
+		socketIo,
+		usersKnown,
+		world
 	);
 
 	server.initialize();

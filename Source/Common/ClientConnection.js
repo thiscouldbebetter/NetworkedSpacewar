@@ -1,26 +1,35 @@
 
 class ClientConnection
 {
-	constructor(server, clientID, socket)
+	constructor(server, clientId, socket)
 	{
 		this.server = server;
-		this.clientID = clientID;
+		this.clientId = clientId;
 		this.socket = socket;
 
+		this.clientIdentifyListen();
+	}
+
+	clientIdSend()
+	{
+		this.socket.emit("connected", this.clientId);
+	}
+
+	clientDisconnectListen()
+	{
 		this.socket.on
 		(
-			"identify", 
-			this.handleEvent_ClientIdentifyingSelf.bind(this)
+			"disconnect", this.clientDisconnectReceive.bind(this)
 		);
 	}
 
-	handleEvent_ClientDisconnected(e)
+	clientDisconnectReceive(e)
 	{
 		var bodiesByName = this.server.world.bodiesByName;
-		var bodyToDestroy = bodiesByName.get(this.clientID);
+		var bodyToDestroy = bodiesByName.get(this.clientId);
 		if (bodyToDestroy == null)
 		{
-			console.log(this.clientID + " left the server.");
+			console.log(this.clientId + " left the server.");
 		}
 		else
 		{
@@ -29,48 +38,36 @@ class ClientConnection
 		}
 	}
 
-	handleEvent_ClientIdentifyingSelf(clientNameColonPassword)
+	clientIdentifyListen()
+	{
+		this.socket.on
+		(
+			"identify", this.clientIdentifyReceive.bind(this)
+		);
+	}
+
+	clientIdentifyReceive(userNameColonPassword)
 	{
 		var server = this.server;
 
-		var clientNameAndPassword = clientNameColonPassword.split(":");
-		var clientName = clientNameAndPassword[0];
-		var clientPassword = clientNameAndPassword[1];
+		var userNameAndPassword = userNameColonPassword.split(":");
+		var userName = userNameAndPassword[0];
+		var userPassword = userNameAndPassword[1];
 
-		var usersKnownByName = server.usersKnownByName;
-		var areUserAndPasswordValid =
+		var isAuthenticationValid = server.authenticateUserNameAndPassword
 		(
-			usersKnownByName.has(clientName)
-			&& usersKnownByName.get(clientName).isPasswordValid(clientPassword)
+			this.clientId, userName, userPassword
 		);
 
-		var clientConnection = server.clientConnections[this.clientID];
-		var socketToClient = clientConnection.socket;
+		this.clientName = userName;
 
-		if
-		(
-			server.areAnonymousUsersAllowed == false
-			&& areUserAndPasswordValid == false
-		)
-		{
-			var errorMessage =
-				"Invalid username or password for name: " + clientName;
-			console.log(errorMessage);
-			socketToClient.emit("serverError", errorMessage);
-			return;
-		}
-
-		this.clientName = clientName;
-
-		var session = new Session(this.clientID, server.world);
+		var session = new Session(this.clientId, server.world);
 		var sessionSerialized = server.serializer.serialize(session);
-		socketToClient.emit("sessionEstablished", sessionSerialized);
+		this.sessionSerializedSend(sessionSerialized);
 
 		var world = server.world;
-		var bodyDefnPlayer = world.bodyDefnsByName.get("_Player");
-		var bodyDefnForClient = bodyDefnPlayer.clone();
-		bodyDefnForClient.name = this.clientID;
-		bodyDefnForClient.color = ColorHelper.random();
+
+		var bodyDefnForClient = this.bodyDefnForClientBuild(world);
 
 		var updateBodyDefnRegister = new Update_BodyDefnRegister
 		(
@@ -79,6 +76,31 @@ class ClientConnection
 		updateBodyDefnRegister.updateWorld(world);
 		world.updatesOutgoing.push(updateBodyDefnRegister);
 
+		var bodyForClient =
+			this.bodyForClientBuild(world, userName, bodyDefnForClient);
+
+		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
+		world.updatesOutgoing.push(updateBodyCreate);
+		updateBodyCreate.updateWorld(world);
+
+		this.updateSerializedListen();
+
+		this.clientDisconnectListen();
+
+		console.log(userName + " joined the server.");
+	}
+
+	bodyDefnForClientBuild(world)
+	{
+		var bodyDefnPlayer = world.bodyDefnsByName.get("_Player");
+		var bodyDefnForClient = bodyDefnPlayer.clone();
+		bodyDefnForClient.name = this.clientId;
+		bodyDefnForClient.color = ColorHelper.random();
+		return bodyDefnForClient;
+	}
+
+	bodyForClientBuild(world, userName, bodyDefnForClient)
+	{
 		var posRandom = new Coords().randomize().multiply(world.size);
 		var forwardInTurnsRandom = Math.random();
 		var locRandom = new Location
@@ -88,32 +110,34 @@ class ClientConnection
 
 		var bodyForClient = new Body
 		(
-			this.clientID, // id
-			clientName, // name
+			this.clientId, // id
+			userName, // name
 			bodyDefnForClient.name,
 			locRandom
 		);
 
-		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
-		world.updatesOutgoing.push(updateBodyCreate);
-		updateBodyCreate.updateWorld(world);
-
-		socketToClient.on
-		(
-			"update",
-			this.handleEvent_ClientUpdateReceived.bind(this)
-		);
-
-		socketToClient.on
-		(
-			"disconnect",
-			this.handleEvent_ClientDisconnected.bind(this)
-		);
-
-		console.log(clientName + " joined the server.");
+		return bodyForClient
 	}
 
-	handleEvent_ClientUpdateReceived(updateSerialized)
+	errorMessageSend(errorMessage)
+	{
+		this.socket.emit("serverError", errorMessage);
+	}
+
+	sessionSerializedSend(sessionSerialized)
+	{
+		this.socket.emit("sessionEstablished", sessionSerialized);
+	}
+
+	updateSerializedListen()
+	{
+		this.socket.on
+		(
+			"update", this.updateSerializedReceive.bind(this)
+		);
+	}
+
+	updateSerializedReceive(updateSerialized)
 	{
 		var serializer;
 		var firstChar = updateSerialized[0];
@@ -137,4 +161,10 @@ class ClientConnection
 
 		update.updateWorld(this.server.world);
 	}
+
+	updateSerializedSend(updateSerialized)
+	{
+		this.socket.emit("update", updateSerialized);
+	}
+
 }

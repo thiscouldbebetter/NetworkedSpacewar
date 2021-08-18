@@ -10,7 +10,7 @@ To run the server:
 1. Make sure a compatible version of Node.js is installed.  As of this writing, version 14 is recommended.
 2. In a command prompt, navigate to the directory containing Server.js.
 3. Run "npm install socket.io" within that directory.
-4. Run "node Server.js".
+4. Run "node ServerStart.js".
 
 To run a client:
 
