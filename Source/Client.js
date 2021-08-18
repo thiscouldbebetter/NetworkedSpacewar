@@ -19,7 +19,10 @@ class Client
 	clientDisconnectSend()
 	{
 		this.socketToServer.emit("disconnect");
-		this.closeSocketKillDisplayAndShowMessage("Client disconnected from server.");
+		this.closeSocketKillDisplayAndShowMessage
+		(
+			"Client disconnected from server."
+		);
 	}
 
 	closeSocketKillDisplayAndShowMessage(message)
@@ -120,7 +123,8 @@ class Client
 
 	serverErrorReceived(errorMessage)
 	{
-		alert("Server error: " + errorMessage);
+		var message = "Server error: " + errorMessage;
+		this.closeSocketKillDisplayAndShowMessage(message);
 	}
 
 	sessionSerializedListen()

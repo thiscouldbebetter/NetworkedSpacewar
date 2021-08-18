@@ -59,35 +59,42 @@ class ClientConnection
 			this.clientId, userName, userPassword
 		);
 
-		this.clientName = userName;
+		if (isAuthenticationValid == false)
+		{
+			// todo
+		}
+		else
+		{
+			this.clientName = userName;
 
-		var session = new Session(this.clientId, server.world);
-		var sessionSerialized = server.serializer.serialize(session);
-		this.sessionSerializedSend(sessionSerialized);
+			var session = new Session(this.clientId, server.world);
+			var sessionSerialized = server.serializer.serialize(session);
+			this.sessionSerializedSend(sessionSerialized);
 
-		var world = server.world;
+			var world = server.world;
 
-		var bodyDefnForClient = this.bodyDefnForClientBuild(world);
+			var bodyDefnForClient = this.bodyDefnForClientBuild(world);
 
-		var updateBodyDefnRegister = new Update_BodyDefnRegister
-		(
-			bodyDefnForClient
-		);
-		updateBodyDefnRegister.updateWorld(world);
-		world.updatesOutgoing.push(updateBodyDefnRegister);
+			var updateBodyDefnRegister = new Update_BodyDefnRegister
+			(
+				bodyDefnForClient
+			);
+			updateBodyDefnRegister.updateWorld(world);
+			world.updatesOutgoing.push(updateBodyDefnRegister);
 
-		var bodyForClient =
-			this.bodyForClientBuild(world, userName, bodyDefnForClient);
+			var bodyForClient =
+				this.bodyForClientBuild(world, userName, bodyDefnForClient);
 
-		var updateBodyCreate = new Update_BodyCreate(bodyForClient);
-		world.updatesOutgoing.push(updateBodyCreate);
-		updateBodyCreate.updateWorld(world);
+			var updateBodyCreate = new Update_BodyCreate(bodyForClient);
+			world.updatesOutgoing.push(updateBodyCreate);
+			updateBodyCreate.updateWorld(world);
 
-		this.updateSerializedListen();
+			this.updateSerializedListen();
 
-		this.clientDisconnectListen();
+			this.clientDisconnectListen();
 
-		console.log(userName + " joined the server.");
+			console.log(userName + " joined the server.");
+		}
 	}
 
 	bodyDefnForClientBuild(world)
