@@ -1,9 +1,9 @@
 
 class Update_Physics
 {
-	constructor(bodyID, loc)
+	constructor(bodyId, loc)
 	{
-		this.bodyID = bodyID;
+		this.bodyId = bodyId;
 		this.loc = loc;
 	}
 
@@ -11,7 +11,7 @@ class Update_Physics
 
 	updateWorld(world)
 	{
-		var body = world.bodiesByName.get(this.bodyID);
+		var body = world.bodiesByName.get(this.bodyId);
 		if (body != null)
 		{
 			body.loc.overwriteWith(this.loc);
@@ -65,7 +65,7 @@ class Update_Physics
 
 		var returnValue =
 			Update_Physics.updateCode() + ";"
-			+ this.bodyID + ";"
+			+ this.bodyId + ";"
 			+ posX + ";" + posY + ";"
 			+ forwardInTurns
 

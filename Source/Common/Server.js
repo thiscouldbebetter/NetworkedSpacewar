@@ -60,6 +60,14 @@ class Server
 		return wasAuthenticationSuccessful;
 	}
 
+	clientConnectListen()
+	{
+		this.io.sockets.on
+		(
+			"connection", this.clientConnectReceive.bind(this)
+		);
+	}
+
 	clientConnectReceive(socketToClient)
 	{
 		var clientId = "C_" + IDHelper.Instance().idNext();
@@ -82,20 +90,17 @@ class Server
 
 		this.serializer = new Serializer();
 
-		this.clientID = IDHelper.Instance().idNext();
+		this.clientId = IDHelper.Instance().idNext();
 
 		this.updatesIncoming = [];
 
-		var io = this.socketIo.listen
+		this.io = this.socketIo.listen
 		(
 			this.portToListenOn,
 			{ log: false }
 		);
 
-		io.sockets.on
-		(
-			"connection", this.clientConnectReceive.bind(this)
-		);
+		this.clientConnectListen();
 
 		console.log("Server started at " + new Date().toLocaleTimeString());
 		console.log
@@ -104,7 +109,12 @@ class Server
 			+ (this.areAnonymousUsersAllowed ? "" : "NOT ")
 			+ "allowed."
 		);
-		console.log("World:" + JSON.stringify(this.world));
+
+		var worldSerialized =
+			JSON.stringify(this.world);
+			//this.serializer.serialize(this.world);
+		console.log("World:" + worldSerialized);
+
 		console.log("Listening on port " + this.portToListenOn + "...");
 
 		setInterval
@@ -112,6 +122,13 @@ class Server
 			this.updateForTick.bind(this),
 			this.world.millisecondsPerTick()
 		);
+	}
+
+	isUserWithNameConnected(userNameToCheck)
+	{
+		var isUserConnected =
+			this.clientConnections.some(x => false); // todo
+		return isUserConnected; 
 	}
 
 	updateForTick()

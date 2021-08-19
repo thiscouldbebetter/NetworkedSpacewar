@@ -89,8 +89,11 @@ var classesByName = compiler.readAndCompileClassFilesInDirectory
 
 var Action = classesByName.get("Action");
 var Activity = classesByName.get("Activity");
+var BitStream = classesByName.get("BitStream");
+var Bitfield = classesByName.get("Bitfield");
 var Body = classesByName.get("Body");
 var BodyDefn = classesByName.get("BodyDefn");
+var ByteHelper = classesByName.get("ByteHelper");
 var ClientConnection = classesByName.get("ClientConnection");
 var Device = classesByName.get("Device");
 var Server = classesByName.get("Server");
@@ -113,6 +116,7 @@ var ShapeCircle = classesByName.get("ShapeCircle");
 var ShapeRay = classesByName.get("ShapeRay");
 
 var ArrayHelper = classesByName.get("ArrayHelper");
+var MapHelper = classesByName.get("MapHelper");
 var NumberHelper = classesByName.get("NumberHelper");
 
 var Serializer = classesByName.get("Serializer");

@@ -3,7 +3,7 @@ class Local
 {
 	initialize()
 	{
-		this.clientID = "_" + IDHelper.Instance().idNext();
+		this.clientId = "_" + IDHelper.Instance().idNext();
 
 		this.updatesIncoming = [];
 
@@ -17,8 +17,8 @@ class Local
 
 		var bodyForUser = new Body
 		(
-			this.clientID,
-			this.clientID,
+			this.clientId,
+			this.clientId,
 			bodyDefnForUser.name,
 			new Location
 			(
@@ -45,7 +45,7 @@ class Local
 
 	start()
 	{
-		this.clientID = IDHelper.Instance().idNext();
+		this.clientId = IDHelper.Instance().idNext();
 		this.document = document;
 
 		this.world = World.create();
@@ -75,7 +75,7 @@ class Local
 	{
 		var world = this.world;
 
-		var bodyForUser = world.bodiesByName.get(this.clientID);
+		var bodyForUser = world.bodiesByName.get(this.clientId);
 
 		if (bodyForUser != null)
 		{

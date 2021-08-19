@@ -16,7 +16,7 @@ class BodyDefn
 		energyPerTick,
 		radius,
 		activity,
-		actionNames,
+		actionCodes,
 		devices,
 		collide,
 		visual
@@ -35,7 +35,7 @@ class BodyDefn
 		this.energyPerTick = energyPerTick;
 		this.radius = radius;
 		this.activity = activity;
-		this.actionNames = actionNames;
+		this.actionCodes = actionCodes;
 		this.devices = devices;
 		this.collide = collide;
 		this.visual = visual;
@@ -68,7 +68,7 @@ class BodyDefn
 			0, // energyPerTick
 			radius, // radius
 			activityGravitate,
-			[], // actionNames
+			[], // actionCodes
 			[], // devices
 			BodyDefn.planet_Collide,
 			visual
@@ -161,14 +161,14 @@ class BodyDefn
 		(
 			"UserInputAccept",
 			// perform
-			function(world, inputHelper, actor, activity)
+			(world, inputHelper, actor, activity) =>
 			{
 				if (inputHelper == null)
 				{
 					return;
 				}
 
-				activity.actionNames.length = 0;
+				activity.actionCodes.length = 0;
 
 				var bodyDefn = actor.defn(world);
 
@@ -177,23 +177,23 @@ class BodyDefn
 				{
 					var inputNameActive = inputNamesActive[i];
 					var action =
-						world.actionsByInputName.get(inputNameActive);
+						world.actionByInputName(inputNameActive);
 					if (action != null)
 					{
-						var actionName = action.name;
-						if (bodyDefn.actionNames.indexOf(actionName) >= 0)
+						var actionCode = action.code;
+						if (bodyDefn.actionCodes.indexOf(actionCode) >= 0)
 						{
-							activity.actionNames.push(actionName);
+							activity.actionCodes.push(actionCode);
 						}
 					}
 				}
 
-				if (activity.actionNames.length > 0)
+				if (activity.actionCodes.length > 0)
 				{
 					var update = new Update_Actions
 					(
 						actor.id,
-						activity.actionNames
+						activity.actionCodes
 					);
 
 					world.updatesOutgoing.push(update);
@@ -207,6 +207,8 @@ class BodyDefn
 			new VisualShape(new ShapeRay(radius * 2), color),
 			new VisualText(name, color)
 		]);
+
+		var actionCodes = [ 1, 2, 3, 4, 5, 6 ];
 
 		var returnValue = new BodyDefn
 		(
@@ -223,7 +225,7 @@ class BodyDefn
 			.1, // energyPerTick
 			radius, // radius
 			activityUserInputAccept, // activity
-			[ "T", "F", "J", "L", "R" ], // actionNames
+			actionCodes,
 			// devices
 			[
 				Device.gun(),
@@ -256,7 +258,7 @@ class BodyDefn
 			0, // energyPerTick
 			radius, // radius
 			null, // activity
-			[], // actionNames
+			[], // actionCodes
 			[], // devices
 			// collide
 			(world, collider, other) =>
@@ -287,7 +289,7 @@ class BodyDefn
 			this.energyPerTick,
 			this.radius,
 			this.activity.clone(),
-			this.actionNames,
+			this.actionCodes,
 			this.devices,
 			this.collide,
 			this.visual

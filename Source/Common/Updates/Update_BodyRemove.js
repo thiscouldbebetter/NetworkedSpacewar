@@ -1,13 +1,13 @@
 
 class Update_BodyRemove
 {
-	constructor(bodyID)
+	constructor(bodyId)
 	{
-		this.bodyID = bodyID;
+		this.bodyId = bodyId;
 	}
 
 	updateWorld(world)
 	{
-		world.bodyIDsToRemove.push(this.bodyID);
+		world.bodyIdsToRemove.push(this.bodyId);
 	}
 }

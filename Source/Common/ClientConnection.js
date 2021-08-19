@@ -63,6 +63,14 @@ class ClientConnection
 		{
 			// todo
 		}
+		else if (server.isUserWithNameConnected(userName))
+		{
+			// todo - Disconnect the user?
+			this.errorMessageSend
+			(
+				"The user '" + userName + "' is already connected."
+			);
+		}
 		else
 		{
 			this.clientName = userName;
@@ -136,6 +144,31 @@ class ClientConnection
 		this.socket.emit("sessionEstablished", sessionSerialized);
 	}
 
+	/*
+	updateActionsBitfieldSerializedListen()
+	{
+		// To optimize bandwidth use.
+
+		this.socket.on
+		(
+			"a", this.updateActionsBitfieldSerializedReceive.bind(this)
+		);
+	}
+
+	updateActionsBitfieldSerializedReceive(updateActionsBitfieldSerialized)
+	{
+		var updateActions =
+			Update_Actions.deserializeBitfield
+			(
+				updateActionsBitfieldSerialized
+			);
+
+		updateActions.bodyId = this.clientId;
+
+		return updateActions;
+	}
+	*/
+
 	updateSerializedListen()
 	{
 		this.socket.on
@@ -159,12 +192,20 @@ class ClientConnection
 			{
 				serializer = new Update_Actions();
 			}
+			else
+			{
+				// Unrecognized update code.
+				// hack - Assume Update_Actions.
+				serializer = new Update_Actions();
+			}
 		}
 
 		var update = serializer.deserialize
 		(
 			updateSerialized
 		);
+
+		update.bodyId = this.clientId;
 
 		update.updateWorld(this.server.world);
 	}

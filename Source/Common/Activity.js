@@ -6,7 +6,7 @@ class Activity
 		this.name = name;
 		this.perform = perform;
 
-		this.actionNames = [];
+		this.actionCodes = [];
 	}
 
 	clone()

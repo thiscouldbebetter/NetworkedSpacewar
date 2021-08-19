@@ -24,7 +24,7 @@ class World
 		this.bodies = [];
 
 		this.bodiesToSpawn = bodiesInitial.slice();
-		this.bodyIDsToRemove = [];
+		this.bodyIdsToRemove = [];
 
 		this.updatesImmediate = [];
 		this.updatesOutgoing = [];
@@ -36,7 +36,8 @@ class World
 
 	lookupsBuild()
 	{
-		this.actionsByName = ArrayHelper.addLookupsByName(this.actions);
+		this.actionsByCode =
+			ArrayHelper.addLookups(this.actions, (x) => x.code);
 		this.actionsByInputName =
 			ArrayHelper.addLookups(this.actions, (e) => e.inputName);
 
@@ -57,6 +58,7 @@ class World
 			new Action
 			(
 				"T", // thrust
+				1, // code
 				"w", // inputName
 				// perform
 				(world, body) =>
@@ -78,6 +80,7 @@ class World
 			new Action
 			(
 				"F", // fire
+				2, // code
 				"f", // inputName
 				// peform
 				(world, body) =>
@@ -90,6 +93,7 @@ class World
 			new Action
 			(
 				"J", // hyperjump
+				3, // code
 				"j", // inputName
 				(world, body) =>
 				{
@@ -101,6 +105,7 @@ class World
 			new Action
 			(
 				"Q", // quit
+				4, // code
 				"Escape", // inputName
 				(world, body) =>
 				{
@@ -111,6 +116,7 @@ class World
 			new Action
 			(
 				"L", // turn left
+				5, // code
 				"a", // inputName
 				(world, body) =>
 				{
@@ -141,6 +147,7 @@ class World
 			new Action
 			(
 				"R", // turn right
+				6, // code
 				"d", // inputName
 				(world, body) =>
 				{
@@ -220,6 +227,18 @@ class World
 
 	// instance methods
 
+	actionByCode(actionCode)
+	{
+		actionCode = parseInt(actionCode); // hack
+		var returnValue = this.actionsByCode.get(actionCode);
+		return returnValue;
+	}
+
+	actionByInputName(inputName)
+	{
+		return this.actionsByInputName.get(inputName);
+	}
+
 	bodyRemove(body)
 	{
 		if (body != null)
@@ -266,22 +285,22 @@ class World
 		// so it can't remove it, but the list is cleared anyway,
 		// so it forgets it needs to remove it,
 		// so once it actually gets created it lasts forever.
-		var bodyIDsThatCannotYetBeRemoved = [];
+		var bodyIdsThatCannotYetBeRemoved = [];
 
-		for(var i = 0; i < this.bodyIDsToRemove.length; i++)
+		for(var i = 0; i < this.bodyIdsToRemove.length; i++)
 		{
-			var bodyID = this.bodyIDsToRemove[i];
-			var body = this.bodiesByName.get(bodyID);
+			var bodyId = this.bodyIdsToRemove[i];
+			var body = this.bodiesByName.get(bodyId);
 			if (body == null)
 			{
-				bodyIDsThatCannotYetBeRemoved.push(bodyID);
+				bodyIdsThatCannotYetBeRemoved.push(bodyId);
 			}
 			else
 			{
 				this.bodyRemove(body);
 			}
 		}
-		this.bodyIDsToRemove = bodyIDsThatCannotYetBeRemoved;
+		this.bodyIdsToRemove = bodyIdsThatCannotYetBeRemoved;
 	}
 
 	updateForTick_Spawn()

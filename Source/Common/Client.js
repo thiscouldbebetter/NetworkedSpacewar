@@ -71,9 +71,9 @@ class Client
 		);
 	}
 
-	serverConnectReceived(clientID)
+	serverConnectReceived(clientId)
 	{
-		this.clientID = clientID;
+		this.clientId = clientId;
 
 		var clientNameColonPassword =
 			this.clientName + ":" + this.clientPassword;
@@ -153,10 +153,7 @@ class Client
 
 		this.updatesIncoming = []; 
 
-		this.socketToServer.on
-		(
-			"update", this.updateSerializedReceived.bind(this)
-		);
+		this.updateSerializedListen();
 
 		this.timer = setInterval
 		(
@@ -214,6 +211,14 @@ class Client
 			this.updateSerializedSend(updateSerialized);
 		}
 		world.updatesOutgoing.length = 0;
+	}
+
+	updateSerializedListen()
+	{
+		this.socketToServer.on
+		(
+			"update", this.updateSerializedReceived.bind(this)
+		);
 	}
 
 	updateSerializedReceived(updateSerialized)

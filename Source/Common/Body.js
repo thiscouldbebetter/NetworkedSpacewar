@@ -64,16 +64,19 @@ class Body
 
 			this.activity.perform(world, null, this, this.activity);
 
-			var actionNames = this.activity.actionNames;
+			var actionCodes = this.activity.actionCodes;
 
-			for (var a = 0; a < actionNames.length; a++)
+			for (var a = 0; a < actionCodes.length; a++)
 			{
-				var actionName = actionNames[a];
-				var action = world.actionsByName.get(actionName);
-				action.perform(world, this);
+				var actionCode = actionCodes[a];
+				var action = world.actionByCode(actionCode);
+				if (action != null)
+				{
+					action.perform(world, this);
+				}
 			}
 
-			actionNames.length = 0;
+			actionCodes.length = 0;
 
 			for (var d = 0; d < this.devices.length; d++)
 			{
