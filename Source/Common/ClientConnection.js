@@ -97,7 +97,8 @@ class ClientConnection
 			world.updatesOutgoing.push(updateBodyCreate);
 			updateBodyCreate.updateWorld(world);
 
-			this.updateSerializedListen();
+			this.updateSerializedAsBinaryStringListen();
+			this.updateSerializedAsJsonListen();
 
 			this.clientDisconnectListen();
 
@@ -144,75 +145,54 @@ class ClientConnection
 		this.socket.emit("sessionEstablished", sessionSerialized);
 	}
 
-	/*
-	updateActionsBitfieldSerializedListen()
-	{
-		// To optimize bandwidth use.
-
-		this.socket.on
-		(
-			"a", this.updateActionsBitfieldSerializedReceive.bind(this)
-		);
-	}
-
-	updateActionsBitfieldSerializedReceive(updateActionsBitfieldSerialized)
-	{
-		var updateActions =
-			Update_Actions.deserializeBitfield
-			(
-				updateActionsBitfieldSerialized
-			);
-
-		updateActions.bodyId = this.clientId;
-
-		return updateActions;
-	}
-	*/
-
-	updateSerializedListen()
+	updateSerializedAsBinaryStringListen()
 	{
 		this.socket.on
 		(
-			"update", this.updateSerializedReceive.bind(this)
+			"", this.updateSerializedAsBinaryStringReceive.bind(this)
 		);
 	}
 
-	updateSerializedReceive(updateSerialized)
+	updateSerializedAsBinaryStringReceive(updateSerialized)
 	{
-		var serializer;
-		var firstChar = updateSerialized[0];
-		if (firstChar == "{") // JSON
-		{
-			serializer = this.server.serializer;
-		}
-		else // terse
-		{
-			var updateCode = firstChar;
-			if (updateCode == Update_Actions.updateCode())
-			{
-				serializer = new Update_Actions();
-			}
-			else
-			{
-				// Unrecognized update code.
-				// hack - Assume Update_Actions.
-				serializer = new Update_Actions();
-			}
-		}
+		var updateAsBytes =
+			ByteHelper.binaryStringToBytes(updateSerialized);
+		var bitStream = new BitStream(updateAsBytes);
+		var update = Update.readFromBitStream(bitStream);
+console.log(JSON.stringify(update));
+		update.bodyId = this.clientId; // Necessary?
 
+		update.updateWorld(this.server.world);
+	}
+
+	updateSerializedAsJsonListen()
+	{
+		this.socket.on
+		(
+			"updateSerializedAsJson",
+			this.updateSerializedAsJsonReceive.bind(this)
+		);
+	}
+
+	updateSerializedAsJsonReceive(updateSerialized)
+	{
+		var serializer = this.server.serializer;
 		var update = serializer.deserialize
 		(
 			updateSerialized
 		);
 
-		update.bodyId = this.clientId;
-
 		update.updateWorld(this.server.world);
 	}
 
-	updateSerializedSend(updateSerialized)
+	updateSerializedAsBinaryStringSend(updateSerialized)
 	{
-		this.socket.emit("update", updateSerialized);
+		this.socket.emit("", updateSerialized);
+	}
+
+	updateSerializedAsJsonSend(updateSerialized)
+	{
+		this.socket.emit("updateSerializedAsJson", updateSerialized);
 	}
 
 }

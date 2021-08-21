@@ -90,7 +90,6 @@ var classesByName = compiler.readAndCompileClassFilesInDirectory
 var Action = classesByName.get("Action");
 var Activity = classesByName.get("Activity");
 var BitStream = classesByName.get("BitStream");
-var Bitfield = classesByName.get("Bitfield");
 var Body = classesByName.get("Body");
 var BodyDefn = classesByName.get("BodyDefn");
 var ByteHelper = classesByName.get("ByteHelper");
@@ -122,10 +121,13 @@ var NumberHelper = classesByName.get("NumberHelper");
 var Serializer = classesByName.get("Serializer");
 var SerializerNode = classesByName.get("SerializerNode");
 
+var Update = classesByName.get("Update");
 var Update_Actions = classesByName.get("Update_Actions");
 var Update_BodyCreate = classesByName.get("Update_BodyCreate");
 var Update_BodyRemove = classesByName.get("Update_BodyRemove");
 var Update_BodyDefnRegister = classesByName.get("Update_BodyDefnRegister");
+var Update_Group = classesByName.get("Update_Group");
+var Update_Instances = classesByName.get("Update_Instances");
 var Update_Physics = classesByName.get("Update_Physics");
 
 var Base64Converter = classesByName.get("Base64Converter");

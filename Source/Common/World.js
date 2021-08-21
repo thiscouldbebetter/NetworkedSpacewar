@@ -58,7 +58,7 @@ class World
 			new Action
 			(
 				"T", // thrust
-				1, // code
+				0, // code
 				"w", // inputName
 				// perform
 				(world, body) =>
@@ -79,44 +79,8 @@ class World
 
 			new Action
 			(
-				"F", // fire
-				2, // code
-				"f", // inputName
-				// peform
-				(world, body) =>
-				{
-					var device = body.devicesByName.get("Gun");
-					device.use(world, body, device);
-				}
-			),
-
-			new Action
-			(
-				"J", // hyperjump
-				3, // code
-				"j", // inputName
-				(world, body) =>
-				{
-					var device = body.devicesByName.get("Jump");
-					device.use(world, body, device);
-				}
-			),
-
-			new Action
-			(
-				"Q", // quit
-				4, // code
-				"Escape", // inputName
-				(world, body) =>
-				{
-					body.integrity = 0;
-				}
-			),
-
-			new Action
-			(
 				"L", // turn left
-				5, // code
+				1, // code
 				"a", // inputName
 				(world, body) =>
 				{
@@ -147,7 +111,7 @@ class World
 			new Action
 			(
 				"R", // turn right
-				6, // code
+				2, // code
 				"d", // inputName
 				(world, body) =>
 				{
@@ -172,6 +136,42 @@ class World
 					).right();
 
 					bodyOri.orthogonalize();
+				}
+			),
+
+			new Action
+			(
+				"F", // fire
+				3, // code
+				"f", // inputName
+				// peform
+				(world, body) =>
+				{
+					var device = body.devicesByName.get("Gun");
+					device.use(world, body, device);
+				}
+			),
+
+			new Action
+			(
+				"J", // hyperjump
+				4, // code
+				"j", // inputName
+				(world, body) =>
+				{
+					var device = body.devicesByName.get("Jump");
+					device.use(world, body, device);
+				}
+			),
+
+			new Action
+			(
+				"Q", // quit
+				5, // code
+				"Escape", // inputName
+				(world, body) =>
+				{
+					body.integrity = 0;
 				}
 			),
 		];
@@ -239,6 +239,11 @@ class World
 		return this.actionsByInputName.get(inputName);
 	}
 
+	bodyByIndex(bodyIndex)
+	{
+		return this.bodies[bodyIndex];
+	}
+
 	bodyRemove(body)
 	{
 		if (body != null)
@@ -250,7 +255,7 @@ class World
 
 	bodySpawn(body)
 	{
-		this.bodies.push(body);
+		this.bodies.splice(0, 0, body);
 		this.bodiesByName.set(body.id, body);
 		body.initializeForWorld(this);
 	}

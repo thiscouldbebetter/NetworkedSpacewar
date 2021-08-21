@@ -190,9 +190,11 @@ class BodyDefn
 
 				if (activity.actionCodes.length > 0)
 				{
+					var bodyIndex = world.bodies.indexOf(actor); // todo
+
 					var update = new Update_Actions
 					(
-						actor.id,
+						bodyIndex,
 						activity.actionCodes
 					);
 

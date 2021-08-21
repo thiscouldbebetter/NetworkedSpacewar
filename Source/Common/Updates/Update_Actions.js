@@ -1,9 +1,9 @@
 
 class Update_Actions
 {
-	constructor(bodyId, actionCodes)
+	constructor(bodyIndex, actionCodes)
 	{
-		this.bodyId = bodyId;
+		this.bodyIndex = bodyIndex;
 		this.actionCodes = actionCodes;
 	}
 
@@ -25,99 +25,67 @@ class Update_Actions
 
 	deserialize(updateSerialized)
 	{
-		return this.deserializeFromBinaryString(updateSerialized);
+		var bytes = ByteHelper.binaryStringToBytes(updateSerialized);
+		var bitStream = new BitStream(bytes);
+		var returnValue = new Update_Actions().readFromBitStream(bitStream);
+		return returnValue;
 	}
 
 	serialize()
 	{
-		return this.serializeToBinaryString();
+		var bitStream = new BitStream();
+		this.writeToBitStream(bitStream);
+		var returnValue = ByteHelper.bytesToBinaryString(bitStream.bytes);
+		return returnValue;
 	}
 
-	// Serialization - Binary string.
+	// bitStream
 
-	bitfieldActionCodes()
+	readFromBitStream(bitStream)
 	{
-		return new Bitfield
-		([
-			["actionCode0", 3],
-			["actionCode1", 3],
-			["actionCode2", 3],
-			["actionCode3", 3],
-			["actionCode4", 3],
-		]);
-	}
+		var updateCode = bitStream.readBitsAsNumberUnsigned(3);
 
-	deserializeFromBinaryString(updateAsBinaryString)
-	{
-		var updateAsBytes =
-			ByteHelper.binaryStringToBytes(updateAsBinaryString);
+		var bodyIndex = bitStream.readBitsAsNumberUnsigned(2);
 
-		var bitfield = this.bitfieldActionCodes();
-		var fieldValuesByName =
-			bitfield.bytesToFieldValuesByName(updateAsBytes);
+		var actionCount = 6;
+		var actionIsActiveByCode = [];
 
-		var actionCodes = bitfield.fieldNameBitWidthPairs.map
-		(
-			x => fieldValuesByName.get(x[0])
-		);
+		var actionCodes = [];
+
+		for (var i = 0; i < actionCount; i++)
+		{
+			var isActionActive = (bitStream.readBit() == 1);
+
+			if (isActionActive)
+			{
+				actionCodes.push(i);
+			}
+		}
 
 		var returnValue = new Update_Actions
 		(
-			null, // bodyId - Will be set in calling scope.
-			actionCodes
+			bodyIndex, actionCodes
 		);
 
 		return returnValue;
 	}
 
-	serializeToBinaryString()
+	writeToBitStream(bitStream)
 	{
-		var bitfield = this.bitfieldActionCodes();
-		var fieldValuesByName = new Map
-		(
-			this.actionCodes.map
-			(
-				(x, i) => ["actionCode" + i, x]
-			)
-		);
+		var updateCode = 0;
+		bitStream.writeNumberUsingBitWidth(updateCode, 3);
 
-		var updateAsBytes =
-			bitfield.fieldValuesByNameToBytes(fieldValuesByName);
+		bitStream.writeNumberUsingBitWidth(this.bodyIndex, 2);
 
-		var updateAsBinaryString =
-			ByteHelper.bytesToBinaryString(updateAsBytes);
+		var actionsAsNumber = 0;
+		var actionCount = 6;
 
-		return updateAsBinaryString;
+		for (var i = 0; i < actionCount; i++)
+		{
+			var isActionActive = (this.actionCodes.indexOf(i) >= 0);
+			var bitToWrite = (isActionActive ? 1 : 0);
+			bitStream.writeBit(bitToWrite);
+		}
+
 	}
-
-	// Serialization - Human-readable (sort of).
-
-	static updateCode()
-	{
-		return "A";
-	}
-
-	serializeToHumanReadableString()
-	{
-		var returnValue =
-			Update_Actions.updateCode() + ";"
-			+ this.bodyId + ";"
-			+ this.actionCodes.join(";");
-
-		return returnValue;
-	}
-
-	deserializeFromHumanReadableString(updateSerialized)
-	{
-		var parts = updateSerialized.split(";");
-
-		var returnValue = new Update_Actions
-		(
-			parts[1], // bodyId
-			parts.slice(2) // actionNames
-		);
-
-		return returnValue
-	}
-
 }

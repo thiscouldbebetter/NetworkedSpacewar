@@ -153,7 +153,8 @@ class Client
 
 		this.updatesIncoming = []; 
 
-		this.updateSerializedListen();
+		this.updateSerializedAsBinaryStringListen();
+		this.updateSerializedAsJsonListen();
 
 		this.timer = setInterval
 		(
@@ -206,46 +207,47 @@ class Client
 		for (var i = 0; i < world.updatesOutgoing.length; i++)
 		{
 			var update = world.updatesOutgoing[i];
-			var serializer = (update.serialize == null ? this.serializer : update);
-			var updateSerialized = serializer.serialize(update);
+			var updateSerialized = update.serialize();
+var updateDeserialized = new Update_Actions().deserialize(updateSerialized);
 			this.updateSerializedSend(updateSerialized);
 		}
 		world.updatesOutgoing.length = 0;
 	}
 
-	updateSerializedListen()
+	updateSerializedAsBinaryStringListen()
 	{
 		this.socketToServer.on
 		(
-			"update", this.updateSerializedReceived.bind(this)
+			"", this.updateSerializedAsBinaryStringReceived.bind(this)
 		);
 	}
 
-	updateSerializedReceived(updateSerialized)
+	updateSerializedAsBinaryStringReceived(updateSerialized)
 	{
-		var serializer;
-		var firstChar = updateSerialized[0];
-		
-		if (firstChar == "{") // JSON
-		{
-			serializer = this.serializer;
-		}
-		else // terse
-		{
-			var updateCode = firstChar;
-			if (updateCode == Update_Physics.updateCode())
-			{
-				serializer = new Update_Physics();
-			}
-		}
+		var updateAsBytes =
+			ByteHelper.binaryStringToBytes(updateSerialized);
+		var updateAsBitStream = new BitStream(updateAsBytes);
+		var update = Update.readFromBitStream(updateAsBitStream);
+		this.updatesIncoming.push(update);
+	}
 
-		var update = serializer.deserialize(updateSerialized);
+	updateSerializedAsJsonListen()
+	{
+		this.socketToServer.on
+		(
+			"updateSerializedAsJson",
+			this.updateSerializedAsJsonReceived.bind(this)
+		);
+	}
 
+	updateSerializedAsJsonReceived(updateSerialized)
+	{
+		var update = this.serializer.deserialize(updateSerialized);
 		this.updatesIncoming.push(update);
 	}
 
 	updateSerializedSend(updateSerialized)
 	{
-		this.socketToServer.emit("update", updateSerialized);
+		this.socketToServer.emit("", updateSerialized);
 	}
 }

@@ -70,6 +70,7 @@ class Server
 
 	clientConnectReceive(socketToClient)
 	{
+console.log("clientConnectReceive()");
 		var clientId = "C_" + IDHelper.Instance().idNext();
 
 		var clientConnection =
@@ -171,14 +172,34 @@ class Server
 		for (var i = 0; i < updates.length; i++)
 		{
 			var update = updates[i];
-			var serializer = (update.serialize == null ? this.serializer : update);
-			var updateSerialized = serializer.serialize(update);
 
-			for (var c = 0; c < this.clientConnections.length; c++)
+			var isJson = (update.serialize == null);
+
+			if (isJson)
 			{
-				var clientConnection = this.clientConnections[c];
-				clientConnection.updateSerializedSend(updateSerialized);
+				var updateSerialized = this.serializer.serialize(update);
+				for (var c = 0; c < this.clientConnections.length; c++)
+				{
+					var clientConnection = this.clientConnections[c];
+					clientConnection.updateSerializedAsJsonSend
+					(
+						updateSerialized
+					);
+				}
 			}
+			else
+			{
+				var updateSerialized = update.serialize();
+				for (var c = 0; c < this.clientConnections.length; c++)
+				{
+					var clientConnection = this.clientConnections[c];
+					clientConnection.updateSerializedAsBinaryStringSend
+					(
+						updateSerialized
+					);
+				}
+			}
+
 		}
 		updates.length = 0;
 	}

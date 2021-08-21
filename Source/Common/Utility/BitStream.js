@@ -3,13 +3,31 @@ class BitStream
 {
 	constructor(bytes)
 	{
-		this.bytes = bytes;
+		this.bytes = bytes || [];
 
 		this.byteOffset = 0;
 		this.bitOffsetWithinByte = 0;
 	}
 
 	static BitsPerByte = 8;
+
+	backUpBits(bitCount)
+	{
+		for (var i = 0; i < bitCount; i++)
+		{
+			this.bitOffsetDecrement();
+		}
+	}
+
+	bitOffsetDecrement()
+	{
+		this.bitOffsetWithinByte--;
+		if (this.bitOffsetWithinByte < 0)
+		{
+			this.byteOffset--;
+			this.bitOffsetWithinByte = BitStream.BitsPerByte - 1;
+		}
+	}
 
 	bitOffsetIncrement()
 	{
@@ -24,6 +42,13 @@ class BitStream
 	byteCurrent()
 	{
 		return this.bytes[this.byteOffset];
+	}
+
+	peekAtBitsAsNumberUnsigned(bitCount)
+	{
+		var returnValue = this.readBitsAsNumberUnsigned(bitCount);
+		this.backUpBits(bitCount);
+		return returnValue;
 	}
 
 	readBit()
@@ -72,6 +97,20 @@ class BitStream
 		this.bytes[this.byteOffset] |= bitToWriteShifted;
 
 		this.bitOffsetIncrement();
+	}
+
+	writeByte(byteToWrite)
+	{
+		this.writeNumberUsingBitWidth(byteToWrite, BitStream.BitsPerByte);
+	}
+
+	writeBytes(bytesToWrite)
+	{
+		for (var i = 0; i < bytesToWrite.length; i++)
+		{
+			var byte = bytesToWrite[i];
+			this.writeByte(byte);
+		}
 	}
 
 	writeNumberUsingBitWidth(numberToWrite, bitWidth)
