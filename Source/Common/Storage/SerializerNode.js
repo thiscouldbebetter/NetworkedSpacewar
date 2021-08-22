@@ -39,7 +39,7 @@ class SerializerNode
 
 				this.objectWrappedTypeName = typeName;
 
-				if (typeName == "Function")
+				if (typeName == Function.name)
 				{
 					this.objectWrapped = this.objectWrapped.toString();
 				}
@@ -63,9 +63,9 @@ class SerializerNode
 
 								if
 								(
-									propertyValueTypeName == "Boolean"
-									|| propertyValueTypeName == "Number"
-									|| propertyValueTypeName == "String"
+									propertyValueTypeName == Boolean.name
+									|| propertyValueTypeName == Number.name
+									|| propertyValueTypeName == String.name
 								)
 								{
 									child = propertyValue;
@@ -92,7 +92,7 @@ class SerializerNode
 						if (child != null)
 						{
 							var childTypeName = child.constructor.name;
-							if (childTypeName == "SerializerNode")
+							if (childTypeName == SerializerNode.name)
 							{
 								child.wrap
 								(
@@ -121,7 +121,7 @@ class SerializerNode
 				if (child != null)
 				{
 					var childTypeName = child.constructor.name;
-					if (childTypeName == "Object")
+					if (childTypeName == Object.name)
 					{
 						child.__proto__ = SerializerNode.prototype;
 						child.prototypesAssign();
@@ -133,7 +133,7 @@ class SerializerNode
 
 	unwrap(nodesAlreadyProcessed)
 	{
-		if (this.isReference == true)
+		if (this.isReference)
 		{
 			var nodeExisting = nodesAlreadyProcessed[this.id];
 			this.objectWrapped = nodeExisting.objectWrapped;
@@ -146,19 +146,40 @@ class SerializerNode
 			{
 				// Value is null.  Do nothing.
 			}
-			else if (typeName == "Array")
+			else if (typeName == Array.name)
 			{
 				this.objectWrapped = [];
 			}
-			else if (typeName == "Function")
+			else if (typeName == Map.name)
 			{
-				this.objectWrapped = eval("(" + this.objectWrapped + ")");
+				this.objectWrapped = new Map();
+			}
+			else if (typeName == Function.name)
+			{
+				var functionCode = this.objectWrapped;
+
+				// Fix methods and "big arrow" functions so eval() works on them.
+
+				var functionKeyword = "function";
+				if (functionCode.indexOf(functionKeyword) != 0)
+				{
+					functionCode = functionKeyword + " " + functionCode;
+				}
+
+				var bigArrowKeyword = "=>"; // Alternate syntax for functions.
+				if (functionCode.indexOf(bigArrowKeyword) >= 0)
+				{
+					functionCode =
+						functionCode.split(bigArrowKeyword).join("");
+				}
+				
+				this.objectWrapped = eval("(" + functionCode + ")");
 			}
 			else if
 			(
-				typeName == "Boolean"
-				|| typeName == "Number"
-				|| typeName == "String"
+				typeName == Boolean.name
+				|| typeName == Number.name
+				|| typeName == String.name
 			)
 			{
 				// Primitive types. Do nothing.
@@ -178,7 +199,7 @@ class SerializerNode
 
 					if (child != null)
 					{
-						if (child.constructor.name == "SerializerNode")
+						if (child.constructor.name == SerializerNode.name)
 						{
 							child = child.unwrap
 							(

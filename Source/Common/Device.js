@@ -21,7 +21,7 @@ class Device
 			5, // ticksToCharge
 			.3, // energyToUse
 			// use
-			function(world, body, device)
+			(world, body, device) =>
 			{
 				if (device.ticksSinceUsed < device.ticksToCharge)
 				{
@@ -38,22 +38,24 @@ class Device
 				body.energy -= device.energyToUse;
 				var bodyDefn = body.defn(world);
 
-				var projectileDefn = world.bodyDefns["Projectile"];
+				var projectileDefn = world.bodyDefnsByName.get("Projectile");
 
 				var projectileID = "P" + IDHelper.Instance().idNext();
 
 				var bodyLoc = body.loc;
+				var bodyOri = bodyLoc.orientation;
+				var bodyForward = bodyOri.forward;
 				var projectile = new Body
 				(
 					projectileID,
-					"", // no name
+					"Proj" + IDHelper.Instance().idNext(), // todo
 					projectileDefn.name,
 					new Location
 					(
 						// pos
 						bodyLoc.pos.clone().add
 						(
-							bodyLoc.orientation.clone().multiplyScalar
+							bodyForward.clone().multiplyScalar
 							(
 								bodyDefn.radius * 1.1
 							)
@@ -61,13 +63,13 @@ class Device
 						(
 							body.vel
 						),
-						bodyLoc.orientation.clone() // ori
+						bodyForward.headingInTurns()
 					)
 				);
 
 				projectile.vel.overwriteWith
 				(
-					bodyLoc.orientation
+					bodyForward
 				).multiplyScalar
 				(
 					projectileDefn.speedMax

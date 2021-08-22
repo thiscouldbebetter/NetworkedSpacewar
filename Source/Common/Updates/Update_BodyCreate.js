@@ -8,10 +8,15 @@ class Update_BodyCreate
 
 	updateWorld(world)
 	{
-		var bodyExisting = world.bodies[this.body.id];
+		var bodyExisting = world.bodyById(this.body.id);
 		if (bodyExisting == null)
 		{
 			world.bodiesToSpawn.push(this.body);
 		}
+	}
+
+	serialize(serializer)
+	{
+		return serializer.serialize(this);
 	}
 }

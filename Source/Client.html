@@ -2,40 +2,62 @@
 <body>
 
 <!-- imports -->
+<script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
 
-<script type="text/javascript" src="Common/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Display/ColorHelper.js"></script>
+<script type="text/javascript" src="Common/Display/Display.js"></script>
+
+<script type="text/javascript" src="Common/Display/Visuals/VisualGroup.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualShape.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualText.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Coords.js"></script>
+<script type="text/javascript" src="Common/Geometry/Coords_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Location.js"></script>
+<script type="text/javascript" src="Common/Geometry/Polar.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeCircle.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRay.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRectangle.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformLocate.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformOrient.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformTranslate.js"></script>
+
+<script type="text/javascript" src="Common/Helpers/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Helpers/MapHelper.js"></script>
+<script type="text/javascript" src="Common/Helpers/NumberHelper.js"></script>
+
+<script type="text/javascript" src="Common/Storage/Serializer.js"></script>
+<script type="text/javascript" src="Common/Storage/SerializerNode.js"></script>
+
+<script type="text/javascript" src="Common/Updates/Update.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Actions.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyCreate.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyDefnRegister.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyRemove.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Group.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Instances.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Physics.js"></script>
+
+<script type="text/javascript" src="Common/Utility/BitStream.js"></script>
+<script type="text/javascript" src="Common/Utility/ByteHelper.js"></script>
+<script type="text/javascript" src="Common/Utility/IDHelper.js"></script>
+<script type="text/javascript" src="Common/Utility/Log.js"></script>
+
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
 <script type="text/javascript" src="Common/BodyDefn.js"></script>
-<script type="text/javascript" src="Common/ColorHelper.js"></script>
-<script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
-<script type="text/javascript" src="Common/Location.js"></script>
-<script type="text/javascript" src="Common/Log.js"></script>
-<script type="text/javascript" src="Common/Display.js"></script>
-<script type="text/javascript" src="Common/IDHelper.js"></script>
 <script type="text/javascript" src="Common/InputHelper.js"></script>
-<script type="text/javascript" src="Common/Serializer.js"></script>
-<script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
-<script type="text/javascript" src="Common/ShapeCircle.js"></script>
-<script type="text/javascript" src="Common/ShapeRay.js"></script>
-<script type="text/javascript" src="Common/ShapeRectangle.js"></script>
-<script type="text/javascript" src="Common/TransformLocate.js"></script>
-<script type="text/javascript" src="Common/TransformOrient.js"></script>
-<script type="text/javascript" src="Common/TransformTranslate.js"></script>
-<script type="text/javascript" src="Common/Update_Actions.js"></script>
-<script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
-<script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
-<script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
-<script type="text/javascript" src="Common/Update_Physics.js"></script>
-<script type="text/javascript" src="Common/VisualGroup.js"></script>
-<script type="text/javascript" src="Common/VisualShape.js"></script>
-<script type="text/javascript" src="Common/VisualText.js"></script>
+<script type="text/javascript" src="Common/Universe.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
 
-<script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
+<script type="text/javascript" src="Common/Client.js"></script>
 
 <!-- imports ends -->
 
@@ -43,16 +65,20 @@
 
 	<h3>Networked Spacewar</h3>
 
-	<p>Enter a unique name and click Connect to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
+	<p>Enter a unique name and click the Connect button to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
 	<label>Server:</label>
 	<input id="inputServiceURL" value="http://localhost:8089"></input>
 	<br />
 
-	<label>Name:</label>
-	<input id="inputName" value=""></input>
+	<label>Player Name:</label>
+	<input id="inputUserName" value=""></input>
 	<br />
 
-	<button onclick="buttonConnect_Clicked();">Connect</button>
+	<label>Password (if required):</label>
+	<input id="inputUserPassword" type="password" value=""></input>
+	<br />
+
+	<button onclick="buttonConnectOrDisconnect_Clicked();">Connect/Disconnect</button>
 	<br />
 
 	<div id="divDisplay"></div>
@@ -63,177 +89,37 @@
 
 // ui event handlers
 
-function buttonConnect_Clicked()
+function buttonConnectOrDisconnect_Clicked()
 {
-	var inputServiceURL = document.getElementById("inputServiceURL");
-	var serviceURL = inputServiceURL.value;
+	var client = Client.Instance();
 
-	var inputName = document.getElementById("inputName");
-	var name = inputName.value;
-	
-	if (serviceURL.length == 0)
+	if (client.isConnected())
 	{
-		alert("No server specified!")
-	}
-	else if (name.length == 0)
-	{
-		alert("No name specified!")
+		client.clientDisconnectSend();
 	}
 	else
 	{
-		Client.Instance().connect(serviceURL, name);
-	}
-}
+		var inputServiceURL = document.getElementById("inputServiceURL");
+		var serviceURL = inputServiceURL.value;
 
-// classes
+		var inputUserName = document.getElementById("inputUserName");
+		var userName = inputUserName.value;
 
-class Client
-{
-	static Instance()
-	{
-		if (Client._instance == null)
+		var inputUserPassword = document.getElementById("inputUserPassword");
+		var userPassword = inputUserPassword.value;
+
+		if (serviceURL.length == 0)
 		{
-			Client._instance = new Client();
+			alert("No server specified!")
 		}
-		return Client._instance;
-	}
-
-	// methods
-
-	connect(serviceURLToConnectTo, clientName)
-	{
-		this.serviceURL = serviceURLToConnectTo;
-		this.clientName = clientName;
-
-		if (this.socketToServer != null)
+		else if (userName.length == 0)
 		{
-			this.socketToServer.disconnect();
-			this.socketToServer = null;
+			alert("No name specified!")
 		}
-
-		this.socketToServer = io.connect(this.serviceURL);
-
-		this.socketToServer.on
-		(
-			"connected", 
-			this.handleEvent_ServerConnected.bind(this)
-		);
-	}
-
-	updateForTick()
-	{
-		var world = this.session.world;
-
-		world.updateForTick_UpdatesApply(this.updatesIncoming);
-
-		world.updateForTick_Remove();
-
-		world.updateForTick_Spawn();
-
-		this.updateForTick_Client();
-
-		this.updateForTick_UpdatesOutgoingSend();
-	}
-
-	updateForTick_Client()
-	{
-		var world = this.session.world;
-
-		var bodyForUser = world.bodies[this.session.idOfBodyControlledByUser];
-
-		if (bodyForUser != null)
+		else
 		{
-			var activity = bodyForUser.activity;
-
-			activity.perform
-			(
-				world, this.inputHelper, bodyForUser, activity
-			);
+			client.connect(serviceURL, userName, userPassword);
 		}
-
-		world.drawToDisplay(this.display);
-	}
-
-	updateForTick_UpdatesOutgoingSend()
-	{
-		var world = this.session.world;
-
-		for (var i = 0; i < world.updatesOutgoing.length; i++)
-		{
-			var update = world.updatesOutgoing[i];
-			var serializer = (update.serialize == null ? this.serializer : update);
-			var updateSerialized = serializer.serialize(update);
-			this.socketToServer.emit("update", updateSerialized);
-		}
-		world.updatesOutgoing.length = 0;
-	}
-
-	// events
-
-	handleEvent_ServerConnected(clientID)
-	{
-		this.clientID = clientID;
-		
-		this.socketToServer.emit("identify", this.clientName);
-
-		this.socketToServer.on
-		(
-			"sessionEstablished", 
-			this.handleEvent_SessionEstablished.bind(this)
-		);
-	}
-
-	handleEvent_SessionEstablished(sessionSerialized)
-	{
-		this.serializer = new Serializer();
-
-		var session = this.serializer.deserialize(sessionSerialized);
-
-		this.session = session;
-		var world = this.session.world;
-
-		this.display = new Display("divDisplay", world.size);
-		this.display.initialize(document);
-
-		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document, this.display);
-
-		this.updatesIncoming = []; 
-
-		this.socketToServer.on
-		(
-			"update", 
-			this.handleEvent_UpdateReceived.bind(this)
-		);
-
-		this.timer = setInterval
-		(
-			this.updateForTick.bind(this),
-			world.millisecondsPerTick()
-		);
-	}
-
-	handleEvent_UpdateReceived(updateSerialized)
-	{
-		var serializer;
-		var firstChar = updateSerialized[0];
-		
-		if (firstChar == "{") // JSON
-		{
-			serializer = this.serializer;
-		}
-		else // terse
-		{
-			var updateCode = firstChar;
-			if (updateCode == Update_Physics.updateCode())
-			{
-				serializer = new Update_Physics();
-			}
-		}
-	
-		var update = serializer.deserialize(updateSerialized);
-		
-		this.updatesIncoming.push(update);
 	}
 }
 

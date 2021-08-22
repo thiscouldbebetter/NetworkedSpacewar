@@ -6,9 +6,14 @@ class Update_BodyDefnRegister
 		this.bodyDefn = bodyDefn;
 	}
 
+	serialize(serializer)
+	{
+		return serializer.serialize(this);
+	}
+
 	updateWorld(world)
 	{
 		world.bodyDefns.push(this.bodyDefn);
-		world.bodyDefns[this.bodyDefn.name] = this.bodyDefn;
+		world.bodyDefnsByName.set(this.bodyDefn.name, this.bodyDefn);
 	}
 }

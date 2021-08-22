@@ -1,0 +1,105 @@
+<html>
+<body>
+
+<script src="../Source/Common/Geometry/Coords.js"></script>
+<script src="../Source/Common/Geometry/Location.js"></script>
+<script src="../Source/Common/Geometry/Orientation.js"></script>
+<script src="../Source/Common/Geometry/Polar.js"></script>
+
+<script src="../Source/Common/Helpers/NumberHelper.js"></script>
+
+<script src="../Source/Common/Updates/Update.js"></script>
+<script src="../Source/Common/Updates/Update_Actions.js"></script>
+<script src="../Source/Common/Updates/Update_BodyCreate.js"></script>
+<script src="../Source/Common/Updates/Update_BodyDefnRegister.js"></script>
+<script src="../Source/Common/Updates/Update_BodyRemove.js"></script>
+<script src="../Source/Common/Updates/Update_Group.js"></script>
+<script src="../Source/Common/Updates/Update_Instances.js"></script>
+<script src="../Source/Common/Updates/Update_Physics.js"></script>
+
+<script src="../Source/Common/Utility/BitStream.js"></script>
+
+<script>
+
+function updateActionsSerializeAndDeserialize()
+{
+	var updateToSerialize = new Update_Actions
+	(
+		1, // bodyId
+		[ 1, 2, 3 ] // actionCodes
+	);
+
+	var updateSerialized = updateToSerialize.serialize();
+
+	var updateDeserialized = Update.deserialize(updateSerialized);
+
+	var updateReserialized = updateDeserialized.serialize();
+	
+	if (updateReserialized.join(",") != updateSerialized.join(","))
+	{
+		throw "updateReserialized != updateSerialized";
+	}
+}
+
+function updatePhysicsSerializeAndDeserialize()
+{
+	var updateToSerialize = new Update_Physics
+	(
+		1, // bodyId
+		new Location
+		(
+			new Coords(1, 2), // pos
+			.25 //forwardInTurns
+		)
+	);
+
+	var updateSerialized = updateToSerialize.serialize();
+
+	var updateDeserialized = Update.deserialize(updateSerialized);
+
+	var updateReserialized = updateDeserialized.serialize();
+	
+	if (updateReserialized.join(",") != updateSerialized.join(","))
+	{
+		throw "updateReserialized != updateSerialized";
+	}
+}
+
+function log(message)
+{
+	document.write(message + "<br />");
+	console.log(message);
+}
+
+function runTests()
+{
+	var testsToRun = 
+	[
+		updateActionsSerializeAndDeserialize,
+		updatePhysicsSerializeAndDeserialize
+	];
+
+	testsToRun.forEach
+	(
+		test =>
+		{
+			try
+			{
+				log("About to run test:" + test.name)
+				test();
+				log("Test passed.");
+			}
+			catch (ex)
+			{
+				log("Test failed with error:" + ex);
+			}
+		}
+	); 
+}
+
+runTests();
+
+</script>
+
+</body>
+</html>

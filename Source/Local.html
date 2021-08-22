@@ -3,37 +3,55 @@
 
 <!-- imports -->
 
-<script type="text/javascript" src="Common/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Display/ColorHelper.js"></script>
+<script type="text/javascript" src="Common/Display/Display.js"></script>
+
+<script type="text/javascript" src="Common/Display/Visuals/VisualGroup.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualShape.js"></script>
+<script type="text/javascript" src="Common/Display/Visuals/VisualText.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Coords.js"></script>
+<script type="text/javascript" src="Common/Geometry/Coords_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation.js"></script>
+<script type="text/javascript" src="Common/Geometry/Orientation_Instances.js"></script>
+<script type="text/javascript" src="Common/Geometry/Location.js"></script>
+<script type="text/javascript" src="Common/Geometry/Polar.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeCircle.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRay.js"></script>
+<script type="text/javascript" src="Common/Geometry/Shapes/ShapeRectangle.js"></script>
+
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformLocate.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformOrient.js"></script>
+<script type="text/javascript" src="Common/Geometry/Transforms/TransformTranslate.js"></script>
+
+<script type="text/javascript" src="Common/Helpers/ArrayHelper.js"></script>
+<script type="text/javascript" src="Common/Helpers/MapHelper.js"></script>
+<script type="text/javascript" src="Common/Helpers/NumberHelper.js"></script>
+
+<script type="text/javascript" src="Common/Storage/Serializer.js"></script>
+<script type="text/javascript" src="Common/Storage/SerializerNode.js"></script>
+
+<script type="text/javascript" src="Common/Updates/Update_Actions.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyCreate.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyDefnRegister.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_BodyRemove.js"></script>
+<script type="text/javascript" src="Common/Updates/Update_Physics.js"></script>
+
+<script type="text/javascript" src="Common/Utility/IDHelper.js"></script>
+<script type="text/javascript" src="Common/Utility/Log.js"></script>
+
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
 <script type="text/javascript" src="Common/Body.js"></script>
 <script type="text/javascript" src="Common/BodyDefn.js"></script>
-<script type="text/javascript" src="Common/ColorHelper.js"></script>
-<script type="text/javascript" src="Common/Coords.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
-<script type="text/javascript" src="Common/Location.js"></script>
-<script type="text/javascript" src="Common/Log.js"></script>
-<script type="text/javascript" src="Common/Display.js"></script>
-<script type="text/javascript" src="Common/IDHelper.js"></script>
 <script type="text/javascript" src="Common/InputHelper.js"></script>
-<script type="text/javascript" src="Common/Serializer.js"></script>
-<script type="text/javascript" src="Common/SerializerNode.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
-<script type="text/javascript" src="Common/ShapeCircle.js"></script>
-<script type="text/javascript" src="Common/ShapeRay.js"></script>
-<script type="text/javascript" src="Common/ShapeRectangle.js"></script>
-<script type="text/javascript" src="Common/TransformLocate.js"></script>
-<script type="text/javascript" src="Common/TransformOrient.js"></script>
-<script type="text/javascript" src="Common/TransformTranslate.js"></script>
-<script type="text/javascript" src="Common/Update_Actions.js"></script>
-<script type="text/javascript" src="Common/Update_BodyCreate.js"></script>
-<script type="text/javascript" src="Common/Update_BodyDefnRegister.js"></script>
-<script type="text/javascript" src="Common/Update_BodyRemove.js"></script>
-<script type="text/javascript" src="Common/Update_Physics.js"></script>
-<script type="text/javascript" src="Common/VisualGroup.js"></script>
-<script type="text/javascript" src="Common/VisualShape.js"></script>
-<script type="text/javascript" src="Common/VisualText.js"></script>
+<script type="text/javascript" src="Common/Universe.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
+
+<script type="text/javascript" src="Common/Local.js"></script>
 
 <!-- imports ends -->
 
@@ -42,129 +60,6 @@
 </div>
 
 <script type="text/javascript">
-
-class Local
-{
-	initialize()
-	{
-		this.clientID = "_" + IDHelper.Instance().idNext();
-
-		this.updatesIncoming = [];
-
-		var bodyDefnForUser = BodyDefn.player
-		(
-			this.world,
-			3 // radius
-		);
-		var update = new Update_BodyDefnRegister(bodyDefnForUser);
-		this.world.updatesOutgoing.push(update);
-
-		var bodyForUser = new Body
-		(
-			this.clientID,
-			this.clientID,
-			bodyDefnForUser.name,
-			new Location
-			(
-				new Coords(10, 10), // pos
-				new Coords(1, 0) // vel
-			)
-		);
-		
-		update = new Update_BodyCreate(bodyForUser);
-		this.world.updatesOutgoing.push(update);
-
-		setInterval
-		(
-			this.updateForTick.bind(this),
-			this.world.millisecondsPerTick()
-		);
-
-		this.inputHelper = new InputHelper();
-		this.inputHelper.initialize(document);
-
-		this.display = new Display("divDisplay", this.world.size);
-		this.display.initialize(document);
-	};
-
-	start()
-	{
-		this.clientID = IDHelper.Instance().idNext();
-		this.document = document;
-
-		this.world = World.create();
-
-		this.initialize();
-	};
-
-	updateForTick()
-	{
-		var world = this.world;
-
-		world.updateForTick_UpdatesApply(this.updatesIncoming);
-
-		world.updateForTick_Remove();
-
-		world.updateForTick_Spawn();
-
-		this.updateForTick_Client();
-
-		this.updateForTick_Server();
-
-		this.updateForTick_UpdatesOutgoingSend();
-	};
-
-	updateForTick_Client()
-	{
-		var world = this.world;
-
-		var bodyForUser = world.bodies[this.clientID];
-
-		if (bodyForUser != null)
-		{
-			var activity = bodyForUser.activity;
-			if (activity != null)
-			{
-				activity.perform(world, this.inputHelper, bodyForUser, activity);
-			}
-		}
-
-		this.world.drawToDisplay(this.display);
-	};
-
-	updateForTick_Server()
-	{
-		var world = this.world;
-		var bodies = world.bodies;
-
-		for (var i = 0; i < bodies.length; i++)
-		{
-			var body = bodies[i];
-			body.updateForTick_Integrity(world);
-			body.updateForTick_Actions(world);
-			body.updateForTick_Physics(world);
-		}
-
-		for (var i = 0; i < bodies.length; i++)
-		{
-			var body = bodies[i];
-			body.updateForTick_Collisions(world, i);
-		}
-	};
-
-	updateForTick_UpdatesOutgoingSend()
-	{
-		var world = this.world;
-
-		var updates = world.updatesOutgoing;
-		for (var i = 0; i < updates.length; i++)
-		{
-			var update = updates[i];
-			this.updatesIncoming.push(update);
-		}
-		world.updatesOutgoing.length = 0;
-	};
-}
 
 new Local().start();
 

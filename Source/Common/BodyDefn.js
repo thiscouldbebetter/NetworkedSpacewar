@@ -16,7 +16,7 @@ class BodyDefn
 		energyPerTick,
 		radius,
 		activity,
-		actionNames,
+		actionCodes,
 		devices,
 		collide,
 		visual
@@ -35,7 +35,7 @@ class BodyDefn
 		this.energyPerTick = energyPerTick;
 		this.radius = radius;
 		this.activity = activity;
-		this.actionNames = actionNames;
+		this.actionCodes = actionCodes;
 		this.devices = devices;
 		this.collide = collide;
 		this.visual = visual;
@@ -45,86 +45,11 @@ class BodyDefn
 	{
 		var color = ColorHelper.random();
 
-		var gravitatePerform = function(world, inputHelper, actor, activity)
-		{
-			var planet = actor;
-			var planetDefn = planet.defn(world);
-			var bodiesOther = world.bodies;
-			for (var i = 0; i < bodiesOther.length; i++)
-			{
-				var bodyOther = bodiesOther[i];
-				if (bodyOther != planet)
-				{
-					if (bodyOther.massInKg != 0)
-					{
-						var displacement = bodyOther.loc.pos.clone().subtract
-						(
-							planet.loc.pos
-						);
-						var distance = displacement.magnitude();
-
-						if (distance > 0)
-						{
-							var bodyOtherDefn = bodyOther.defn(world);
-
-							var direction = displacement.divideScalar
-							(
-								distance
-							);
-
-							var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
-
-							var accelDueToGravity = direction.multiplyScalar
-							(
-								gravityConstantInPixels2OverKg2 * planetDefn.massInKg
-							).divideScalar
-							(
-								distance * distance
-							);
-
-							bodyOther.accel.subtract(accelDueToGravity);
-						}
-					}
-				}
-			}
-		};
-
 		var activityGravitate = new Activity
 		(
 			"Gravitate",
-			gravitatePerform
+			BodyDefn.planet_Gravitate
 		);
-
-		var collide = function(world, collider, other)
-		{
-			var planet = collider;
-			var displacement = other.loc.pos.clone().subtract
-			(
-				planet.loc.pos
-			);
-
-			var distance = displacement.magnitude();
-
-			var direction = displacement.divideScalar(distance);
-
-			other.loc.pos.overwriteWith
-			(
-				planet.loc.pos
-			).add
-			(
-				direction.clone().multiplyScalar
-				(
-					planet.defn(world).radius
-					+ other.defn(world).radius
-				)
-			);
-
-			var speedAlongRadius = other.vel.dotProduct(direction);
-
-			var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
-
-			other.accel.subtract(accelOfReflection);
-		};
 
 		var visual = new VisualShape(new ShapeCircle(radius), color);
 
@@ -143,13 +68,89 @@ class BodyDefn
 			0, // energyPerTick
 			radius, // radius
 			activityGravitate,
-			[], // actionNames
+			[], // actionCodes
 			[], // devices
-			collide,
+			BodyDefn.planet_Collide,
 			visual
 		);
 
 		return returnValue;
+	}
+
+	static planet_Collide(world, collider, other)
+	{
+		var planet = collider;
+		var displacement = other.loc.pos.clone().subtract
+		(
+			planet.loc.pos
+		);
+
+		var distance = displacement.magnitude();
+
+		var direction = displacement.divideScalar(distance);
+
+		other.loc.pos.overwriteWith
+		(
+			planet.loc.pos
+		).add
+		(
+			direction.clone().multiplyScalar
+			(
+				planet.defn(world).radius
+				+ other.defn(world).radius
+			)
+		);
+
+		var speedAlongRadius = other.vel.dotProduct(direction);
+
+		var accelOfReflection = direction.multiplyScalar(speedAlongRadius * 2);
+
+		other.accel.subtract(accelOfReflection);
+	};
+
+
+	static planet_Gravitate(universe, world, actor, activity)
+	{
+		var planet = actor;
+		var planetDefn = planet.defn(world);
+		var bodiesOther = world.bodies;
+		for (var i = 0; i < bodiesOther.length; i++)
+		{
+			var bodyOther = bodiesOther[i];
+			if (bodyOther != planet)
+			{
+				if (bodyOther.massInKg != 0)
+				{
+					var displacement = bodyOther.loc.pos.clone().subtract
+					(
+						planet.loc.pos
+					);
+					var distance = displacement.magnitude();
+
+					if (distance > 0)
+					{
+						var bodyOtherDefn = bodyOther.defn(world);
+
+						var direction = displacement.divideScalar
+						(
+							distance
+						);
+
+						var gravityConstantInPixels2OverKg2 = 2 * Math.pow(10, -24);
+
+						var accelDueToGravity = direction.multiplyScalar
+						(
+							gravityConstantInPixels2OverKg2 * planetDefn.massInKg
+						).divideScalar
+						(
+							distance * distance
+						);
+
+						bodyOther.accel.subtract(accelDueToGravity);
+					}
+				}
+			}
+		}
 	}
 
 	static player(name, radius)
@@ -160,43 +161,7 @@ class BodyDefn
 		(
 			"UserInputAccept",
 			// perform
-			function(world, inputHelper, actor, activity)
-			{
-				if (inputHelper == null)
-				{
-					return;
-				}
-
-				activity.actionNames.length = 0;
-
-				var bodyDefn = actor.defn(world);
-
-				var inputNamesActive = inputHelper.inputNamesActive;
-				for (var i = 0; i < inputNamesActive.length; i++)
-				{
-					var inputNameActive = inputNamesActive[i];
-					var action = world.actions[inputNameActive];
-					if (action != null)
-					{
-						var actionName = action.name;
-						if (bodyDefn.actionNames.indexOf(actionName) >= 0)
-						{
-							activity.actionNames.push(actionName);
-						}
-					}
-				}
-
-				if (activity.actionNames.length > 0)
-				{
-					var update = new Update_Actions
-					(
-						actor.id,
-						activity.actionNames
-					);
-
-					world.updatesOutgoing.push(update);
-				}
-			}
+			BodyDefn.activityUserInputAcceptPerform
 		);
 
 		var visual = new VisualGroup
@@ -205,6 +170,8 @@ class BodyDefn
 			new VisualShape(new ShapeRay(radius * 2), color),
 			new VisualText(name, color)
 		]);
+
+		var actionCodes = [ 0, 1, 2, 3, 4, 5 ];
 
 		var returnValue = new BodyDefn
 		(
@@ -221,7 +188,7 @@ class BodyDefn
 			.1, // energyPerTick
 			radius, // radius
 			activityUserInputAccept, // activity
-			[ "T", "F", "J", "L", "R" ], // actionNames
+			actionCodes,
 			// devices
 			[
 				Device.gun(),
@@ -232,6 +199,49 @@ class BodyDefn
 		);
 
 		return returnValue;
+	}
+
+	static activityUserInputAcceptPerform(universe, world, actor, activity)
+	{
+		var inputHelper = universe.inputHelper;
+
+		if (inputHelper == null)
+		{
+			return; // hack - This is happening on the server, not client.
+		}
+
+		activity.actionCodes.length = 0;
+
+		var bodyDefn = actor.defn(world);
+
+		var inputNamesActive = inputHelper.inputNamesActive;
+		for (var i = 0; i < inputNamesActive.length; i++)
+		{
+			var inputNameActive = inputNamesActive[i];
+			var action =
+				world.actionByInputName(inputNameActive);
+			if (action != null)
+			{
+				var actionCode = action.code;
+				if (bodyDefn.actionCodes.indexOf(actionCode) >= 0)
+				{
+					activity.actionCodes.push(actionCode);
+				}
+			}
+		}
+
+		if (activity.actionCodes.length > 0)
+		{
+			var bodyId = actor.id; // todo
+
+			var update = new Update_Actions
+			(
+				bodyId,
+				activity.actionCodes
+			);
+
+			world.updatesOutgoing.push(update);
+		}
 	}
 
 	static projectile(radius)
@@ -254,10 +264,10 @@ class BodyDefn
 			0, // energyPerTick
 			radius, // radius
 			null, // activity
-			[], // actionNames
+			[], // actionCodes
 			[], // devices
 			// collide
-			function(world, collider, other)
+			(world, collider, other) =>
 			{
 				this.integrity = 0;
 				other.integrity--;
@@ -285,7 +295,7 @@ class BodyDefn
 			this.energyPerTick,
 			this.radius,
 			this.activity.clone(),
-			this.actionNames,
+			this.actionCodes,
 			this.devices,
 			this.collide,
 			this.visual

@@ -8,8 +8,8 @@ class Body
 		this.defnName = defnName;
 		this.loc = loc;
 
-		this.vel = new Coords(0, 0);
-		this.accel = new Coords(0, 0);
+		this.vel = Coords.zeroes();
+		this.accel = Coords.zeroes();
 	}
 
 	// instance methods
@@ -31,7 +31,7 @@ class Body
 
 	defn(world)
 	{
-		var returnValue = world.bodyDefns[this.defnName];
+		var returnValue = world.bodyDefnsByName.get(this.defnName);
 		return returnValue;
 	}
 
@@ -42,7 +42,9 @@ class Body
 		this.ticksToLive = bodyDefn.ticksToLive;
 		this.energy = 0;
 		this.ticksSinceActionPerformed = 0;
-		this.devices = ArrayHelper.addLookups(ArrayHelper.clone(bodyDefn.devices), "name");
+		this.devices = ArrayHelper.clone(bodyDefn.devices);
+		this.devicesByName =
+			ArrayHelper.addLookupsByName(this.devices);
 		this.activity = bodyDefn.activity;
 	}
 
@@ -54,24 +56,27 @@ class Body
 		this.accel.overwriteWith(other.accel);
 	}
 
-	updateForTick_Actions(world)
+	updateForTick_Actions(universe, world)
 	{
 		if (this.activity != null)
 		{
 			var bodyDefn = this.defn(world);
 
-			this.activity.perform(world, null, this, this.activity);
+			this.activity.perform(universe, world, this, this.activity);
 
-			var actionNames = this.activity.actionNames;
+			var actionCodes = this.activity.actionCodes;
 
-			for (var a = 0; a < actionNames.length; a++)
+			for (var a = 0; a < actionCodes.length; a++)
 			{
-				var actionName = actionNames[a];
-				var action = world.actions[actionName];
-				action.perform(world, this);
+				var actionCode = actionCodes[a];
+				var action = world.actionByCode(actionCode);
+				if (action != null)
+				{
+					action.perform(world, this);
+				}
 			}
 
-			actionNames.length = 0;
+			actionCodes.length = 0;
 
 			for (var d = 0; d < this.devices.length; d++)
 			{
@@ -87,7 +92,7 @@ class Body
 		}
 	}
 
-	updateForTick_Collisions(world, i)
+	updateForTick_Collisions(universe, world, i)
 	{
 		var bodies = world.bodies;
 
@@ -111,7 +116,7 @@ class Body
 		}
 	}
 
-	updateForTick_Integrity(world)
+	updateForTick_Integrity(universe, world)
 	{
 		if (this.ticksToLive != null)
 		{
@@ -137,14 +142,14 @@ class Body
 		}
 	}
 
-	updateForTick_Physics(world)
+	updateForTick_Physics(universe, world)
 	{
 		var bodyDefn = this.defn(world);
 
 		this.vel.add
 		(
 			this.accel
-		).trimToMagnitude
+		).trimToMagnitudeMax
 		(
 			bodyDefn.speedMax
 		);
@@ -152,7 +157,7 @@ class Body
 		this.loc.pos.add
 		(
 			this.vel
-		).wrapToRange
+		).wrapToRangeMax
 		(
 			world.size
 		);

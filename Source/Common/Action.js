@@ -1,9 +1,10 @@
 
 class Action
 {
-	constructor(name, inputName, perform)
+	constructor(name, code, inputName, perform)
 	{
 		this.name = name;
+		this.code = code;
 		this.inputName = inputName;
 		this.perform = perform;
 	}
