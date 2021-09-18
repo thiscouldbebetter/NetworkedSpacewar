@@ -3,13 +3,13 @@ class Update_Actions
 {
 	constructor(bodyId, actionCodes)
 	{
-		this.bodyId = bodyId;
+		this.entityId = bodyId;
 		this.actionCodes = actionCodes;
 	}
 
 	updateWorld(world)
 	{
-		var body = world.bodyById(this.bodyId);
+		var body = world.entityById(this.entityId);
 
 		if (body != null)
 		{
@@ -78,7 +78,7 @@ class Update_Actions
 		bitStream.writeNumberUsingBitWidth(updateCode, updateCodeBitWidth);
 
 		var bodyIdBitWidth = 4; // max 16
-		bitStream.writeNumberUsingBitWidth(this.bodyId, bodyIdBitWidth);
+		bitStream.writeNumberUsingBitWidth(this.entityId, bodyIdBitWidth);
 
 		var actionsAsNumber = 0;
 		var actionCount = 6;

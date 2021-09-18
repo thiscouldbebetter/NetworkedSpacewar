@@ -1,14 +1,14 @@
 
-class Update_BodyRemove
+class Update_EntityRemove
 {
-	constructor(bodyId)
+	constructor(entityId)
 	{
-		this.bodyId = bodyId;
+		this.entityId = entityId;
 	}
 
 	updateWorld(world)
 	{
-		world.bodyIdsToRemove.push(this.bodyId);
+		world.entityIdsToRemove.push(this.entityId);
 	}
 
 	// Serialization.

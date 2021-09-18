@@ -8,8 +8,8 @@ class World
 		size,
 		playersMax,
 		actions,
-		bodyDefns,
-		bodiesInitial
+		entityDefns,
+		entitiesInitial
 	)
 	{
 		this.name = name;
@@ -19,12 +19,12 @@ class World
 
 		this.actions = actions;
 
-		this.bodyDefns = bodyDefns;
+		this.entityDefns = entityDefns;
 
-		this.bodies = [];
+		this.entities = [];
 
-		this.bodiesToSpawn = bodiesInitial.slice();
-		this.bodyIdsToRemove = [];
+		this.entitiesToSpawn = entitiesInitial.slice();
+		this.entityIdsToRemove = [];
 
 		this.updatesImmediate = [];
 		this.updatesOutgoing = [];
@@ -41,9 +41,9 @@ class World
 		this.actionsByInputName =
 			ArrayHelper.addLookups(this.actions, (e) => e.inputName);
 
-		this.bodyDefnsByName = ArrayHelper.addLookupsByName(this.bodyDefns);
+		this.entityDefnsByName = ArrayHelper.addLookupsByName(this.entityDefns);
 
-		this.bodiesById = ArrayHelper.addLookups(this.bodies, x => x.id);
+		this.entitiesById = ArrayHelper.addLookups(this.entities, x => x.id);
 	}
 
 	// static methods
@@ -61,15 +61,15 @@ class World
 				0, // code
 				"w", // inputName
 				// perform
-				(world, body) =>
+				(world, entity) =>
 				{
-					var bodyDefn = body.defn(world);
-					var acceleration = bodyDefn.accelerationPerTick;
+					var entityDefn = entity.defn(world);
+					var acceleration = entityDefn.accelerationPerTick;
 
-					var bodyLoc = body.loc;
-					body.accel.add
+					var entityLoc = entity.loc;
+					entity.accel.add
 					(
-						bodyLoc.orientation.forward.clone().multiplyScalar
+						entityLoc.orientation.forward.clone().multiplyScalar
 						(
 							acceleration
 						)
@@ -82,29 +82,29 @@ class World
 				"L", // turn left
 				1, // code
 				"a", // inputName
-				(world, body) =>
+				(world, entity) =>
 				{
-					var bodyDefn = body.defn(world);
-					var turnRate = bodyDefn.turnRate;
+					var entityDefn = entity.defn(world);
+					var turnRate = entityDefn.turnRate;
 
-					var bodyLoc = body.loc;
-					var bodyOri = bodyLoc.orientation;
-					var bodyForward = bodyOri.forward;
-					var bodyRight = bodyOri.right;
-					bodyForward.subtract
+					var entityLoc = entity.loc;
+					var entityOri = entityLoc.orientation;
+					var entityForward = entityOri.forward;
+					var entityRight = entityOri.right;
+					entityForward.subtract
 					(
-						bodyRight.clone().multiplyScalar
+						entityRight.clone().multiplyScalar
 						(
 							turnRate
 						)
 					).normalize();
 
-					bodyRight.overwriteWith
+					entityRight.overwriteWith
 					(
-						bodyForward
+						entityForward
 					).right();
 
-					bodyOri.orthogonalize();
+					entityOri.orthogonalize();
 				}
 			),
 
@@ -113,29 +113,29 @@ class World
 				"R", // turn right
 				2, // code
 				"d", // inputName
-				(world, body) =>
+				(world, entity) =>
 				{
-					var bodyDefn = body.defn(world);
-					var turnRate = bodyDefn.turnRate;
+					var entityDefn = entity.defn(world);
+					var turnRate = entityDefn.turnRate;
 
-					var bodyLoc = body.loc;
-					var bodyOri = bodyLoc.orientation;
-					var bodyForward = bodyOri.forward;
-					var bodyRight = bodyOri.right;
-					bodyForward.add
+					var entityLoc = entity.loc;
+					var entityOri = entityLoc.orientation;
+					var entityForward = entityOri.forward;
+					var entityRight = entityOri.right;
+					entityForward.add
 					(
-						bodyRight.clone().multiplyScalar
+						entityRight.clone().multiplyScalar
 						(
 							turnRate
 						)
 					).normalize();
 
-					bodyRight.overwriteWith
+					entityRight.overwriteWith
 					(
-						bodyForward
+						entityForward
 					).right();
 
-					bodyOri.orthogonalize();
+					entityOri.orthogonalize();
 				}
 			),
 
@@ -145,10 +145,10 @@ class World
 				3, // code
 				"f", // inputName
 				// peform
-				(world, body) =>
+				(world, entity) =>
 				{
-					var device = body.devicesByName.get("Gun");
-					device.use(world, body, device);
+					var device = entity.devicesByName.get("Gun");
+					device.use(world, entity, device);
 				}
 			),
 
@@ -157,10 +157,10 @@ class World
 				"J", // hyperjump
 				4, // code
 				"j", // inputName
-				(world, body) =>
+				(world, entity) =>
 				{
-					var device = body.devicesByName.get("Jump");
-					device.use(world, body, device);
+					var device = entity.devicesByName.get("Jump");
+					device.use(world, entity, device);
 				}
 			),
 
@@ -169,24 +169,24 @@ class World
 				"Q", // quit
 				5, // code
 				"Escape", // inputName
-				(world, body) =>
+				(world, entity) =>
 				{
-					body.integrity = 0;
+					entity.integrity = 0;
 				}
 			),
 		];
 
 		var actionNames = actions.map(x => x.name);
 
-		var bodyDefnPlanet = BodyDefn.planet(planetSize);
+		var entityDefnPlanet = EntityDefn.planet(planetSize);
 
 		var worldSize = new Coords(1, 1).multiplyScalar(arenaSize);
 
-		var bodyPlanet = new Body
+		var entityPlanet = new Entity
 		(
 			"Planet", // id
 			"", // name
-			bodyDefnPlanet.name,
+			entityDefnPlanet.name,
 			new Location
 			(
 				worldSize.clone().divideScalar(2), // pos
@@ -201,15 +201,15 @@ class World
 			worldSize,
 			playersMax,
 			actions,
-			// bodyDefns
+			// entityDefns
 			[
-				bodyDefnPlanet,
-				BodyDefn.projectile(bulletSize),
-				BodyDefn.player("_Player", shipSize),
+				entityDefnPlanet,
+				EntityDefn.projectile(bulletSize),
+				EntityDefn.player("_Player", shipSize),
 			],
-			// bodies
+			// entities
 			[
-				bodyPlanet
+				entityPlanet
 			]
 		);
 
@@ -239,26 +239,33 @@ class World
 		return this.actionsByInputName.get(inputName);
 	}
 
-	bodyById(bodyId)
+	entityById(entityId)
 	{
-		return this.bodiesById.get(bodyId);
+		return this.entitiesById.get(entityId);
 	}
 
-	bodyRemove(body)
+	entityRemove(entity)
 	{
-		if (body != null)
+		if (entity != null)
 		{
-			ArrayHelper.remove(this.bodies, body);
-			this.bodiesById.delete(body.id);
+			ArrayHelper.remove(this.entities, entity);
+			this.entitiesById.delete(entity.id);
 		}
 	}
 
-	bodySpawn(body)
+	entitySpawn(entityToSpawn)
 	{
-		body.id = this.bodies.length;
-		this.bodies.push(body);
-		this.bodiesById.set(body.id, body);
-		body.initializeForWorld(this);
+		for (var i = 0; i <= this.entities.length; i++)
+		{
+			if (this.entitiesById.has(i) == false)
+			{
+				entityToSpawn.id = i;
+				this.entities.push(entityToSpawn);
+				this.entitiesById.set(entityToSpawn.id, entityToSpawn);
+				entityToSpawn.initializeForWorld(this);
+				break;
+			}
+		}
 	}
 
 	initialize()
@@ -278,45 +285,45 @@ class World
 		this.ticksPerSecond = other.ticksPerSecond;
 		this.size = other.size;
 		this.actions = other.actions;
-		this.bodyDefns = other.bodyDefns;
-		this.bodies = other.bodies;
+		this.entityDefns = other.entityDefns;
+		this.entities = other.entities;
 	}
 
 	updateForTick_Remove()
 	{
 		// hack
 		// If a client is paused, the updates build up,
-		// and once processing resumes, the body may not be created
+		// and once processing resumes, the entity may not be created
 		// by the time this attempts to remove it,
 		// so it can't remove it, but the list is cleared anyway,
 		// so it forgets it needs to remove it,
 		// so once it actually gets created it lasts forever.
-		var bodyIdsThatCannotYetBeRemoved = [];
+		var entityIdsThatCannotYetBeRemoved = [];
 
-		for(var i = 0; i < this.bodyIdsToRemove.length; i++)
+		for(var i = 0; i < this.entityIdsToRemove.length; i++)
 		{
-			var bodyId = this.bodyIdsToRemove[i];
-			var body = this.bodyById(bodyId);
-			if (body == null)
+			var entityId = this.entityIdsToRemove[i];
+			var entity = this.entityById(entityId);
+			if (entity == null)
 			{
-				bodyIdsThatCannotYetBeRemoved.push(bodyId);
+				entityIdsThatCannotYetBeRemoved.push(entityId);
 			}
 			else
 			{
-				this.bodyRemove(body);
+				this.entityRemove(entity);
 			}
 		}
-		this.bodyIdsToRemove = bodyIdsThatCannotYetBeRemoved;
+		this.entityIdsToRemove = entityIdsThatCannotYetBeRemoved;
 	}
 
 	updateForTick_Spawn()
 	{
-		for (var i = 0; i < this.bodiesToSpawn.length; i++)
+		for (var i = 0; i < this.entitiesToSpawn.length; i++)
 		{
-			var body = this.bodiesToSpawn[i];
-			this.bodySpawn(body);
+			var entity = this.entitiesToSpawn[i];
+			this.entitySpawn(entity);
 		}
-		this.bodiesToSpawn.length = 0;
+		this.entitiesToSpawn.length = 0;
 	}
 
 	updateForTick_UpdatesApply(updatesToApply)
@@ -337,11 +344,11 @@ class World
 	{
 		display.clear("Black");
 
-		var bodies = this.bodies;
-		for (var i = 0; i < bodies.length; i++)
+		var entities = this.entities;
+		for (var i = 0; i < entities.length; i++)
 		{
-			var body = bodies[i];
-			body.drawToDisplay(display, this);
+			var entity = entities[i];
+			entity.drawToDisplay(display, this);
 		}
 	}
 }

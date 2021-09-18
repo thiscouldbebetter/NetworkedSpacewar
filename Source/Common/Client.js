@@ -71,9 +71,9 @@ class Client
 		);
 	}
 
-	serverConnectReceived(bodyId)
+	serverConnectReceived(entityId)
 	{
-		this.bodyId = bodyId;
+		this.entityId = entityId;
 
 		var userNameColonPassword =
 			this.userName + ":" + this.userPassword;
@@ -178,18 +178,18 @@ class Client
 		var universe = this.universe;
 		var world = universe.world;
 
-		var bodyForUser = world.bodyById
+		var entityForUser = world.entityById
 		(
-			this.session.idOfBodyControlledByUser
+			this.session.idOfEntityControlledByUser
 		);
 
-		if (bodyForUser != null)
+		if (entityForUser != null)
 		{
-			var activity = bodyForUser.activity;
+			var activity = entityForUser.activity;
 
 			activity.perform
 			(
-				universe, world, bodyForUser, activity
+				universe, world, entityForUser, activity
 			);
 		}
 

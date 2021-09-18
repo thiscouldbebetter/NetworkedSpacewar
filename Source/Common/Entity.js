@@ -1,5 +1,5 @@
 
-class Body
+class Entity
 {
 	constructor(id, name, defnName, loc)
 	{
@@ -16,36 +16,36 @@ class Body
 
 	collideWith(world, other)
 	{
-		var bodyDefnThis = this.defn(world);
-		var bodyDefnOther = other.defn(world);
+		var entityDefnThis = this.defn(world);
+		var entityDefnOther = other.defn(world);
 
-		if (bodyDefnThis.collide != null)
+		if (entityDefnThis.collide != null)
 		{
-			bodyDefnThis.collide(world, this, other);
+			entityDefnThis.collide(world, this, other);
 		}
-		if (bodyDefnOther.collide != null)
+		if (entityDefnOther.collide != null)
 		{
-			bodyDefnOther.collide(world, other, this);
+			entityDefnOther.collide(world, other, this);
 		}
 	}
 
 	defn(world)
 	{
-		var returnValue = world.bodyDefnsByName.get(this.defnName);
+		var returnValue = world.entityDefnsByName.get(this.defnName);
 		return returnValue;
 	}
 
 	initializeForWorld(world)
 	{
-		var bodyDefn = this.defn(world);
-		this.integrity = bodyDefn.integrityMax;
-		this.ticksToLive = bodyDefn.ticksToLive;
+		var entityDefn = this.defn(world);
+		this.integrity = entityDefn.integrityMax;
+		this.ticksToLive = entityDefn.ticksToLive;
 		this.energy = 0;
 		this.ticksSinceActionPerformed = 0;
-		this.devices = ArrayHelper.clone(bodyDefn.devices);
+		this.devices = ArrayHelper.clone(entityDefn.devices);
 		this.devicesByName =
 			ArrayHelper.addLookupsByName(this.devices);
-		this.activity = bodyDefn.activity;
+		this.activity = entityDefn.activity;
 	}
 
 	overwriteWith(other)
@@ -60,7 +60,7 @@ class Body
 	{
 		if (this.activity != null)
 		{
-			var bodyDefn = this.defn(world);
+			var entityDefn = this.defn(world);
 
 			this.activity.perform(universe, world, this, this.activity);
 
@@ -84,34 +84,34 @@ class Body
 				device.updateForTick(world, this);
 			}
 
-			this.energy += bodyDefn.energyPerTick;
-			if (this.energy > bodyDefn.energyMax)
+			this.energy += entityDefn.energyPerTick;
+			if (this.energy > entityDefn.energyMax)
 			{
-				this.energy = bodyDefn.energyMax;
+				this.energy = entityDefn.energyMax;
 			}
 		}
 	}
 
 	updateForTick_Collisions(universe, world, i)
 	{
-		var bodies = world.bodies;
+		var entities = world.entities;
 
-		for (var j = i + 1; j < bodies.length; j++)
+		for (var j = i + 1; j < entities.length; j++)
 		{
-			var bodyOther = bodies[j];
+			var entityOther = entities[j];
 
-			var distanceFromThisToOther = bodyOther.loc.pos.clone().subtract
+			var distanceFromThisToOther = entityOther.loc.pos.clone().subtract
 			(
 				this.loc.pos
 			).magnitude();
 
 			var sumOfRadii =
 				this.defn(world).radius
-				+ bodyOther.defn(world).radius;
+				+ entityOther.defn(world).radius;
 
 			if (distanceFromThisToOther < sumOfRadii)
 			{
-				this.collideWith(world, bodyOther);
+				this.collideWith(world, entityOther);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ class Body
 			{
 				Log.Instance().write(this.name + " was destroyed.")
 			}
-			var update = new Update_BodyRemove
+			var update = new Update_EntityRemove
 			(
 				this.id
 			);
@@ -144,14 +144,14 @@ class Body
 
 	updateForTick_Physics(universe, world)
 	{
-		var bodyDefn = this.defn(world);
+		var entityDefn = this.defn(world);
 
 		this.vel.add
 		(
 			this.accel
 		).trimToMagnitudeMax
 		(
-			bodyDefn.speedMax
+			entityDefn.speedMax
 		);
 
 		this.loc.pos.add
@@ -164,7 +164,7 @@ class Body
 
 		this.accel.clear();
 
-		if (bodyDefn.speedMax != 0 || bodyDefn.turnRate != 0)
+		if (entityDefn.speedMax != 0 || entityDefn.turnRate != 0)
 		{
 			var update = new Update_Physics
 			(

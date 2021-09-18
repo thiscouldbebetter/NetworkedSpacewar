@@ -4,18 +4,18 @@ class Update_Instances
 	constructor()
 	{
 		this.Actions = new Update_Actions();
-		this.BodyCreate = new Update_BodyCreate();
-		this.BodyDefnRegister = new Update_BodyDefnRegister();
-		this.BodyRemove = new Update_BodyRemove();
+		this.EntityCreate = new Update_EntityCreate();
+		this.EntityDefnRegister = new Update_EntityDefnRegister();
+		this.EntityRemove = new Update_EntityRemove();
 		this.Group = new Update_Group();
 		this.Physics = new Update_Physics();
 
 		this._All =
 		[
 			this.Actions,
-			this.BodyCreate,
-			this.BodyDefnRegister,
-			this.BodyRemove,
+			this.EntityCreate,
+			this.EntityDefnRegister,
+			this.EntityRemove,
 			this.Group,
 			this.Physics
 		];

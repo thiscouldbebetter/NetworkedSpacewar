@@ -21,31 +21,31 @@ class Device
 			5, // ticksToCharge
 			.3, // energyToUse
 			// use
-			(world, body, device) =>
+			(world, entity, device) =>
 			{
 				if (device.ticksSinceUsed < device.ticksToCharge)
 				{
 					return;
 				}
 
-				if (body.energy < device.energyToUse)
+				if (entity.energy < device.energyToUse)
 				{
 					return;
 				}
 
 				device.ticksSinceUsed = 0;
 
-				body.energy -= device.energyToUse;
-				var bodyDefn = body.defn(world);
+				entity.energy -= device.energyToUse;
+				var entityDefn = entity.defn(world);
 
-				var projectileDefn = world.bodyDefnsByName.get("Projectile");
+				var projectileDefn = world.entityDefnsByName.get("Projectile");
 
 				var projectileID = "P" + IDHelper.Instance().idNext();
 
-				var bodyLoc = body.loc;
-				var bodyOri = bodyLoc.orientation;
-				var bodyForward = bodyOri.forward;
-				var projectile = new Body
+				var entityLoc = entity.loc;
+				var entityOri = entityLoc.orientation;
+				var entityForward = entityOri.forward;
+				var projectile = new Entity
 				(
 					projectileID,
 					"Proj" + IDHelper.Instance().idNext(), // todo
@@ -53,29 +53,29 @@ class Device
 					new Location
 					(
 						// pos
-						bodyLoc.pos.clone().add
+						entityLoc.pos.clone().add
 						(
-							bodyForward.clone().multiplyScalar
+							entityForward.clone().multiplyScalar
 							(
-								bodyDefn.radius * 1.1
+								entityDefn.radius * 1.1
 							)
 						).add
 						(
-							body.vel
+							entity.vel
 						),
-						bodyForward.headingInTurns()
+						entityForward.headingInTurns()
 					)
 				);
 
 				projectile.vel.overwriteWith
 				(
-					bodyForward
+					entityForward
 				).multiplyScalar
 				(
 					projectileDefn.speedMax
 				);
 
-				var update = new Update_BodyCreate(projectile);
+				var update = new Update_EntityCreate(projectile);
 				world.updatesImmediate.push(update);
 				world.updatesOutgoing.push(update);
 			}
@@ -92,23 +92,23 @@ class Device
 			50, // ticksToCharge
 			1, // energyToUse
 			// use
-			function(world, body, device)
+			function(world, entity, device)
 			{
 				if (device.ticksSinceUsed < device.ticksToCharge)
 				{
 					return;
 				}
 
-				if (body.energy < device.energyToUse)
+				if (entity.energy < device.energyToUse)
 				{
 					return;
 				}
 
 				device.ticksSinceUsed = 0;
 
-				body.energy -= device.energyToUse;
+				entity.energy -= device.energyToUse;
 
-				body.loc.pos.randomize().multiply
+				entity.loc.pos.randomize().multiply
 				(
 					world.size
 				);
@@ -125,7 +125,7 @@ class Device
 		return new Device(this.name, this.ticksToCharge, this.energyToUse, this.use);
 	}
 
-	updateForTick(world, body)
+	updateForTick(world, entity)
 	{
 		this.ticksSinceUsed++;
 	}

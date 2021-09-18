@@ -1,5 +1,5 @@
 
-class BodyDefn
+class EntityDefn
 {
 	constructor
 	(
@@ -48,12 +48,12 @@ class BodyDefn
 		var activityGravitate = new Activity
 		(
 			"Gravitate",
-			BodyDefn.planet_Gravitate
+			EntityDefn.planet_Gravitate
 		);
 
 		var visual = new VisualShape(new ShapeCircle(radius), color);
 
-		var returnValue = new BodyDefn
+		var returnValue = new EntityDefn
 		(
 			"Planet",
 			[ "Planet" ], // categoryNames
@@ -70,7 +70,7 @@ class BodyDefn
 			activityGravitate,
 			[], // actionCodes
 			[], // devices
-			BodyDefn.planet_Collide,
+			EntityDefn.planet_Collide,
 			visual
 		);
 
@@ -113,10 +113,10 @@ class BodyDefn
 	{
 		var planet = actor;
 		var planetDefn = planet.defn(world);
-		var bodiesOther = world.bodies;
-		for (var i = 0; i < bodiesOther.length; i++)
+		var entitiesOther = world.entities;
+		for (var i = 0; i < entitiesOther.length; i++)
 		{
-			var bodyOther = bodiesOther[i];
+			var bodyOther = entitiesOther[i];
 			if (bodyOther != planet)
 			{
 				if (bodyOther.massInKg != 0)
@@ -161,7 +161,7 @@ class BodyDefn
 		(
 			"UserInputAccept",
 			// perform
-			BodyDefn.activityUserInputAcceptPerform
+			EntityDefn.activityUserInputAcceptPerform
 		);
 
 		var visual = new VisualGroup
@@ -173,7 +173,7 @@ class BodyDefn
 
 		var actionCodes = [ 0, 1, 2, 3, 4, 5 ];
 
-		var returnValue = new BodyDefn
+		var returnValue = new EntityDefn
 		(
 			name,
 			[ "Player" ], // categoryNames
@@ -249,7 +249,7 @@ class BodyDefn
 		var color = "Yellow";
 		var visual = new VisualShape(new ShapeCircle(radius), color);
 
-		return new BodyDefn
+		return new EntityDefn
 		(
 			"Projectile", // name
 			[], // categoryNames
@@ -280,7 +280,7 @@ class BodyDefn
 
 	clone()
 	{
-		return new BodyDefn
+		return new EntityDefn
 		(
 			this.name,
 			this.categoryNames,

@@ -11,12 +11,12 @@ class VisualGroup
 		return new VisualGroup(this.children.clone());
 	}
 
-	draw(display, body)
+	draw(display, entity)
 	{
 		for (var i = 0; i < this.children.length; i++)
 		{
 			var child = this.children[i];
-			child.draw(display, body);
+			child.draw(display, entity);
 		}
 	}
 }

@@ -69,10 +69,10 @@ class Server
 	clientConnectReceive(socketToClient)
 	{
 		var world = this.universe.world;
-		var bodyId = world.bodies.length;
+		var entityId = world.entities.length;
 
 		var clientConnection =
-			new ClientConnection(this, bodyId, socketToClient);
+			new ClientConnection(this, entityId, socketToClient);
 
 		this.clientConnections.push(clientConnection);
 
@@ -143,20 +143,20 @@ class Server
 	{
 		var universe = this.universe;
 		var world = universe.world;
-		var bodies = world.bodies;
+		var entities = world.entities;
 
-		for (var i = 0; i < bodies.length; i++)
+		for (var i = 0; i < entities.length; i++)
 		{
-			var body = bodies[i];
-			body.updateForTick_Integrity(universe, world);
-			body.updateForTick_Actions(universe, world);
-			body.updateForTick_Physics(universe, world);
+			var entity = entities[i];
+			entity.updateForTick_Integrity(universe, world);
+			entity.updateForTick_Actions(universe, world);
+			entity.updateForTick_Physics(universe, world);
 		}
 
-		for (var i = 0; i < bodies.length; i++)
+		for (var i = 0; i < entities.length; i++)
 		{
-			var body = bodies[i];
-			body.updateForTick_Collisions(universe, world, i);
+			var entity = entities[i];
+			entity.updateForTick_Collisions(universe, world, i);
 		}
 	}
 

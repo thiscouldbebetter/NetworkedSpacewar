@@ -9,20 +9,20 @@ class Local
 
 		this.updatesIncoming = [];
 
-		var bodyDefnForUser = BodyDefn.player
+		var entityDefnForUser = EntityDefn.player
 		(
 			world,
 			3 // radius
 		);
-		var update = new Update_BodyDefnRegister(bodyDefnForUser);
+		var update = new Update_EntityDefnRegister(entityDefnForUser);
 
 		world.updatesOutgoing.push(update);
 
-		var bodyForUser = new Body
+		var entityForUser = new Entity
 		(
 			this.clientId,
 			this.clientId,
-			bodyDefnForUser.name,
+			entityDefnForUser.name,
 			new Location
 			(
 				new Coords(10, 10), // pos
@@ -30,7 +30,7 @@ class Local
 			)
 		);
 
-		update = new Update_BodyCreate(bodyForUser);
+		update = new Update_EntityCreate(entityForUser);
 		world.updatesOutgoing.push(update);
 
 		setInterval
@@ -77,16 +77,16 @@ class Local
 		var universe = this.universe;
 		var world = universe.world;
 
-		var bodyForUser = world.bodyById(this.clientId);
+		var entityForUser = world.entityById(this.clientId);
 
-		if (bodyForUser != null)
+		if (entityForUser != null)
 		{
-			var activity = bodyForUser.activity;
+			var activity = entityForUser.activity;
 			if (activity != null)
 			{
 				activity.perform
 				(
-					universe, world, bodyForUser, activity
+					universe, world, entityForUser, activity
 				);
 			}
 		}
@@ -98,20 +98,20 @@ class Local
 	{
 		var universe = this.universe;
 		var world = universe.world;
-		var bodies = world.bodies;
+		var entities = world.entities;
 
-		for (var i = 0; i < bodies.length; i++)
+		for (var i = 0; i < entities.length; i++)
 		{
-			var body = bodies[i];
-			body.updateForTick_Integrity(universe, world);
-			body.updateForTick_Actions(universe, world);
-			body.updateForTick_Physics(universe, world);
+			var entity = entities[i];
+			entity.updateForTick_Integrity(universe, world);
+			entity.updateForTick_Actions(universe, world);
+			entity.updateForTick_Physics(universe, world);
 		}
 
-		for (var i = 0; i < bodies.length; i++)
+		for (var i = 0; i < entities.length; i++)
 		{
-			var body = bodies[i];
-			body.updateForTick_Collisions(universe, world, i);
+			var entity = entities[i];
+			entity.updateForTick_Collisions(universe, world, i);
 		}
 	}
 
@@ -119,12 +119,8 @@ class Local
 	{
 		var world = this.universe.world;
 
-		var updates = world.updatesOutgoing;
-		for (var i = 0; i < updates.length; i++)
-		{
-			var update = updates[i];
-			this.updatesIncoming.push(update);
-		}
-		world.updatesOutgoing.length = 0;
+		var worldUpdatesOutgoing = world.updatesOutgoing;
+		this.updatesIncoming.push(...worldUpdatesOutgoing);
+		worldUpdatesOutgoing.length = 0;
 	}
 }

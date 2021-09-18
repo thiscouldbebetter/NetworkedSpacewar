@@ -12,8 +12,8 @@ class VisualText
 		return new VisualText(this.text, this.color);
 	}
 
-	draw(display, body)
+	draw(display, entity)
 	{
-		display.drawText(this.text, body, this.color);
+		display.drawText(this.text, entity, this.color);
 	}
 }

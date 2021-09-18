@@ -1,10 +1,10 @@
 
 class ClientConnection
 {
-	constructor(server, bodyId, socket)
+	constructor(server, entityId, socket)
 	{
 		this.server = server;
-		this.bodyId = bodyId;
+		this.entityId = entityId;
 		this.socket = socket;
 
 		this.clientIdentifyListen();
@@ -12,7 +12,7 @@ class ClientConnection
 
 	clientIdSend()
 	{
-		this.socket.emit("connected", this.bodyId);
+		this.socket.emit("connected", this.entityId);
 	}
 
 	clientDisconnectListen()
@@ -26,15 +26,15 @@ class ClientConnection
 	clientDisconnectReceive(e)
 	{
 		var world = this.server.universe.world;
-		var bodyToDestroy = world.bodyById(this.bodyId);
-		if (bodyToDestroy == null)
+		var entityToDestroy = world.entityById(this.entityId);
+		if (entityToDestroy == null)
 		{
 			console.log(this.userName + " left the server.");
 		}
 		else
 		{
-			bodyToDestroy.integrity = 0;
-			console.log(bodyToDestroy.name + " left the server.");
+			entityToDestroy.integrity = 0;
+			console.log(entityToDestroy.name + " left the server.");
 		}
 	}
 
@@ -79,25 +79,25 @@ class ClientConnection
 
 			var world = server.universe.world;
 
-			var bodyDefnForClient = this.bodyDefnForClientBuild(world);
+			var entityDefnForClient = this.entityDefnForClientBuild(world);
 
-			var updateBodyDefnRegister = new Update_BodyDefnRegister
+			var updateEntityDefnRegister = new Update_EntityDefnRegister
 			(
-				bodyDefnForClient
+				entityDefnForClient
 			);
-			updateBodyDefnRegister.updateWorld(world);
-			world.updatesOutgoing.push(updateBodyDefnRegister);
+			updateEntityDefnRegister.updateWorld(world);
+			world.updatesOutgoing.push(updateEntityDefnRegister);
 
-			var bodyForClient =
-				this.bodyForClientBuild(world, userName, bodyDefnForClient);
+			var entityForClient =
+				this.entityForClientBuild(world, userName, entityDefnForClient);
 
-			var session = new Session(bodyForClient.id, world);
+			var session = new Session(entityForClient.id, world);
 			var sessionSerialized = server.serializer.serialize(session);
 			this.sessionSerializedSend(sessionSerialized);
 
-			var updateBodyCreate = new Update_BodyCreate(bodyForClient);
-			world.updatesOutgoing.push(updateBodyCreate);
-			updateBodyCreate.updateWorld(world);
+			var updateEntityCreate = new Update_EntityCreate(entityForClient);
+			world.updatesOutgoing.push(updateEntityCreate);
+			updateEntityCreate.updateWorld(world);
 
 			this.clientDisconnectListen();
 			this.updateSerializedListen();
@@ -106,16 +106,16 @@ class ClientConnection
 		}
 	}
 
-	bodyDefnForClientBuild(world)
+	entityDefnForClientBuild(world)
 	{
-		var bodyDefnPlayer = world.bodyDefnsByName.get("_Player");
-		var bodyDefnForClient = bodyDefnPlayer.clone();
-		bodyDefnForClient.name = this.userName;
-		bodyDefnForClient.color = ColorHelper.random();
-		return bodyDefnForClient;
+		var entityDefnPlayer = world.entityDefnsByName.get("_Player");
+		var entityDefnForClient = entityDefnPlayer.clone();
+		entityDefnForClient.name = this.userName;
+		entityDefnForClient.color = ColorHelper.random();
+		return entityDefnForClient;
 	}
 
-	bodyForClientBuild(world, userName, bodyDefnForClient)
+	entityForClientBuild(world, userName, entityDefnForClient)
 	{
 		var posRandom = new Coords().randomize().multiply(world.size);
 		var forwardInTurnsRandom = Math.random();
@@ -124,15 +124,15 @@ class ClientConnection
 			posRandom, forwardInTurnsRandom
 		);
 
-		var bodyForClient = new Body
+		var entityForClient = new Entity
 		(
-			world.bodies.length, // bodyId
+			world.entities.length, // entityId
 			userName, // name
-			bodyDefnForClient.name,
+			entityDefnForClient.name,
 			locRandom
 		);
 
-		return bodyForClient;
+		return entityForClient;
 	}
 
 	errorMessageSend(errorMessage)
@@ -157,7 +157,7 @@ class ClientConnection
 	{
 		var bitStream = new BitStream(updateAsBytes);
 		var update = Update.readFromBitStream(bitStream);
-		update.bodyId = this.bodyId; // Necessary?
+		update.entityId = this.entityId; // Necessary?
 
 		update.updateWorld(this.server.universe.world);
 	}

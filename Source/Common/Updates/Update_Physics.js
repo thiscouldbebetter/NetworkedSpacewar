@@ -1,9 +1,9 @@
 
 class Update_Physics
 {
-	constructor(bodyId, loc)
+	constructor(entityId, loc)
 	{
-		this.bodyId = bodyId;
+		this.entityId = entityId;
 		this.loc = loc;
 	}
 
@@ -11,10 +11,10 @@ class Update_Physics
 
 	updateWorld(world)
 	{
-		var body = world.bodyById(this.bodyId);
-		if (body != null)
+		var entity = world.entityById(this.entityId);
+		if (entity != null)
 		{
-			body.loc.overwriteWith(this.loc);
+			entity.loc.overwriteWith(this.loc);
 		}
 	}
 
@@ -41,8 +41,8 @@ class Update_Physics
 	{
 		var updateCode = bitStream.readBitsAsNumberUnsigned(3);
 
-		var bitsForBodyId = 4; // max 16
-		var bodyId = bitStream.readBitsAsNumberUnsigned(bitsForBodyId);
+		var bitsForEntityId = 4; // max 16
+		var entityId = bitStream.readBitsAsNumberUnsigned(bitsForEntityId);
 
 		var posX = bitStream.readBitsAsNumberUnsigned(10); // max 1024
 		var posY = bitStream.readBitsAsNumberUnsigned(10); // max 1024
@@ -64,7 +64,7 @@ class Update_Physics
 
 		var loc = new Location(pos, forwardInTurns);
 
-		var returnValue = new Update_Physics(bodyId, loc);
+		var returnValue = new Update_Physics(entityId, loc);
 
 		return returnValue;
 	}
@@ -74,10 +74,10 @@ class Update_Physics
 		var updateCode = 5;
 		bitStream.writeNumberUsingBitWidth(updateCode, 3);
 
-		var bitsForBodyId = 4; // max 16
+		var bitsForEntityId = 4; // max 16
 		bitStream.writeNumberUsingBitWidth
 		(
-			this.bodyId, bitsForBodyId
+			this.entityId, bitsForEntityId
 		);
 
 		var pos = this.loc.pos;
