@@ -6,7 +6,7 @@ class Server
 		portToListenOn,
 		areAnonymousUsersAllowed,
 		hasher,
-		socketIo,
+		socketProvider,
 		usersKnown,
 		universe
 	)
@@ -14,7 +14,7 @@ class Server
 		this.portToListenOn = portToListenOn;
 		this.areAnonymousUsersAllowed = areAnonymousUsersAllowed;
 		this.hasher = hasher;
-		this.socketIo = socketIo;
+		this.socketProvider = socketProvider;
 		this.usersKnown = usersKnown;
 		this.universe = universe;
 
@@ -60,19 +60,21 @@ class Server
 
 	clientConnectListen()
 	{
-		this.io.sockets.on
+		this.socketProvider.listenerOn
 		(
 			"connection", this.clientConnectReceive.bind(this)
 		);
 	}
 
-	clientConnectReceive(socketToClient)
+	clientConnectReceive(socketIoToClient)
 	{
 		var world = this.universe.world;
 		var entityId = world.entities.length;
 
+		var socketProvider = new SocketProviderSocketIo(socketIoToClient);
+
 		var clientConnection =
-			new ClientConnection(this, entityId, socketToClient);
+			new ClientConnection(this, entityId, socketProvider);
 
 		this.clientConnections.push(clientConnection);
 
@@ -89,7 +91,7 @@ class Server
 
 		this.updatesIncoming = [];
 
-		this.io = this.socketIo.listen
+		this.socketProvider.listen
 		(
 			this.portToListenOn,
 			{ log: false }

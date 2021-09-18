@@ -1,23 +1,23 @@
 
 class ClientConnection
 {
-	constructor(server, entityId, socket)
+	constructor(server, entityId, socketProvider)
 	{
 		this.server = server;
 		this.entityId = entityId;
-		this.socket = socket;
+		this.socketProvider = socketProvider;
 
 		this.clientIdentifyListen();
 	}
 
 	clientIdSend()
 	{
-		this.socket.emit("connected", this.entityId);
+		this.socketProvider.emit("connected", this.entityId);
 	}
 
 	clientDisconnectListen()
 	{
-		this.socket.on
+		this.socketProvider.on
 		(
 			"disconnect", this.clientDisconnectReceive.bind(this)
 		);
@@ -40,7 +40,7 @@ class ClientConnection
 
 	clientIdentifyListen()
 	{
-		this.socket.on
+		this.socketProvider.on
 		(
 			"identify", this.clientIdentifyReceive.bind(this)
 		);
@@ -137,17 +137,17 @@ class ClientConnection
 
 	errorMessageSend(errorMessage)
 	{
-		this.socket.emit("serverError", errorMessage);
+		this.socketProvider.emit("serverError", errorMessage);
 	}
 
 	sessionSerializedSend(sessionSerialized)
 	{
-		this.socket.emit("sessionEstablished", sessionSerialized);
+		this.socketProvider.emit("sessionEstablished", sessionSerialized);
 	}
 
 	updateSerializedListen()
 	{
-		this.socket.on
+		this.socketProvider.on
 		(
 			"", this.updateSerializedReceive.bind(this)
 		);
@@ -164,7 +164,7 @@ class ClientConnection
 
 	updateSerializedSend(updateSerialized)
 	{
-		this.socket.emit("", updateSerialized);
+		this.socketProvider.emit("", updateSerialized);
 	}
 
 }

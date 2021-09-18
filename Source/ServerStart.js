@@ -97,6 +97,7 @@ var Entity = classesByName.get("Entity");
 var EntityDefn = classesByName.get("EntityDefn");
 var Server = classesByName.get("Server");
 var Session = classesByName.get("Session");
+var SocketProviderSocketIo = classesByName.get("SocketProviderSocketIo");
 var Universe = classesByName.get("Universe");
 var User = classesByName.get("User");
 var World = classesByName.get("World");
@@ -213,13 +214,14 @@ function main()
 	var hasher = new HasherCrypto(crypto);
 
 	var socketIo = require("socket.io");
+	var socketProvider = new SocketProviderSocketIo(socketIo);
 
 	var server = new Server
 	(
 		servicePort,
 		areAnonymousUsersAllowed,
 		hasher,
-		socketIo,
+		socketProvider,
 		usersKnown,
 		universe
 	);

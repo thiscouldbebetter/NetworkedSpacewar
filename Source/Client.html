@@ -30,6 +30,8 @@
 <script type="text/javascript" src="Common/Helpers/MapHelper.js"></script>
 <script type="text/javascript" src="Common/Helpers/NumberHelper.js"></script>
 
+<script type="text/javascript" src="Common/Network/SocketProviderSocketIo.js"></script>
+
 <script type="text/javascript" src="Common/Storage/Serializer.js"></script>
 <script type="text/javascript" src="Common/Storage/SerializerNode.js"></script>
 
@@ -99,13 +101,15 @@ function buttonConnectOrDisconnect_Clicked()
 	}
 	else
 	{
-		var inputServiceURL = document.getElementById("inputServiceURL");
+		var d = document;
+
+		var inputServiceURL = d.getElementById("inputServiceURL");
 		var serviceURL = inputServiceURL.value;
 
-		var inputUserName = document.getElementById("inputUserName");
+		var inputUserName = d.getElementById("inputUserName");
 		var userName = inputUserName.value;
 
-		var inputUserPassword = document.getElementById("inputUserPassword");
+		var inputUserPassword = d.getElementById("inputUserPassword");
 		var userPassword = inputUserPassword.value;
 
 		if (serviceURL.length == 0)
