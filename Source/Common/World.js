@@ -32,6 +32,8 @@ class World
 		this.timerTicksSoFar = 0;
 
 		this.lookupsBuild();
+
+		this.entitiesSpawn();
 	}
 
 	lookupsBuild()
@@ -239,9 +241,31 @@ class World
 		return this.actionsByInputName.get(inputName);
 	}
 
+	entitiesSpawn()
+	{
+		this.entitiesToSpawn.forEach(x => this.entitySpawn(x));
+		this.entitiesToSpawn.length = 0;
+	}
+
 	entityById(entityId)
 	{
 		return this.entitiesById.get(entityId);
+	}
+
+	entityIdNext()
+	{
+		var entityId = null;
+
+		for (var i = 0; i <= this.entities.length; i++)
+		{
+			if (this.entitiesById.has(i) == false)
+			{
+				entityId = i;
+				break;
+			}
+		}
+
+		return entityId;
 	}
 
 	entityRemove(entity)
@@ -255,17 +279,12 @@ class World
 
 	entitySpawn(entityToSpawn)
 	{
-		for (var i = 0; i <= this.entities.length; i++)
-		{
-			if (this.entitiesById.has(i) == false)
-			{
-				entityToSpawn.id = i;
-				this.entities.push(entityToSpawn);
-				this.entitiesById.set(entityToSpawn.id, entityToSpawn);
-				entityToSpawn.initializeForWorld(this);
-				break;
-			}
-		}
+		var entityId = this.entityIdNext();
+
+		entityToSpawn.id = entityId;
+		this.entities.push(entityToSpawn);
+		this.entitiesById.set(entityToSpawn.id, entityToSpawn);
+		entityToSpawn.initializeForWorld(this);
 	}
 
 	initialize()
@@ -314,16 +333,6 @@ class World
 			}
 		}
 		this.entityIdsToRemove = entityIdsThatCannotYetBeRemoved;
-	}
-
-	updateForTick_Spawn()
-	{
-		for (var i = 0; i < this.entitiesToSpawn.length; i++)
-		{
-			var entity = this.entitiesToSpawn[i];
-			this.entitySpawn(entity);
-		}
-		this.entitiesToSpawn.length = 0;
 	}
 
 	updateForTick_UpdatesApply(updatesToApply)

@@ -1,23 +1,23 @@
 
 class Update_Actions
 {
-	constructor(bodyId, actionCodes)
+	constructor(entityId, actionCodes)
 	{
-		this.entityId = bodyId;
+		this.entityId = entityId;
 		this.actionCodes = actionCodes;
 	}
 
 	updateWorld(world)
 	{
-		var body = world.entityById(this.entityId);
+		var entity = world.entityById(this.entityId);
 
-		if (body != null)
+		if (entity != null)
 		{
-			body.ticksSinceActionPerformed = 0;
-			var bodyActivity = body.activity;
-			var bodyActivityActionCodes = bodyActivity.actionCodes;
-			bodyActivityActionCodes.length = 0;
-			bodyActivityActionCodes.push(...this.actionCodes);
+			entity.ticksSinceActionPerformed = 0;
+			var entityActivity = entity.activity;
+			var entityActivityActionCodes = entityActivity.actionCodes;
+			entityActivityActionCodes.length = 0;
+			entityActivityActionCodes.push(...this.actionCodes);
 		}
 	}
 
@@ -45,8 +45,8 @@ class Update_Actions
 		var updateCodeBitWidth = 3; // max 8
 		var updateCode = bitStream.readBitsAsNumberUnsigned(updateCodeBitWidth);
 
-		var bodyIdBitWidth = 4; // max 16
-		var bodyId = bitStream.readBitsAsNumberUnsigned(bodyIdBitWidth);
+		var entityIdBitWidth = 4; // max 16
+		var entityId = bitStream.readBitsAsNumberUnsigned(entityIdBitWidth);
 
 		var actionCount = 6;
 		var actionIsActiveByCode = [];
@@ -65,7 +65,7 @@ class Update_Actions
 
 		var returnValue = new Update_Actions
 		(
-			bodyId, actionCodes
+			entityId, actionCodes
 		);
 
 		return returnValue;
@@ -77,8 +77,8 @@ class Update_Actions
 		var updateCodeBitWidth = 3;
 		bitStream.writeNumberUsingBitWidth(updateCode, updateCodeBitWidth);
 
-		var bodyIdBitWidth = 4; // max 16
-		bitStream.writeNumberUsingBitWidth(this.entityId, bodyIdBitWidth);
+		var entityIdBitWidth = 4; // max 16
+		bitStream.writeNumberUsingBitWidth(this.entityId, entityIdBitWidth);
 
 		var actionsAsNumber = 0;
 		var actionCount = 6;

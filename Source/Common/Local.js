@@ -63,7 +63,7 @@ class Local
 
 		world.updateForTick_Remove();
 
-		world.updateForTick_Spawn();
+		world.entitiesSpawn();
 
 		this.updateForTick_Client();
 

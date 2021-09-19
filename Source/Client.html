@@ -30,6 +30,10 @@
 <script type="text/javascript" src="Common/Helpers/MapHelper.js"></script>
 <script type="text/javascript" src="Common/Helpers/NumberHelper.js"></script>
 
+<script type="text/javascript" src="Common/Network/NetworkMock.js"></script>
+<script type="text/javascript" src="Common/Network/NetworkMockMessage.js"></script>
+<script type="text/javascript" src="Common/Network/NetworkMockNode.js"></script>
+<script type="text/javascript" src="Common/Network/SocketProviderMock.js"></script>
 <script type="text/javascript" src="Common/Network/SocketProviderSocketIo.js"></script>
 
 <script type="text/javascript" src="Common/Storage/Serializer.js"></script>
@@ -48,13 +52,16 @@
 <script type="text/javascript" src="Common/Utility/ByteHelper.js"></script>
 <script type="text/javascript" src="Common/Utility/IDHelper.js"></script>
 <script type="text/javascript" src="Common/Utility/Log.js"></script>
+<script type="text/javascript" src="Common/Utility/RandomizerSystem.js"></script>
 
 <script type="text/javascript" src="Common/Action.js"></script>
 <script type="text/javascript" src="Common/Activity.js"></script>
+<script type="text/javascript" src="Common/ClientConnection.js"></script>
 <script type="text/javascript" src="Common/Entity.js"></script>
 <script type="text/javascript" src="Common/EntityDefn.js"></script>
 <script type="text/javascript" src="Common/Device.js"></script>
 <script type="text/javascript" src="Common/InputHelper.js"></script>
+<script type="text/javascript" src="Common/Server.js"></script>
 <script type="text/javascript" src="Common/Session.js"></script>
 <script type="text/javascript" src="Common/Universe.js"></script>
 <script type="text/javascript" src="Common/World.js"></script>
@@ -69,7 +76,11 @@
 
 	<p>Enter a unique name and click the Connect button to join the server. Press W, A, S, D to move, F to fire, J to hyperjump.</p>
 	<label>Server:</label>
-	<input id="inputServiceURL" value="http://localhost:8089"></input>
+	<select id="selectServerType" onchange="selectServerType_Changed(this);">
+		<option>Web</option>
+		<option>Browser</option>
+	</select>
+	<input id="inputServerUrl" value="http://localhost:8089"></input>
 	<br />
 
 	<label>Player Name:</label>
@@ -93,7 +104,73 @@
 
 function buttonConnectOrDisconnect_Clicked()
 {
-	var client = Client.Instance();
+	var d = document;
+
+	var inputServerUrl = d.getElementById("inputServerUrl");
+	var serverUrl = inputServerUrl.value;
+
+	var inputUserName = d.getElementById("inputUserName");
+	var userName = inputUserName.value;
+
+	var selectServerType = d.getElementById("selectServerType");
+	var serverTypeName = selectServerType.value;
+
+	var socketProvider = null;
+	if (serverTypeName == "Web")
+	{
+		socketProvider = new SocketProviderSocketIo(io);
+	}
+	else if (serverTypeName == "Browser")
+	{
+		var networkNodeServer = new NetworkMockNode
+		(
+			serverUrl,
+			(networkNode, message) => // messageSend
+			{
+				var server = networkNode.server;
+				var socketProviderToUse = server.socketProviderByClientName(message.nodeFromName);
+				socketProviderToUse.messageReceive(message);
+			}
+		);
+
+		var networkNodeClient = new NetworkMockNode
+		(
+			userName,
+			(networkNode, message) => // messageSend
+			{
+				networkNode.socketProvider.messageReceive(message);
+			}
+		);
+
+		var network = new NetworkMock
+		([
+			networkNodeServer, networkNodeClient
+		]);
+
+		var world = World.create();
+		var universe = new Universe(world);
+		var socketProviderServer = new SocketProviderMock(network, serverUrl);
+
+		var server = new Server
+		(
+			null, // servicePort,
+			true, // areAnonymousUsersAllowed,
+			null, // hasher,
+			socketProviderServer,
+			[], // usersKnown,
+			universe
+		);
+
+		server.initialize();
+
+		socketProvider = new SocketProviderMock(network, userName, serverUrl);
+
+		networkNodeServer.socketProvider = socketProviderServer;
+		networkNodeServer.server = server;
+		networkNodeClient.socketProvider = socketProvider;
+	}
+
+	var client = new Client(socketProvider);
 
 	if (client.isConnected())
 	{
@@ -101,18 +178,10 @@ function buttonConnectOrDisconnect_Clicked()
 	}
 	else
 	{
-		var d = document;
-
-		var inputServiceURL = d.getElementById("inputServiceURL");
-		var serviceURL = inputServiceURL.value;
-
-		var inputUserName = d.getElementById("inputUserName");
-		var userName = inputUserName.value;
-
 		var inputUserPassword = d.getElementById("inputUserPassword");
 		var userPassword = inputUserPassword.value;
 
-		if (serviceURL.length == 0)
+		if (serverUrl.length == 0)
 		{
 			alert("No server specified!")
 		}
@@ -122,8 +191,27 @@ function buttonConnectOrDisconnect_Clicked()
 		}
 		else
 		{
-			client.connect(serviceURL, userName, userPassword);
+			client.connect(serverUrl, userName, userPassword);
 		}
+	}
+}
+
+function selectServerType_Changed(selectServerType)
+{
+	var d = document;
+	var inputServerUrl = d.getElementById("inputServerUrl");
+	var serverTypeNameSelected = selectServerType.value;
+	if (serverTypeNameSelected == "Browser")
+	{
+		inputServerUrl.disabled = true;
+	}
+	else if (serverTypeNameSelected == "Web")
+	{
+		inputServerUrl.disabled = false;
+	}
+	else
+	{
+		alert("Unrecognized server type: " + serverTypeNameSelected);
 	}
 }
 

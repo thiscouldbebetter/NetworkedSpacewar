@@ -60,21 +60,28 @@ class Server
 
 	clientConnectListen()
 	{
-		this.socketProvider.listenerOn
+		var server = this;
+		this.socketProvider.on
 		(
-			"connection", this.clientConnectReceive.bind(this)
+			"connection",
+			(socketProvider, connectData) =>
+			{
+				var socketProviderToClient =
+					server.socketProvider.childFromConnectData(connectData);
+
+				this.clientConnectReceive(socketProviderToClient);
+			}
 		);
 	}
 
-	clientConnectReceive(socketIoToClient)
+	clientConnectReceive(socketProviderToClient)
 	{
 		var world = this.universe.world;
-		var entityId = world.entities.length;
 
-		var socketProvider = new SocketProviderSocketIo(socketIoToClient);
+		var entityId = world.entityIdNext();
 
 		var clientConnection =
-			new ClientConnection(this, entityId, socketProvider);
+			new ClientConnection(this, entityId, socketProviderToClient);
 
 		this.clientConnections.push(clientConnection);
 
@@ -91,6 +98,8 @@ class Server
 
 		this.updatesIncoming = [];
 
+		console.log("Server started at " + new Date().toLocaleTimeString());
+
 		this.socketProvider.listen
 		(
 			this.portToListenOn,
@@ -99,7 +108,8 @@ class Server
 
 		this.clientConnectListen();
 
-		console.log("Server started at " + new Date().toLocaleTimeString());
+		console.log("Listening on port " + this.portToListenOn + "...");
+
 		console.log
 		(
 			"Anoymous users are "
@@ -112,8 +122,6 @@ class Server
 		var worldSerialized =
 			JSON.stringify(world);
 		console.log("World:" + worldSerialized);
-
-		console.log("Listening on port " + this.portToListenOn + "...");
 
 		setInterval
 		(
@@ -129,12 +137,25 @@ class Server
 		return isUserConnected; 
 	}
 
+	socketProviderByClientName(clientName)
+	{
+		var clientConnection =
+			this.clientConnections.filter(x => x.socketProvider.clientNameIs(clientName) )[0];
+		var returnValue =
+		(
+			clientConnection == null
+			? this.socketProvider
+			: clientConnection.socketProvider
+		);
+		return returnValue;
+	}
+
 	updateForTick()
 	{
 		var world = this.universe.world;
 
 		world.updateForTick_UpdatesApply(this.updatesIncoming);
-		world.updateForTick_Spawn();
+		world.entitiesSpawn();
 		this.updateForTick_Server();
 		world.updateForTick_UpdatesApply(world.updatesImmediate);
 		world.updateForTick_Remove();

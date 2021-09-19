@@ -46,7 +46,7 @@ class ClientConnection
 		);
 	}
 
-	clientIdentifyReceive(userNameColonPassword)
+	clientIdentifyReceive(socketProvider, userNameColonPassword)
 	{
 		var server = this.server;
 
@@ -149,7 +149,11 @@ class ClientConnection
 	{
 		this.socketProvider.on
 		(
-			"", this.updateSerializedReceive.bind(this)
+			"",
+			(socketProvider, updateSerialized) =>
+			{
+				this.updateSerializedReceive(updateSerialized);
+			}
 		);
 	}
 

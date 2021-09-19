@@ -212,7 +212,7 @@ class EntityDefn
 
 		activity.actionCodes.length = 0;
 
-		var bodyDefn = actor.defn(world);
+		var entityDefn = actor.defn(world);
 
 		var inputNamesActive = inputHelper.inputNamesActive;
 		for (var i = 0; i < inputNamesActive.length; i++)
@@ -223,7 +223,7 @@ class EntityDefn
 			if (action != null)
 			{
 				var actionCode = action.code;
-				if (bodyDefn.actionCodes.indexOf(actionCode) >= 0)
+				if (entityDefn.actionCodes.indexOf(actionCode) >= 0)
 				{
 					activity.actionCodes.push(actionCode);
 				}

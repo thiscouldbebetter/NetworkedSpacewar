@@ -1,24 +1,21 @@
+
 class Client
 {
-	static Instance()
+	constructor(socketProvider)
 	{
-		if (Client._instance == null)
-		{
-			Client._instance = new Client();
-		}
-		return Client._instance;
+		this.socketProvider = socketProvider;
 	}
 
 	// methods
 
 	clientIdentifySend(userNameColonPassword)
 	{
-		this.socketToServer.emit("identify", userNameColonPassword);
+		this.socketProvider.emit("identify", userNameColonPassword);
 	}
 
 	clientDisconnectSend()
 	{
-		this.socketToServer.emit("disconnect");
+		this.socketProvider.emit("disconnect");
 		this.closeSocketKillDisplayAndShowMessage
 		(
 			"Client disconnected from server."
@@ -27,7 +24,7 @@ class Client
 
 	closeSocketKillDisplayAndShowMessage(message)
 	{
-		this.socketToServer.close();
+		this.socketProvider.close();
 		if (this.display != null)
 		{
 			this.display.finalize(document);
@@ -41,54 +38,41 @@ class Client
 		this.userName = userName;
 		this.userPassword = userPassword;
 
-		if (this.socketToServer != null)
+		if (this.socketProvider.isConnected())
 		{
-			this.socketToServer.disconnect();
-			this.socketToServer = null;
+			this.socketProvider.disconnect();
 		}
 
-		this.socketToServer = io.connect(this.serviceURL);
+		this.socketProvider.connect
+		(
+			this.serviceURL,
+			this.serverConnectReceived.bind(this),
+			this.serverConnectErrorReceived.bind(this),
+			this.serverErrorReceived.bind(this),
+		);
 
+		/*
+		// fix - These calls have to come after connect for live sockets, but before for mock!
 		this.serverConnectListen();
 		this.serverConnectErrorListen();
 		this.serverErrorListen();
+		*/
 	}
 
 	isConnected()
 	{
-		var returnValue =
-		(
-			this.socketToServer != null && this.socketToServer.connected
-		);
+		var returnValue = this.socketProvider.isConnected();
 		return returnValue;
 	}
 
-	serverConnectListen()
+	serverConnectReceived()
 	{
-		this.socketToServer.on
-		(
-			"connected", this.serverConnectReceived.bind(this)
-		);
-	}
-
-	serverConnectReceived(entityId)
-	{
-		this.entityId = entityId;
-
 		var userNameColonPassword =
 			this.userName + ":" + this.userPassword;
 
-		this.clientIdentifySend(userNameColonPassword);
-
 		this.sessionSerializedListen();
-	}
 
-	serverConnectErrorListen()
-	{
-		this.socketToServer.on
-		(
-			"connect_error", this.serverConnectErrorReceived.bind(this)
-		);
+		this.clientIdentifySend(userNameColonPassword);
 	}
 
 	serverConnectErrorReceived(e)
@@ -100,9 +84,9 @@ class Client
 
 	serverDisconnectListen()
 	{
-		this.socketToServer.on
+		this.socketProvider.on
 		(
-			"disconnect", this.serverConnectReceived.bind(this)
+			"disconnect", this.serverDisconnectReceived.bind(this)
 		);
 	}
 
@@ -110,15 +94,6 @@ class Client
 	{
 		var message = "Server disconnected!";
 		this.closeSocketKillDisplayAndShowMessage(message);
-	}
-
-	serverErrorListen()
-	{
-		this.socketToServer.on
-		(
-			"serverError", // A bad name, but "error" seems to be reserved.
-			this.serverErrorReceived.bind(this)
-		);
 	}
 
 	serverErrorReceived(errorMessage)
@@ -129,14 +104,14 @@ class Client
 
 	sessionSerializedListen()
 	{
-		this.socketToServer.on
+		this.socketProvider.on
 		(
 			"sessionEstablished", 
 			this.sessionSerializedReceived.bind(this)
 		);
 	}
 
-	sessionSerializedReceived(sessionSerialized)
+	sessionSerializedReceived(socketProvider, sessionSerialized)
 	{
 		this.serializer = new Serializer();
 
@@ -166,7 +141,7 @@ class Client
 
 		world.updateForTick_Remove();
 
-		world.updateForTick_Spawn();
+		world.entitiesSpawn();
 
 		this.updateForTick_Client();
 
@@ -211,13 +186,13 @@ class Client
 
 	updateSerializedListen()
 	{
-		this.socketToServer.on
+		this.socketProvider.on
 		(
-			"", this.updateSerializedReceived.bind(this)
+			"", this.updateSerializedReceive.bind(this)
 		);
 	}
 
-	updateSerializedReceived(updateSerialized)
+	updateSerializedReceive(socketProvider, updateSerialized)
 	{
 		var update =
 			Update.deserialize(updateSerialized, this.serializer);
@@ -226,6 +201,6 @@ class Client
 
 	updateSerializedSend(updateSerialized)
 	{
-		this.socketToServer.emit("", updateSerialized);
+		this.socketProvider.emit("", updateSerialized);
 	}
 }
