@@ -9,7 +9,7 @@ class Local
 
 		this.updatesIncoming = [];
 
-		var entityDefnForUser = new EntityDefnBuilderSpacewar().player
+		var entityDefnForUser = new EntityDefnSpacewarBuilder().player
 		(
 			world,
 			3 // radius
@@ -49,7 +49,7 @@ class Local
 
 		var worldBuilder =
 			new WorldBuilderSpacewar();
-			// new WorldBuilderChess();
+			//new WorldBuilderChess();
 		var world = worldBuilder.buildDefault();
 
 		this.universe = new Universe(world);

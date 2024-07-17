@@ -1,5 +1,5 @@
 
-class EntityDefn
+class EntityDefnSpacewar
 {
 	constructor
 	(
@@ -40,9 +40,6 @@ class EntityDefn
 		this.collide = collide;
 		this.visual = visual;
 	}
-
-	static fromNameAndVisual(name, visual)
-	{}
 
 	// Activities.
 
@@ -93,7 +90,7 @@ class EntityDefn
 
 	clone()
 	{
-		return new EntityDefn
+		return new EntityDefnSpacewar
 		(
 			this.name,
 			this.categoryNames,

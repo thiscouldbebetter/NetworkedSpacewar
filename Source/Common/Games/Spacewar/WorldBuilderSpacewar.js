@@ -10,7 +10,7 @@ class WorldBuilderSpacewar
 
 		var actionNames = actions.map(x => x.name);
 
-		var entityDefnBuilder = new EntityDefnBuilderSpacewar();
+		var entityDefnBuilder = new EntityDefnSpacewarBuilder();
 		var entityDefnPlanet = entityDefnBuilder.planet(planetSize);
 
 		var worldSize = new Coords(1, 1).multiplyScalar(arenaSize);

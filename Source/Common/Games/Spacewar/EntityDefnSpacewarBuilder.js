@@ -1,5 +1,5 @@
 
-class EntityDefnBuilderSpacewar
+class EntityDefnSpacewarBuilder
 {
 	planet(radius)
 	{
@@ -15,7 +15,7 @@ class EntityDefnBuilderSpacewar
 
 		var visual = new VisualShape(collider, color);
 
-		var returnValue = new EntityDefn
+		var returnValue = new EntityDefnSpacewar
 		(
 			"Planet",
 			[ "Planet" ], // categoryNames
@@ -122,7 +122,7 @@ class EntityDefnBuilderSpacewar
 		(
 			"UserInputAccept",
 			// perform
-			EntityDefn.activityUserInputAcceptPerform
+			EntityDefnSpacewar.activityUserInputAcceptPerform
 		);
 
 		var collider = new ShapeCircle(radius);
@@ -136,7 +136,7 @@ class EntityDefnBuilderSpacewar
 
 		var actionCodes = [ 0, 1, 2, 3, 4, 5 ];
 
-		var returnValue = new EntityDefn
+		var returnValue = new EntityDefnSpacewar
 		(
 			name,
 			[ "Player" ], // categoryNames
@@ -170,7 +170,7 @@ class EntityDefnBuilderSpacewar
 		var collider = new ShapeCircle(radius);
 		var visual = new VisualShape(collider, color);
 
-		return new EntityDefn
+		return new EntityDefnSpacewar
 		(
 			"Projectile", // name
 			[], // categoryNames
