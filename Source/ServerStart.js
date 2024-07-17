@@ -114,6 +114,8 @@ var Orientation = classesByName.get("Orientation");
 var Polar = classesByName.get("Polar");
 
 var ShapeCircle = classesByName.get("ShapeCircle");
+var ShapeGroup = classesByName.get("ShapeGroup");
+var ShapePolygon = classesByName.get("ShapePolygon");
 var ShapeRay = classesByName.get("ShapeRay");
 
 var ArrayHelper = classesByName.get("ArrayHelper");
@@ -138,6 +140,16 @@ var IDHelper = classesByName.get("IDHelper");
 var Log = classesByName.get("Log");
 var RandomizerSystem = classesByName.get("RandomizerSystem");
 
+// Games.
+
+// Chess.
+
+// var WorldBuilderChess = classesByName.get("WorldBuilderChess");
+
+// Spacewar.
+
+var EntityDefnBuilderSpacewar = classesByName.get("EntityDefnBuilderSpacewar");
+var WorldBuilderSpacewar = classesByName.get("WorldBuilderSpacewar");
 
 function main()
 {
@@ -158,6 +170,9 @@ function main()
 
 	var argDefaultsByName = new Map
 	([
+		// todo - Move game-specific settings elsewhere.
+
+		[ "--game", "spacewar" ],
 		[ "--anonymous-users-allowed", "false" ],
 		[ "--arena-size", "128" ],
 		[ "--bullet-size", "1" ],
@@ -197,16 +212,35 @@ function main()
 		filesystemProvider, "UsersKnown.txt"
 	);
 
-	var playersMax = parseInt(argsByName.get("--players-max"));
-	var arenaSize = parseInt(argsByName.get("--arena-size"));
-	var planetSize = parseInt(argsByName.get("--planet-size"));
-	var shipSize = parseInt(argsByName.get("--ship-size"));
-	var bulletSize = parseInt(argsByName.get("--bullet-size"));
+	var world = null;
 
-	var world = World.build
-	(
-		playersMax, arenaSize, planetSize, shipSize, bulletSize
-	);
+	var gameName = argsByName.get("--game").toLowerCase();
+
+	if (gameName == "spacewar")
+	{
+		var playersMax = parseInt(argsByName.get("--players-max"));
+		var arenaSize = parseInt(argsByName.get("--arena-size"));
+		var planetSize = parseInt(argsByName.get("--planet-size"));
+		var shipSize = parseInt(argsByName.get("--ship-size"));
+		var bulletSize = parseInt(argsByName.get("--bullet-size"));
+
+		var worldBuilder = new WorldBuilderSpacewar();
+
+		world = worldBuilder.build
+		(
+			playersMax, arenaSize, planetSize, shipSize, bulletSize
+		);
+	}
+	else if (gameName == "chess")
+	{
+		var worldBuilder = new WorldBuilderChess();
+
+		world = worldBuilder.build();
+	}
+	else
+	{
+		throw new Error("Unrecognized game name: " + gameName);
+	}
 
 	var universe = new Universe(world);
 

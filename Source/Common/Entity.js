@@ -106,8 +106,8 @@ class Entity
 			).magnitude();
 
 			var sumOfRadii =
-				this.defn(world).radius
-				+ entityOther.defn(world).radius;
+				this.defn(world).collider.radius
+				+ entityOther.defn(world).collider.radius;
 
 			if (distanceFromThisToOther < sumOfRadii)
 			{

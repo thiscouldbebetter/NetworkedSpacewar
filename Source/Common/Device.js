@@ -57,7 +57,7 @@ class Device
 						(
 							entityForward.clone().multiplyScalar
 							(
-								entityDefn.radius * 1.1
+								entityDefn.collider.radius * 1.1
 							)
 						).add
 						(
