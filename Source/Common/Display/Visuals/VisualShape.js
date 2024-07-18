@@ -12,8 +12,8 @@ class VisualShape
 		return new VisualShape(this.shape.clone(), this.color);
 	}
 
-	draw(display, body)
+	draw(display, entity)
 	{
-		this.shape.draw(display, body.loc, this.color);
+		this.shape.draw(display, entity.loc, this.color);
 	}
 }

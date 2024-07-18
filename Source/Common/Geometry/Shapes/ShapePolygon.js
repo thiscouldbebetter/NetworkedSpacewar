@@ -15,11 +15,15 @@ class ShapePolygon
 
 	draw(display, loc, color)
 	{
-		// todo
-		this.verticesTransformed.overwriteWith(this.verticesAtRest);
-		this.transform.loc.overwriteWith(loc);
-		this.transform.applyToPoints(this.verticesTransformed);
-		display.drawPolygon(this.verticesTransformed, color);
+		var pos = loc.pos;
+		var verticesTransformed = this.verticesTransformed();
+		verticesTransformed.forEach
+		(
+			(x, i) => x.overwriteWith(this.verticesAtRest[i]).add(pos)
+		);
+		// this.transform.loc.overwriteWith(loc);
+		// this.transform.applyToPoints(this.verticesTransformed);
+		display.drawPolygon(verticesTransformed, color);
 	}
 
 	verticesTransformed()

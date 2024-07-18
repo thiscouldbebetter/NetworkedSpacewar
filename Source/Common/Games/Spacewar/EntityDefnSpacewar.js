@@ -88,6 +88,22 @@ class EntityDefnSpacewar
 
 	// instance methods
 
+	entityInitializeForWorld(entity, world)
+	{
+		var entityDefn = this;
+		entity.integrity = entityDefn.integrityMax;
+		entity.ticksToLive = entityDefn.ticksToLive;
+		entity.energy = 0;
+		entity.ticksSinceActionPerformed = 0;
+		entity.devices = ArrayHelper.clone(entityDefn.devices);
+		entity.devicesByName =
+			ArrayHelper.addLookupsByName(this.devices);
+		entity.activity = entityDefn.activity;
+	}
+
+
+	// Clonable.
+	
 	clone()
 	{
 		return new EntityDefnSpacewar

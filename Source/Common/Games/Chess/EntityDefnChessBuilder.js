@@ -12,7 +12,7 @@ class EntityDefnChessBuilder
 			//new VisualText(name, heightInPixels, visualColor, colorBorder)
 		]);
 		
-		var returnValue = new EntityDefn
+		var returnValue = new EntityDefnChess
 		(
 			name,
 			[ "Movable" ], // categoryNames
@@ -85,7 +85,7 @@ class EntityDefnChessBuilder
 			new VisualText("Player", fontHeightInPixels, visualColorBorder)
 		]);
 
-		var returnValue = new EntityDefn
+		var returnValue = new EntityDefnChess
 		(
 			name,
 			[ "Player" ], // categoryNames
@@ -113,7 +113,7 @@ class EntityDefnChessBuilder
 			new VisualText("PlayerScreen", fontHeightInPixels, visualColor)
 		]);
 
-		var returnValue = new EntityDefn
+		var returnValue = new EntityDefnChess
 		(
 			"PlayerScreen",
 			[ "PlayerScreen" ], // categoryNames

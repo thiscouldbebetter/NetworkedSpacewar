@@ -12,6 +12,11 @@ class Entity
 		this.accel = Coords.zeroes();
 	}
 
+	static fromIdNameDefnNameAndLoc(id, name, defnName, loc)
+	{
+		return new Entity(id, name, defnName, loc);
+	}
+
 	// instance methods
 
 	collideWith(world, other)
@@ -38,14 +43,7 @@ class Entity
 	initializeForWorld(world)
 	{
 		var entityDefn = this.defn(world);
-		this.integrity = entityDefn.integrityMax;
-		this.ticksToLive = entityDefn.ticksToLive;
-		this.energy = 0;
-		this.ticksSinceActionPerformed = 0;
-		this.devices = ArrayHelper.clone(entityDefn.devices);
-		this.devicesByName =
-			ArrayHelper.addLookupsByName(this.devices);
-		this.activity = entityDefn.activity;
+		entityDefn.entityInitializeForWorld(this, world);
 	}
 
 	overwriteWith(other)
@@ -105,13 +103,24 @@ class Entity
 				this.loc.pos
 			).magnitude();
 
-			var sumOfRadii =
-				this.defn(world).collider.radius
-				+ entityOther.defn(world).collider.radius;
+			var thisDefn = this.defn(world);
+			var otherDefn = entityOther.defn(world);
 
-			if (distanceFromThisToOther < sumOfRadii)
+			var thisCollider = thisDefn.collider;
+			var otherCollider = otherDefn.collider;
+
+			var canCollide = (thisCollider != null && otherCollider != null);
+
+			if (canCollide)
 			{
-				this.collideWith(world, entityOther);
+				var sumOfRadii =
+					thisCollider.radius
+					+ otherCollider.radius;
+
+				if (distanceFromThisToOther < sumOfRadii)
+				{
+					this.collideWith(world, entityOther);
+				}
 			}
 		}
 	}

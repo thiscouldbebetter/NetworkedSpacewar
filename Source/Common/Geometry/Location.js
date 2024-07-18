@@ -10,6 +10,11 @@ class Location
 		this.orientation = Orientation.fromForward(forwardAsCoords);
 	}
 
+	static fromPos(pos)
+	{
+		return new Location(pos, 0);
+	}
+
 	clone()
 	{
 		return new Location

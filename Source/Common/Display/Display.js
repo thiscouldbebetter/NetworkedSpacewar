@@ -91,6 +91,26 @@ class Display
 		g.stroke();
 	}
 
+	drawRectangle(center, size, colorFill, colorBorder)
+	{
+		var g = this.graphics;
+
+		g.beginPath();
+
+		var min = this._drawPos.overwriteWith(size).half().invert().add(center);
+
+		if (colorFill != null)
+		{
+			g.fillStyle = colorFill;
+			g.fillRect(min.x, min.y, size.x, size.y);
+		}
+		if (colorBorder != null)
+		{
+			g.strokeStyle = colorBorder;
+			g.strokeRect(min.x, min.y, size.x, size.y);
+		}
+	}
+
 	drawText(text, drawPos)
 	{
 		this.graphics.fillStyle = this.colorFore;

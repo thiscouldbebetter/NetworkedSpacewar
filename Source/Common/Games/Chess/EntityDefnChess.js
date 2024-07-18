@@ -28,6 +28,11 @@ class EntityDefnChess
 		return (this.actionNames.indexOf(name) >= 0);
 	}
 
+	entityInitializeForWorld(entity, world)
+	{
+		// todo
+	}
+
 	movable()
 	{
 		return (this.categoryNames.indexOf("Movable") >= 0);

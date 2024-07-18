@@ -24,26 +24,12 @@ class Local
 	{
 		var world = this.universe.world;
 
-		var entityDefnForUser = new EntityDefnSpacewarBuilder().player
-		(
-			world,
-			3 // radius
-		);
+		var entityDefnForUser = world.entityDefnForClientBuild(this.clientId);
 		var update = new Update_EntityDefnRegister(entityDefnForUser);
 
 		world.updatesOutgoing.push(update);
 
-		var entityForUser = new Entity
-		(
-			this.clientId,
-			this.clientId,
-			entityDefnForUser.name,
-			new Location
-			(
-				new Coords(10, 10), // pos
-				0 // forwardInTurns
-			)
-		);
+		var entityForUser = world.entityForClientBuild(this.clientId, entityDefnForUser);
 
 		update = new Update_EntityCreate(entityForUser);
 		world.updatesOutgoing.push(update);
@@ -55,8 +41,8 @@ class Local
 		this.document = document;
 
 		var worldBuilder =
-			new WorldBuilderSpacewar();
-			//new WorldBuilderChess();
+			//new WorldBuilderSpacewar();
+			new WorldBuilderChess();
 		var world = worldBuilder.buildDefault();
 
 		this.universe = new Universe(world);

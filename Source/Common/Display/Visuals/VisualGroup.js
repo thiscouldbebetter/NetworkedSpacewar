@@ -8,7 +8,10 @@ class VisualGroup
 
 	clone()
 	{
-		return new VisualGroup(this.children.clone());
+		return new VisualGroup
+		(
+			this.children.map(x => x.clone() )
+		);
 	}
 
 	draw(display, entity)

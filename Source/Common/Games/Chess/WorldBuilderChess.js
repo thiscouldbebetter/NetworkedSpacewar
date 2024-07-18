@@ -3,13 +3,14 @@ class WorldBuilderChess
 {
 	build
 	(
-		arenaSize,
+		arenaDimension,
 		movableDimension,
 		playerSize,
 		numberOfPlayers
 	)
 	{
-		arenaSize = arenaSize || new Coords(1, 1).multiplyScalar(256);
+		arenaDimension = arenaDimension || 256;
+		var arenaSize = new Coords(1, 1).multiplyScalar(arenaDimension);
 		movableDimension = movableDimension || 20;
 		playerSize = playerSize || 16;
 		numberOfPlayers = numberOfPlayers || 2;
@@ -21,34 +22,36 @@ class WorldBuilderChess
 		var pieceNamesShapesAndCounts =
 			this.build_PieceNamesShapesAndCounts();
 
-		var bodyDefns =
-			this.build_BodyDefns(colors, pieceNamesShapesAndCounts);
+		var entityDefns =
+			this.build_entityDefns(colors, pieceNamesShapesAndCounts);
 
-		var worldSize =
-			new Coords(1, 1).multiplyScalar(arenaSize);
+		var worldSize = arenaSize;
 
-		var bodies = this.build_Bodies
+		var entities = this.build_Entities
 		(
-			bodyDefns,
+			entityDefns,
 			colors,
 			pieceNamesShapesAndCounts,
 			worldSize
 		);
 
 		var playerName = "Player"; // todo
-		var bodyDefnPlayer = BodyDefn.player(playerName, playerSize);
-		bodyDefns.push(bodyDefnPlayer);
+		var entityDefnChessBuilder = new EntityDefnChessBuilder();
+		var entityDefnPlayer = entityDefnChessBuilder.player(playerName, playerSize);
+		entityDefns.push(entityDefnPlayer);
+
+		var defn = new WorldDefnChess();
 
 		var returnValue = new World
 		(
 			"World0",
-			null, // defn
+			defn,
 			20, // ticksPerSecond,
-			"Green", // colorBackground
 			worldSize,
+			2, // playersMax
 			actions,
-			bodyDefns,
-			bodies
+			entityDefns,
+			entities
 		);
 
 		return returnValue;
@@ -71,9 +74,9 @@ class WorldBuilderChess
 				"MoveDown",
 				"ArrowDown", // inputName
 				// perform
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
-					body.pos.y += 1;
+					entity.pos.y += 1;
 				}
 			),
 
@@ -82,9 +85,9 @@ class WorldBuilderChess
 				"MoveLeft",
 				"ArrowLeft", // inputName
 				// perform
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
-					body.pos.x -= 1;
+					entity.pos.x -= 1;
 				}
 			),
 
@@ -93,9 +96,9 @@ class WorldBuilderChess
 				"MoveRight",
 				"ArrowRight", // inputName
 				// perform
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
-					body.pos.x += 1;
+					entity.pos.x += 1;
 				}
 			),
 
@@ -104,10 +107,10 @@ class WorldBuilderChess
 				"MoveToMouseCursor",
 				"MouseMove", // inputName
 				// perform
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
 					var mousePos = universe.inputHelper.mousePos;
-					body.pos.overwriteWith(mousePos);
+					entity.pos.overwriteWith(mousePos);
 				}
 			),
 
@@ -116,9 +119,9 @@ class WorldBuilderChess
 				"MoveUp",
 				"ArrowUp", // inputName
 				// perform
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
-					body.pos.y -= 1;
+					entity.pos.y -= 1;
 				}
 			),
 
@@ -126,7 +129,7 @@ class WorldBuilderChess
 			(
 				"Quit",
 				"Escape", // inputName
-				(universe, world, body) =>
+				(universe, world, entity) =>
 				{
 					// todo
 				}
@@ -136,95 +139,99 @@ class WorldBuilderChess
 		return actions;
 	}
 
-	build_Bodies
+	build_Entities
 	(
-		bodyDefns,
+		entityDefns,
 		colors,
 		pieceNamesShapesAndCounts,
 		worldSize
 	)
 	{
-		var bodies = [];
+		var entities = [];
 
-		var bodyOrientationDefault = new Coords(1, 0); // todo
+		var entityBoardPos = Coords.zeroes(); // todo
 
-		var bodyBoardPos = Coords.zeroes(); // todo
+		var entityDefnBoard = entityDefns.find(x => x.name == "Board");
 
-		var bodyDefnBoard = bodyDefns.find(x => x.name == "Board");
-
-		var bodyBoard = new Body
+		var entityBoardLoc = Location.fromPos
 		(
-			bodyDefnBoard.name, // id
-			"_Board", // name
-			bodyDefnBoard.name, // defn
-			bodyBoardPos, // pos
-			bodyOrientationDefault
+			entityBoardPos
 		);
 
-		bodies.push(bodyBoard);
+		var entityBoard = Entity.fromIdNameDefnNameAndLoc
+		(
+			entityDefnBoard.name, // id
+			"_Board", // name
+			entityDefnBoard.name, // defn
+			entityBoardLoc
+		);
 
-		var bodyPosInCells = new Coords();
+		entities.push(entityBoard);
+
+		var entityPosInCells = new Coords();
 		var boardSizeInCells = new Coords(8, 8);
 		var cellSizeInPixels = new Coords(1, 1).multiplyScalar(50);
 
-		var body = (defnName, index, posInCells) =>
-			new Body
+		var entity = (defnName, index, posInCells) =>
+			Entity.fromIdNameDefnNameAndLoc
 			(
 				defnName,
 				defnName + index,
 				defnName,
-				posInCells
-					.clone()
-					.add(Coords.ones() ) 
-					.multiply(cellSizeInPixels),
-				bodyOrientationDefault
+				Location.fromPos
+				(
+					posInCells
+						.clone()
+						.add(Coords.ones() ) 
+						.multiply(cellSizeInPixels)
+				)
 			);
 
-		var bodiesPieces =
+		var entitiesPieces =
 		[
-			body("Black Rook", 		"0", new Coords(0, 0) ),
-			body("Black Knight", 	"0", new Coords(1, 0) ),
-			body("Black Bishop", 	"0", new Coords(2, 0) ),
-			body("Black Queen", 	"", new Coords(3, 0) ),
-			body("Black King", 		"", new Coords(4, 0) ),
-			body("Black Bishop", 	"1", new Coords(5, 0) ),
-			body("Black Knight", 	"1", new Coords(6, 0) ),
-			body("Black Rook", 		"1", new Coords(7, 0) ),
+			entity("Black Rook", 		"0", new Coords(0, 0) ),
+			entity("Black Knight", 		"0", new Coords(1, 0) ),
+			entity("Black Bishop", 		"0", new Coords(2, 0) ),
+			entity("Black Queen", 		"", new Coords(3, 0) ),
+			entity("Black King", 		"", new Coords(4, 0) ),
+			entity("Black Bishop", 		"1", new Coords(5, 0) ),
+			entity("Black Knight", 		"1", new Coords(6, 0) ),
+			entity("Black Rook", 		"1", new Coords(7, 0) ),
 
-			body("Black Pawn", 		"0", new Coords(0, 1) ),
-			body("Black Pawn", 		"1", new Coords(1, 1) ),
-			body("Black Pawn", 		"2", new Coords(2, 1) ),
-			body("Black Pawn", 		"3", new Coords(3, 1) ),
-			body("Black Pawn", 		"4", new Coords(4, 1) ),
-			body("Black Pawn", 		"5", new Coords(5, 1) ),
-			body("Black Pawn", 		"6", new Coords(6, 1) ),
-			body("Black Pawn", 		"7", new Coords(7, 1) ),
+			entity("Black Pawn", 		"0", new Coords(0, 1) ),
+			entity("Black Pawn", 		"1", new Coords(1, 1) ),
+			entity("Black Pawn", 		"2", new Coords(2, 1) ),
+			entity("Black Pawn", 		"3", new Coords(3, 1) ),
+			entity("Black Pawn", 		"4", new Coords(4, 1) ),
+			entity("Black Pawn", 		"5", new Coords(5, 1) ),
+			entity("Black Pawn", 		"6", new Coords(6, 1) ),
+			entity("Black Pawn", 		"7", new Coords(7, 1) ),
 
-			body("White Pawn", 		"0", new Coords(0, 6) ),
-			body("White Pawn", 		"1", new Coords(1, 6) ),
-			body("White Pawn", 		"2", new Coords(2, 6) ),
-			body("White Pawn", 		"3", new Coords(3, 6) ),
-			body("White Pawn", 		"4", new Coords(4, 6) ),
-			body("White Pawn", 		"5", new Coords(5, 6) ),
-			body("White Pawn", 		"6", new Coords(6, 6) ),
-			body("White Pawn", 		"7", new Coords(7, 6) ),
+			entity("White Pawn", 		"0", new Coords(0, 6) ),
+			entity("White Pawn", 		"1", new Coords(1, 6) ),
+			entity("White Pawn", 		"2", new Coords(2, 6) ),
+			entity("White Pawn", 		"3", new Coords(3, 6) ),
+			entity("White Pawn", 		"4", new Coords(4, 6) ),
+			entity("White Pawn", 		"5", new Coords(5, 6) ),
+			entity("White Pawn", 		"6", new Coords(6, 6) ),
+			entity("White Pawn", 		"7", new Coords(7, 6) ),
 
-			body("White Rook", 		"0", new Coords(0, 7) ),
-			body("White Knight", 	"0", new Coords(1, 7) ),
-			body("White Bishop", 	"0", new Coords(2, 7) ),
-			body("White Queen", 	"", new Coords(3, 7) ),
-			body("White King", 		"", new Coords(4, 7) ),
-			body("White Bishop", 	"1", new Coords(5, 7) ),
-			body("White Knight", 	"1", new Coords(6, 7) ),
-			body("White Rook", 		"1", new Coords(7, 7) )
+			entity("White Rook", 		"0", new Coords(0, 7) ),
+			entity("White Knight", 	"0", new Coords(1, 7) ),
+			entity("White Bishop", 	"0", new Coords(2, 7) ),
+			entity("White Queen", 	"", new Coords(3, 7) ),
+			entity("White King", 		"", new Coords(4, 7) ),
+			entity("White Bishop", 	"1", new Coords(5, 7) ),
+			entity("White Knight", 	"1", new Coords(6, 7) ),
+			entity("White Rook", 		"1", new Coords(7, 7) )
 		];
 
-		bodies.push(...bodiesPieces);
+		entities.push(...entitiesPieces);
 
-		return bodies;
+		return entities;
 	}
 
-	build_BodyDefnBoard()
+	build_entityDefnBoard()
 	{
 		var boardSquareDimension = 100;
 		var boardSquareSize = 
@@ -277,7 +284,7 @@ class WorldBuilderChess
 
 		var boardVisual = new VisualGroup(boardSquaresAsVisuals);
 
-		var bodyDefnBoard = new BodyDefn
+		var entityDefnBoard = new EntityDefnChess
 		(
 			"Board", // name, 
 			null, // categoryNames,
@@ -288,12 +295,13 @@ class WorldBuilderChess
 			null // actionNames
 		);
 
-		return bodyDefnBoard;
+		return entityDefnBoard;
 	}
 
-	build_BodyDefns(colors, pieceNamesShapesAndCounts)
+	build_entityDefns(colors, pieceNamesShapesAndCounts)
 	{
-		var bodyDefns = [];
+		var entityDefns = [];
+		var entityDefnChessBuilder = new EntityDefnChessBuilder();
 
 		for (var c = 0; c < colors.length; c++)
 		{
@@ -306,7 +314,7 @@ class WorldBuilderChess
 				var pieceName = pieceNameShapeAndCount[0];
 				var pieceShape = pieceNameShapeAndCount[1];
 
-				var bodyDefn = BodyDefn.movable
+				var entityDefn = entityDefnChessBuilder.movable
 				(
 					color + " " + pieceName, // name
 					color,
@@ -314,14 +322,14 @@ class WorldBuilderChess
 					pieceShape
 				);
 
-				bodyDefns.push(bodyDefn);
+				entityDefns.push(entityDefn);
 			}
 		}
 
-		var bodyDefnBoard = this.build_BodyDefnBoard();
-		bodyDefns.push(bodyDefnBoard);
+		var entityDefnBoard = this.build_entityDefnBoard();
+		entityDefns.push(entityDefnBoard);
 
-		return bodyDefns;
+		return entityDefns;
 	}
 
 	build_Colors()
@@ -482,29 +490,29 @@ class WorldBuilderChess
 
 	// Actions.
 
-	actionActivatePerform(universe, world, body)
+	actionActivatePerform(universe, world, entity)
 	{
 		universe.inputHelper.inputRemove("MouseDown");
 
-		var player = body;
+		var player = entity;
 		var playerPos = player.pos;
-		if (player.bodyHeld == null)
+		if (player.entityHeld == null)
 		{
 			var movablesAtPos =
 				world.movablesAtPosAddToList(playerPos, []);
 			if (movablesAtPos.length > 0)
 			{
 				var movableToPickUp = movablesAtPos[0];
-				world.bodyRemove(movableToPickUp);
-				player.bodyHeld = movableToPickUp;
+				world.entityRemove(movableToPickUp);
+				player.entityHeld = movableToPickUp;
 			}
 		}
 		else
 		{
-			var movableToDrop = player.bodyHeld;
-			player.bodyHeld = null;
+			var movableToDrop = player.entityHeld;
+			player.entityHeld = null;
 			movableToDrop.pos.overwriteWith(playerPos);
-			world.bodySpawn
+			world.entitySpawn
 			(
 				movableToDrop,
 				false // spawnUnder

@@ -6,6 +6,11 @@ class ShapeRectangle
 		this.size = size;
 	}
 
+	static fromSize(size)
+	{
+		return new ShapeRectangle(size);
+	}
+
 	clone()
 	{
 		return new ShapeRectangle(this.size.clone());

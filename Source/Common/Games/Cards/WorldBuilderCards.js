@@ -116,7 +116,6 @@ class WorldBuilderCards
 			"WorldCards",
 			null, // defn
 			20, // ticksPerSecond,
-			"Green", // colorBackground
 			worldSize,
 			actions,
 			bodyDefns,
