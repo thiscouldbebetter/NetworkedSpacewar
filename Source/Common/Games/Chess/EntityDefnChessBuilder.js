@@ -106,10 +106,9 @@ class EntityDefnChessBuilder
 		var shape = new ShapeRectangle(new Coords(1, 1).multiplyScalar(dimension));
 		var fontHeightInPixels = 10;
 		var collider = shape;
-		var visualColor = color;
 		var visual = new VisualGroup
 		([
-			new VisualShape(shape, visualColor),
+			new VisualShape(shape, "Gray", "White"),
 			new VisualText("PlayerScreen", fontHeightInPixels, visualColor)
 		]);
 

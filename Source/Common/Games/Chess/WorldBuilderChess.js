@@ -9,7 +9,7 @@ class WorldBuilderChess
 		numberOfPlayers
 	)
 	{
-		arenaDimension = arenaDimension || 256;
+		arenaDimension = arenaDimension || 512;
 		var arenaSize = new Coords(1, 1).multiplyScalar(arenaDimension);
 		movableDimension = movableDimension || 20;
 		playerSize = playerSize || 16;
@@ -37,7 +37,8 @@ class WorldBuilderChess
 
 		var playerName = "Player"; // todo
 		var entityDefnChessBuilder = new EntityDefnChessBuilder();
-		var entityDefnPlayer = entityDefnChessBuilder.player(playerName, playerSize);
+		var entityDefnPlayer =
+			entityDefnChessBuilder.player(playerName, playerSize);
 		entityDefns.push(entityDefnPlayer);
 
 		var defn = new WorldDefnChess();
@@ -217,12 +218,12 @@ class WorldBuilderChess
 			entity("White Pawn", 		"7", new Coords(7, 6) ),
 
 			entity("White Rook", 		"0", new Coords(0, 7) ),
-			entity("White Knight", 	"0", new Coords(1, 7) ),
-			entity("White Bishop", 	"0", new Coords(2, 7) ),
-			entity("White Queen", 	"", new Coords(3, 7) ),
+			entity("White Knight", 		"0", new Coords(1, 7) ),
+			entity("White Bishop", 		"0", new Coords(2, 7) ),
+			entity("White Queen", 		"", new Coords(3, 7) ),
 			entity("White King", 		"", new Coords(4, 7) ),
-			entity("White Bishop", 	"1", new Coords(5, 7) ),
-			entity("White Knight", 	"1", new Coords(6, 7) ),
+			entity("White Bishop", 		"1", new Coords(5, 7) ),
+			entity("White Knight", 		"1", new Coords(6, 7) ),
 			entity("White Rook", 		"1", new Coords(7, 7) )
 		];
 

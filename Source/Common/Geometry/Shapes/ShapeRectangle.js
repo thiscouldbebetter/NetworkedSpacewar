@@ -24,8 +24,8 @@ class ShapeRectangle
 		return returnValue;
 	}
 
-	draw(display, pos, color)
+	draw(display, loc, colorFill, colorBorder)
 	{
-		display.drawRectangle(pos, this.size, color);
+		display.drawRectangle(loc.pos, this.size, colorFill, colorBorder);
 	}
 }

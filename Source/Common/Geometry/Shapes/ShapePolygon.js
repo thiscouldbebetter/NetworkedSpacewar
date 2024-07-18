@@ -13,7 +13,7 @@ class ShapePolygon
 		return new ShapePolygon(this.vertices.clone());
 	}
 
-	draw(display, loc, color)
+	draw(display, loc, colorFill, colorBorder)
 	{
 		var pos = loc.pos;
 		var verticesTransformed = this.verticesTransformed();
@@ -23,7 +23,7 @@ class ShapePolygon
 		);
 		// this.transform.loc.overwriteWith(loc);
 		// this.transform.applyToPoints(this.verticesTransformed);
-		display.drawPolygon(verticesTransformed, color);
+		display.drawPolygon(verticesTransformed, colorFill, colorBorder);
 	}
 
 	verticesTransformed()

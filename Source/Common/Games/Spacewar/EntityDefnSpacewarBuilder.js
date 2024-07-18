@@ -13,7 +13,7 @@ class EntityDefnSpacewarBuilder
 
 		var collider = new ShapeCircle(radius);
 
-		var visual = new VisualShape(collider, color);
+		var visual = new VisualShape(collider, color, null);
 
 		var returnValue = new EntityDefnSpacewar
 		(
@@ -129,8 +129,8 @@ class EntityDefnSpacewarBuilder
 
 		var visual = new VisualGroup
 		([
-			new VisualShape(collider, color),
-			new VisualShape(new ShapeRay(radius * 2), color),
+			new VisualShape(collider, color, null),
+			new VisualShape(new ShapeRay(radius * 2), color, null),
 			new VisualText(name, color)
 		]);
 
@@ -168,9 +168,9 @@ class EntityDefnSpacewarBuilder
 	{
 		var color = "Yellow";
 		var collider = new ShapeCircle(radius);
-		var visual = new VisualShape(collider, color);
+		var visual = new VisualShape(collider, color, null);
 
-		return new EntityDefnSpacewar
+		var returnValue = new EntityDefnSpacewar
 		(
 			"Projectile", // name
 			[], // categoryNames
@@ -195,6 +195,8 @@ class EntityDefnSpacewarBuilder
 			},
 			visual
 		);
+
+		return returnValue;
 	}
 
 
