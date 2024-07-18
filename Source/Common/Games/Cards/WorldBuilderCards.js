@@ -114,6 +114,7 @@ class WorldBuilderCards
 		var returnValue = new World
 		(
 			"WorldCards",
+			null, // defn
 			20, // ticksPerSecond,
 			"Green", // colorBackground
 			worldSize,

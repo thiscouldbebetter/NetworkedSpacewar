@@ -140,7 +140,10 @@ class Server
 	socketProviderByClientName(clientName)
 	{
 		var clientConnection =
-			this.clientConnections.filter(x => x.socketProvider.clientNameIs(clientName) )[0];
+			this.clientConnections.filter(
+				x => x.socketProvider.clientNameIs(clientName)
+			)[0];
+
 		var returnValue =
 		(
 			clientConnection == null

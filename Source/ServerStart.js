@@ -151,6 +151,7 @@ var RandomizerSystem = classesByName.get("RandomizerSystem");
 var EntityDefnSpacewar = classesByName.get("EntityDefnSpacewar");
 var EntityDefnSpacewarBuilder = classesByName.get("EntityDefnSpacewarBuilder");
 var WorldBuilderSpacewar = classesByName.get("WorldBuilderSpacewar");
+var WorldDefnSpacewar = classesByName.get("WorldDefnSpacewar");
 
 function main()
 {

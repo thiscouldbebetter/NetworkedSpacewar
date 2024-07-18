@@ -27,9 +27,12 @@ class WorldBuilderSpacewar
 			)
 		);
 
+		var worldDefn = new WorldDefnSpacewar();
+
 		var returnValue = new World
 		(
 			"World0",
+			worldDefn,
 			20, // ticksPerSecond
 			worldSize,
 			playersMax,

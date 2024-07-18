@@ -42,6 +42,7 @@ class WorldBuilderChess
 		var returnValue = new World
 		(
 			"World0",
+			null, // defn
 			20, // ticksPerSecond,
 			"Green", // colorBackground
 			worldSize,

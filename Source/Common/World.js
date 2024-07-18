@@ -4,6 +4,7 @@ class World
 	constructor
 	(
 		name,
+		defn,
 		ticksPerSecond,
 		size,
 		playersMax,
@@ -13,6 +14,7 @@ class World
 	)
 	{
 		this.name = name;
+		this.defn = defn;
 		this.ticksPerSecond = ticksPerSecond;
 		this.size = size;
 		this.playersMax = playersMax;
@@ -71,6 +73,21 @@ class World
 	entityById(entityId)
 	{
 		return this.entitiesById.get(entityId);
+	}
+
+	entityDefnByName(name)
+	{
+		return this.entityDefnsByName.get(name);
+	}
+
+	entityDefnForClientBuild(userName)
+	{
+		return this.defn.entityDefnForClientBuild(this, userName);
+	}
+
+	entityForClientBuild(userName, entityDefnForClient)
+	{
+		return this.defn.entityForClientBuild(this, userName, entityDefnForClient);
 	}
 
 	entityIdNext()
