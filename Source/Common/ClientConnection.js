@@ -65,45 +65,51 @@ class ClientConnection
 		{
 			// todo
 		}
-		else if (server.isUserWithNameConnected(userName))
+		else if (server.isUserWithNameConnected(userName) )
 		{
 			// todo - Disconnect the user?
-			this.errorMessageSend
-			(
-				"The user '" + userName + "' is already connected."
-			);
+			var errorMessage = "The user '" + userName + "' is already connected.";
+			console.log(errorMessage);
+			this.errorMessageSend(errorMessage);
 		}
 		else
 		{
-			this.userName = userName;
-
-			var world = server.universe.world;
-
-			var entityDefnForClient = this.entityDefnForClientBuild(world);
-
-			var updateEntityDefnRegister = new Update_EntityDefnRegister
-			(
-				entityDefnForClient
-			);
-			updateEntityDefnRegister.updateWorld(world);
-			world.updatesOutgoing.push(updateEntityDefnRegister);
-
-			var entityForClient =
-				this.entityForClientBuild(world, userName, entityDefnForClient);
-
-			var session = new Session(entityForClient.id, world);
-			var sessionSerialized = server.serializer.serialize(session);
-			this.sessionSerializedSend(sessionSerialized);
-
-			var updateEntityCreate = new Update_EntityCreate(entityForClient);
-			world.updatesOutgoing.push(updateEntityCreate);
-			updateEntityCreate.updateWorld(world);
-
-			this.clientDisconnectListen();
-			this.updateSerializedListen();
-
-			console.log(userName + " joined the server.");
+			this.clientIdentifyReceive_CreateEntityAndDefnForUserNameSendSessionAndListen(userName);
 		}
+	}
+
+	clientIdentifyReceive_CreateEntityAndDefnForUserNameSendSessionAndListen(userName)
+	{
+		this.userName = userName;
+
+		var server = this.server;
+
+		var world = server.universe.world;
+
+		var entityDefnForClient = this.entityDefnForClientBuild(world);
+
+		var updateEntityDefnRegister = new Update_EntityDefnRegister
+		(
+			entityDefnForClient
+		);
+		updateEntityDefnRegister.updateWorld(world);
+		world.updatesOutgoing.push(updateEntityDefnRegister);
+
+		var entityForClient =
+			this.entityForClientBuild(world, userName, entityDefnForClient);
+
+		var session = new Session(entityForClient.id, world);
+		var sessionSerialized = server.serializer.serialize(session);
+		this.sessionSerializedSend(sessionSerialized);
+
+		var updateEntityCreate = new Update_EntityCreate(entityForClient);
+		world.updatesOutgoing.push(updateEntityCreate);
+		updateEntityCreate.updateWorld(world);
+
+		this.clientDisconnectListen();
+		this.updateSerializedListen();
+
+		console.log(userName + " joined the server.");
 	}
 
 	entityDefnForClientBuild(world)

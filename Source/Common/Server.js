@@ -156,13 +156,13 @@ class Server
 
 		world.updateForTick_UpdatesApply(this.updatesIncoming);
 		world.entitiesSpawn();
-		this.updateForTick_Server();
+		this.updateForTick_UpdateEntityIntegrityActionsAndPhysics();
 		world.updateForTick_UpdatesApply(world.updatesImmediate);
-		world.updateForTick_Remove();
+		world.updateForTick_RemoveEntities();
 		this.updateForTick_UpdatesOutgoingSend();
 	}
 
-	updateForTick_Server()
+	updateForTick_UpdateEntityIntegrityActionsAndPhysics()
 	{
 		var universe = this.universe;
 		var world = universe.world;

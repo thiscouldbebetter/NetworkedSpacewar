@@ -11,7 +11,7 @@ class Update_EntityCreate
 		var entityExisting = world.entityById(this.entity.id);
 		if (entityExisting == null)
 		{
-			world.entitiesToSpawn.push(this.entity);
+			world.entityToSpawnAdd(this.entity);
 		}
 	}
 

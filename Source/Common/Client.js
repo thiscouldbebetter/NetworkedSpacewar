@@ -139,7 +139,7 @@ class Client
 
 		world.updateForTick_UpdatesApply(this.updatesIncoming);
 
-		world.updateForTick_Remove();
+		world.updateForTick_RemoveEntities();
 
 		world.entitiesSpawn();
 

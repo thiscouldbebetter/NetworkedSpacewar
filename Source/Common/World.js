@@ -108,6 +108,11 @@ class World
 		entityToSpawn.initializeForWorld(this);
 	}
 
+	entityToSpawnAdd(entity)
+	{
+		this.entitiesToSpawn.push(entity);
+	}
+
 	initialize()
 	{
 		this.lookupsBuild();
@@ -129,7 +134,7 @@ class World
 		this.entities = other.entities;
 	}
 
-	updateForTick_Remove()
+	updateForTick_RemoveEntities()
 	{
 		// hack
 		// If a client is paused, the updates build up,
@@ -140,7 +145,7 @@ class World
 		// so once it actually gets created it lasts forever.
 		var entityIdsThatCannotYetBeRemoved = [];
 
-		for(var i = 0; i < this.entityIdsToRemove.length; i++)
+		for (var i = 0; i < this.entityIdsToRemove.length; i++)
 		{
 			var entityId = this.entityIdsToRemove[i];
 			var entity = this.entityById(entityId);

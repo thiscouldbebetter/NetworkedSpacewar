@@ -9,6 +9,21 @@ class Local
 
 		this.updatesIncoming = [];
 
+		this.createClientEntity();
+
+		setInterval
+		(
+			this.updateForTick.bind(this),
+			world.millisecondsPerTick()
+		);
+
+		this.universe.initialize();
+	}
+
+	createClientEntity()
+	{
+		var world = this.universe.world;
+
 		var entityDefnForUser = new EntityDefnSpacewarBuilder().player
 		(
 			world,
@@ -32,14 +47,6 @@ class Local
 
 		update = new Update_EntityCreate(entityForUser);
 		world.updatesOutgoing.push(update);
-
-		setInterval
-		(
-			this.updateForTick.bind(this),
-			world.millisecondsPerTick()
-		);
-
-		this.universe.initialize();
 	}
 
 	start()
@@ -64,18 +71,18 @@ class Local
 
 		world.updateForTick_UpdatesApply(this.updatesIncoming);
 
-		world.updateForTick_Remove();
+		world.updateForTick_RemoveEntities();
 
 		world.entitiesSpawn();
 
-		this.updateForTick_Client();
+		this.updateForTick_PerformUserActivityAndDraw();
 
-		this.updateForTick_Server();
+		this.updateForTick_EntitiesUpdateIntegrityActionsPhysics();
 
 		this.updateForTick_UpdatesOutgoingSend();
 	}
 
-	updateForTick_Client()
+	updateForTick_PerformUserActivityAndDraw()
 	{
 		var universe = this.universe;
 		var world = universe.world;
@@ -97,7 +104,7 @@ class Local
 		world.drawToDisplay(universe.display);
 	}
 
-	updateForTick_Server()
+	updateForTick_EntitiesUpdateIntegrityActionsPhysics()
 	{
 		var universe = this.universe;
 		var world = universe.world;

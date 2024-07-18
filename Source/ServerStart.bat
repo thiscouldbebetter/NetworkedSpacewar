@@ -1,2 +1,1 @@
 node ServerStart.js
-pause
