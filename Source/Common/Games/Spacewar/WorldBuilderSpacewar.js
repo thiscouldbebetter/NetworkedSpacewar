@@ -148,7 +148,7 @@ class WorldBuilderSpacewar
 				// peform
 				(world, entity) =>
 				{
-					var device = entity.devicesByName.get("Gun");
+					var device = entity.deviceGetByName("Gun");
 					device.use(world, entity, device);
 				}
 			),
@@ -160,7 +160,7 @@ class WorldBuilderSpacewar
 				"j", // inputName
 				(world, entity) =>
 				{
-					var device = entity.devicesByName.get("Jump");
+					var device = entity.deviceGetByName("Jump");
 					device.use(world, entity, device);
 				}
 			),

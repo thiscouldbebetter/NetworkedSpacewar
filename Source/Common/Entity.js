@@ -40,6 +40,11 @@ class Entity
 		return returnValue;
 	}
 
+	deviceGetByName(name)
+	{
+		return this.devices.find(x => x.name == name);
+	}
+
 	initializeForWorld(world)
 	{
 		var entityDefn = this.defn(world);

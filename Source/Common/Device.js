@@ -8,7 +8,7 @@ class Device
 		this.energyToUse = energyToUse;
 		this.use = use;
 
-		this.ticksSinceUsed = 0;
+		this.ticksSinceUsedClear();
 	}
 
 	// static methods
@@ -23,7 +23,7 @@ class Device
 			// use
 			(world, entity, device) =>
 			{
-				if (device.ticksSinceUsed < device.ticksToCharge)
+				if (device.ticksSinceUsedGet() < device.ticksToCharge)
 				{
 					return;
 				}
@@ -33,7 +33,7 @@ class Device
 					return;
 				}
 
-				device.ticksSinceUsed = 0;
+				device.ticksSinceUsedClear();
 
 				entity.energy -= device.energyToUse;
 				var entityDefn = entity.defn(world);
@@ -92,9 +92,9 @@ class Device
 			50, // ticksToCharge
 			1, // energyToUse
 			// use
-			function(world, entity, device)
+			(world, entity, device) =>
 			{
-				if (device.ticksSinceUsed < device.ticksToCharge)
+				if (device.ticksSinceUsedGet() < device.ticksToCharge)
 				{
 					return;
 				}
@@ -104,7 +104,7 @@ class Device
 					return;
 				}
 
-				device.ticksSinceUsed = 0;
+				device.ticksSinceUsedClear();
 
 				entity.energy -= device.energyToUse;
 
@@ -125,8 +125,28 @@ class Device
 		return new Device(this.name, this.ticksToCharge, this.energyToUse, this.use);
 	}
 
+	ticksSinceUsedClear()
+	{
+		this.ticksSinceUsedSet(0);
+	}
+
+	ticksSinceUsedGet()
+	{
+		return this._ticksSinceUsed;
+	}
+
+	ticksSinceUsedIncrement()
+	{
+		this.ticksSinceUsedSet(this.ticksSinceUsedGet() + 1);
+	}
+
+	ticksSinceUsedSet(value)
+	{
+		this._ticksSinceUsed = value;
+	}
+
 	updateForTick(world, entity)
 	{
-		this.ticksSinceUsed++;
+		this.ticksSinceUsedIncrement();
 	}
 }

@@ -41,8 +41,8 @@ class Local
 		this.document = document;
 
 		var worldBuilder =
-			//new WorldBuilderSpacewar();
-			new WorldBuilderChess();
+			new WorldBuilderSpacewar();
+			//new WorldBuilderChess();
 		var world = worldBuilder.buildDefault();
 
 		this.universe = new Universe(world);

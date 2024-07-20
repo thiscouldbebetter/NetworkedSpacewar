@@ -96,8 +96,6 @@ class EntityDefnSpacewar
 		entity.energy = 0;
 		entity.ticksSinceActionPerformed = 0;
 		entity.devices = ArrayHelper.clone(entityDefn.devices);
-		entity.devicesByName =
-			ArrayHelper.addLookupsByName(this.devices);
 		entity.activity = entityDefn.activity;
 	}
 
